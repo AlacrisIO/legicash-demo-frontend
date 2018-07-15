@@ -1,6 +1,10 @@
 import { HashValue } from './hash'
 import { Address } from './address'
 
+/* XXX: Should have something in Transaction to indicate who the facilitator
+ * is, for sidechain transactions? What about epistemic state?
+ */
+
 /** Represents a cryptographic transaction */
 export class Transaction {
 
