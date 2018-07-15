@@ -1,35 +1,9 @@
-import { Record, List } from 'immutable'
+import { List } from 'immutable'
 import { keccak256 } from 'js-sha3'
-
-var hash_regexp = RegExp("^0x([0-9A-Fa-f]{2}){32}$|^$")
-
-/** Represents a 256-bit hash value as a hexadecimal string */
-export class HashValue {
-    /** The hexadecimal representation */
-    readonly hash: string
-    constructor(hash: string) {
-        if (!hash_regexp.test(hash)) { throw "Bad hash: " + hash }
-        this.hash = hash
-    }
-    public toString(): string { return `HashValue(${this.hash})` }
-    public equal(o: HashValue): Boolean { return (this.hash == o.hash) }
-}
-
-var empty_hash = new HashValue('')
-
-interface IMerkleProofLayer {
-    readonly left: HashValue;
-    readonly right: HashValue;
-    readonly child: Boolean;
-}
-
-const MerkleProofLayerRecord = Record({
-    left: empty_hash, right: empty_hash, child: false
-})
+import { HashValue, empty_hash } from './hash'
 
 /** Represents one layer in a Merkle proof */
-export class MerkleProofLayer extends MerkleProofLayerRecord
-    implements IMerkleProofLayer {
+export class MerkleProofLayer {
     /** Left hash value at this point in the Merkle tree */
     readonly left: HashValue;
     /** Right hash value at this point in the Merkle tree */
@@ -37,21 +11,21 @@ export class MerkleProofLayer extends MerkleProofLayerRecord
     /** Whether the relevant child is left or right (0 means left.) */
     readonly child: Boolean;
 
+    constructor(props: { left: HashValue; right: HashValue; child: Boolean }) {
+        Object.assign(this, props)
+        Object.freeze(this)
+    }
+
+    /** The hash of the concatenation of these hashes. */
     next_hash(): HashValue {
         return new HashValue(
-            '0x' + keccak256(this.left.toString() + this.right.toString()))
+            '0x' + keccak256(this.left.hash + this.right.hash))
     }
 }
 
-interface IMerkleProof {
-    readonly root: HashValue;
-    readonly proof: List<MerkleProofLayer>;
-}
-
-const MerkleProofRecord = Record({ leaf: '', root: '', proof: List() })
-
 /** Represents a Merkle proof */
-export class MerkleProof extends MerkleProofRecord implements IMerkleProof {
+export class MerkleProof {
+
     /** The root Merkle tree commitment */
     readonly root: HashValue;
     /** Layers in the Merkle proof that root contains the leaf
@@ -59,11 +33,11 @@ export class MerkleProof extends MerkleProofRecord implements IMerkleProof {
       * Leaf is the indicated HashValue in the first entry in the proof entry,
       * via the`child` attribute. */
     readonly proof: List<MerkleProofLayer>;
-    constructor(props: IMerkleProof) {
-        super(props);
+
+    constructor(props: { root: HashValue; proof: List<MerkleProofLayer> }) {
         // Check that the Merkle proof is valid
         var current_hash: HashValue = empty_hash
-        this.proof.forEach((layer: MerkleProofLayer) => {
+        props.proof.forEach((layer: MerkleProofLayer) => {
             // `child` true means right child, false means left child.
             var target_hash: HashValue = layer.child ? layer.right : layer.left
             if (!current_hash.equal(empty_hash) &&
@@ -72,12 +46,15 @@ export class MerkleProof extends MerkleProofRecord implements IMerkleProof {
             }
             current_hash = layer.next_hash()
         })
-        if (!current_hash.equal(this.root)) {
+        if (!current_hash.equal(props.root)) {
             throw `Bad Merkle proof; root does not match:
             ${ this}
             Current hash: ${ current_hash} `
         }
+        Object.assign(this, props)
+        Object.freeze(this)
     }
+
     throw_bad_proof(
         layer: MerkleProofLayer,
         current_hash: HashValue,

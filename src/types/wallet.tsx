@@ -2,6 +2,13 @@ import { Record, List } from 'immutable'
 import { Transaction } from './tx'
 import { Address } from './address'
 
+/* *****************************************************************************
+ * Wallet boilerplate boilerplate
+ *
+ * We want Wallet to be a record, because we expect it to change, so having it
+ * backed by a persistent data structure will allow for efficient real-time
+ * updates. Otherwise, it could just extend Object, like Transaction and
+ * MerkleProof */
 interface IWallet {
     readonly username: string;
     readonly address: Address;
@@ -13,6 +20,8 @@ interface IWallet {
 const WalletRecord = Record({
     username: '', onchain_balance: 0, offchain_balance: 0, txs: List()
 })
+/* End wallet boilerplate
+ ******************************************************************************/
 
 /**
  * Represents an onchain/offchain wallet (They both use the same address.)
@@ -34,5 +43,9 @@ export class Wallet extends WalletRecord implements IWallet {
         if (this.onchain_balance < 0) { throw "Onchain balance negative!" }
         if (this.offchain_balance < 0) { throw "Offchain balance negative!" }
         // XXX: Check that all transactions belong to `address`?
+    }
+    /** Force typechecking on get */
+    get<T extends keyof IWallet>(value: T): IWallet[T] {
+        return super.get(value)
     }
 }

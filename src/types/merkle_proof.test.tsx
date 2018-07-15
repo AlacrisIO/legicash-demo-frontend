@@ -1,8 +1,9 @@
 import { List } from 'immutable'
-import { HashValue, MerkleProofLayer, MerkleProof } from './merkle_proof'
-import { randomBytes } from 'crypto'
+import { HashValue } from './hash'
+import { MerkleProofLayer, MerkleProof } from './merkle_proof'
+import { random_hash_string } from './common'
 
-const random_hash = () => new HashValue('0x' + randomBytes(32).toString('hex'))
+const random_hash = () => new HashValue(random_hash_string())
 
 var first_layer = new MerkleProofLayer({
     left: random_hash(), right: random_hash(), child: false

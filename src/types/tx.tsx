@@ -1,33 +1,28 @@
+import { HashValue } from './hash'
 import { Address } from './address'
-import { Record } from 'immutable'
 
-interface ITransaction {
-    readonly chain: string,
-    readonly from: Address, readonly to: Address,
-    readonly amount: number
-}
+/** Represents a cryptographic transaction */
+export class Transaction {
 
-const empty_address = new Address('')
+    // There is no need for this to extend the immutable.js Record class,
+    // because transactions should never be modified.
 
-const TransactionRecord = Record({
-    chain: '', from: empty_address, to: empty_address, amount: 0
-})
-
-/**
- * Represents a transaction. May be on- or offchain.
- */
-export class Transaction extends TransactionRecord implements ITransaction {
     /** Name of the chain this transaction targets. */
     readonly chain: string;
     /** Source address for transaction */
     readonly from: Address;
     /** Destination address for transaction */
     readonly to: Address;
-    /** Amount transaferred. Cannot be negative. */
+    /** Amount transferred. Cannot be negative. */
     readonly amount: number;
-    constructor(props: ITransaction) {
-        super(props);
-        if (this.amount < 0) { throw "Tx with negative amount!" }
+    /** Hash for identifying this tx */
+    readonly hash: HashValue
+    constructor(props: {
+        chain: string; from: Address; to: Address; amount: number;
+        hash: HashValue
+    }) {
+        if (props.amount < 0) { throw "Tx with negative amount!" }
+        Object.assign(this, props)
+        Object.freeze(this)
     }
 }
-
