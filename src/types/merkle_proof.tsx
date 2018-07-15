@@ -21,6 +21,9 @@ export class MerkleProofLayer {
         return new HashValue(
             '0x' + keccak256(this.left.hash + this.right.hash))
     }
+
+    /** The parent/leaf hash in the path through the tree */
+    target_hash(): HashValue { return this.child ? this.right : this.left }
 }
 
 /** Represents a Merkle proof */
@@ -39,10 +42,9 @@ export class MerkleProof {
         var current_hash: HashValue = empty_hash
         props.proof.forEach((layer: MerkleProofLayer) => {
             // `child` true means right child, false means left child.
-            var target_hash: HashValue = layer.child ? layer.right : layer.left
             if (!current_hash.equal(empty_hash) &&
-                !current_hash.equal(target_hash)) {
-                this.throw_bad_proof(layer, current_hash, target_hash)
+                !current_hash.equal(layer.target_hash())) {
+                this.throw_bad_proof(layer, current_hash, layer.target_hash())
             }
             current_hash = layer.next_hash()
         })
@@ -66,4 +68,6 @@ export class MerkleProof {
             Current hash: ${ current_hash}
             Target hash: ${target_hash}`
     }
+
+    leaf_hash(): HashValue { return this.proof.get(0).target_hash() }
 }
