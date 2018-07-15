@@ -14,3 +14,5 @@ export class Address {
     }
     public toString(): string { return this.address }
 }
+
+export const empty_address = new Address('')
