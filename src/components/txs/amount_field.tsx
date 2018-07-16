@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 var number_re = RegExp("^[0-9]+(\.[0-9]*)?$")
+
 /** Input field which only accepts non-negative numeric values
  *
  * Final value is in this.state.value, as a string.
