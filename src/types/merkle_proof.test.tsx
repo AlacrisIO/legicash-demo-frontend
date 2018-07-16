@@ -13,14 +13,17 @@ var second_layer = new MerkleProofLayer({
     left: random_hash(), right: first_layer.next_hash(), child: true
 })
 
-it('Accepts and stores a sensible Merkle proof', () => {
-    new MerkleProof({
-        root: second_layer.next_hash(), proof: List([first_layer, second_layer])
+describe('Tests of Merkle proof types', () => {
+    it('Accepts and stores a sensible Merkle proof', () => {
+        new MerkleProof({
+            root: second_layer.next_hash(),
+            proof: List([first_layer, second_layer])
+        })
     })
-})
 
-it('Rejects bad Merkle proofs', () => {
-    expect(() => new MerkleProof({
-        root: random_hash(), proof: List([first_layer, second_layer])
-    })).toThrow()
+    it('Rejects bad Merkle proofs', () => {
+        expect(() => new MerkleProof({
+            root: random_hash(), proof: List([first_layer, second_layer])
+        })).toThrow()
+    })
 })
