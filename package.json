@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "crypto": "^1.0.1",
+    "enzyme": "^3.3.0",
     "immutable": "^3.8.2",
     "js-sha3": "^0.7.0",
     "react": "^16.4.1",
@@ -18,6 +18,10 @@
     "eject": "react-scripts-ts eject"
   },
   "devDependencies": {
+    "crypto": "^1.0.1",
+    "enzyme": "^3.3.0",
+    "enzyme-adapter-react-16": "*",
+    "react-test-renderer": "^16.4.1",
     "@types/jest": "^23.1.5",
     "@types/node": "^10.5.2",
     "@types/react": "^16.4.6",
