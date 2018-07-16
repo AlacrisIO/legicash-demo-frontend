@@ -10,6 +10,7 @@ export class AmountField extends React.Component {
     constructor(props: any) {
         super(props);
         this.state = { value: '0' }
+        this.handle_change = this.handle_change.bind(this)
     }
 
     handle_change(event: React.FormEvent<EventTarget>): void {
@@ -27,5 +28,8 @@ export class AmountField extends React.Component {
         );
     }
 
-
+    get_value(): number {
+        return parseFloat(this.state.value)
+    }
+}
 
