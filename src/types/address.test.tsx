@@ -4,11 +4,11 @@ describe('Tests of address types', () => {
     it('Accepts and stores a sensible ethereum address', () => {
         const address_string = '0x5050505050505050505050505050505050505050';
         const address = new Address(address_string);
-        expect(address.toString() == address_string);
+        expect(address.toString()).toEqual(address_string);
     })
 
     it('Accepts an empty address', () => {
-        expect((new Address('')).toString() == '');
+        expect((new Address('')).toString()).toEqual('');
     })
 
     it('Rejects addresses which do not match', () => {

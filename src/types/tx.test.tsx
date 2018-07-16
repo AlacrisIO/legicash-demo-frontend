@@ -12,7 +12,7 @@ describe('Tests of Transaction type', () => {
         const tx = new Transaction({
             chain: 'main', from: addr1, to: addr2, amount: 1, hash
         })
-        expect(tx.from == addr1)
+        expect(tx.from).toEqual(addr1)
     })
 
     it('Rejects transactions with a negative amount', () => {
