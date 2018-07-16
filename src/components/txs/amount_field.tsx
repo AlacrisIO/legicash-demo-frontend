@@ -22,8 +22,8 @@ export class AmountField extends React.Component {
 
     render() {
         return (
-            <div> <input type="text" value={this.state.name}
-                onChange=this.handle_change/> </div>
+            <div> <input type="text" value={this.state.value}
+                onChange={this.handle_change} /> </div>
         );
     }
 
