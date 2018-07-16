@@ -16,7 +16,11 @@ export class MerkleProofLayer {
         Object.freeze(this)
     }
 
-    /** The hash of the concatenation of these hashes. */
+    /** 
+     * The hash of the concatenation of these hashes.
+     *
+     * XXX: This needs to be adapted to whatever scheme is used on the backend.
+     */
     next_hash(): HashValue {
         return new HashValue(
             '0x' + keccak256(this.left.hash + this.right.hash))
