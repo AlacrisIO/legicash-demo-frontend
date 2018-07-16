@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Record } from 'immutable';
-import { AmountField } from './amountField';
-import { SendButton } from './sendButton';
+import { AmountField } from './amount_field';
+import { SendButton } from './send_button';
 
 const payDialogRecord = ()
