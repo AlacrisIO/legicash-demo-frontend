@@ -30,7 +30,7 @@ export class AmountField extends React.Component<IAmountFieldProps, {}> {
 
     render() {
         return (<div> <input type="text" value={this.state.value}
-            onChange={this.handle_change} /> </div>);
+            className="amountField" onChange={this.handle_change} /> </div>);
     }
 
     get_value(): number {
