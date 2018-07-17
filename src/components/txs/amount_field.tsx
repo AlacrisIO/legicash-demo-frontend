@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-var number_re = RegExp("^[0-9]+(\.[0-9]*)?$")
+var number_re = RegExp("^[0-9]+(\.[0-9]*)?$")  // Matches +ve decimals only.
 
 /** Input field which only accepts non-negative numeric values
  *
@@ -15,6 +15,8 @@ export class AmountField extends React.Component {
     }
 
     handle_change(event: React.FormEvent<EventTarget>): void {
+        // XXX: This is probably not the redux way. Come back to this when we
+        // wire everything up...
         let target = event.target as HTMLInputElement;
         // Only accept input if it's a non-negative numeric value
         if (number_re.exec(target.value)) {
@@ -23,10 +25,8 @@ export class AmountField extends React.Component {
     }
 
     render() {
-        return (
-            <div> <input type="text" value={this.state.value}
-                onChange={this.handle_change} /> </div>
-        );
+        return (<div> <input type="text" value={this.state.value}
+            onChange={this.handle_change} /> </div>);
     }
 
     get_value(): number {
