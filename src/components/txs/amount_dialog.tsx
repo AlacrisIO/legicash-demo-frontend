@@ -18,7 +18,8 @@ export const AmountDialog = (
         <h1>{header}</h1>
         <form onSubmit={e => submitCallback(amount)}>
             <label>{amountDescription}
-                <AmountField callback={(v) => { amount = v }} />
+                <AmountField
+                    callback={(v) => { amount = v }} className="amtField" />
             </label>
             <input type="submit" value="Submit" />
         </form>

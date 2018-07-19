@@ -12,7 +12,7 @@ describe('AmountDialog tests', () => {
             expect(dialog.find('h1').text()).toEqual("foo")
             expect(dialog.find('label').text()).toMatch(
                 RegExp("bar *(<AmountField />)?"))
-            const input = dialog.find('input.amountField')
+            const input = dialog.find('.amtField').find('.amountField')
             expect(input.props().type).toEqual("text")
             // Enter some text in the input field
             input.simulate('change', { target: { value: '3.5' } })
