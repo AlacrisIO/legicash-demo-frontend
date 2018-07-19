@@ -10,16 +10,12 @@ interface IAmountFieldProps { callback: (value: number) => void }
  */
 export class AmountField extends React.Component<IAmountFieldProps, {}> {
     state: { value: string };
-    propTypes: { callback: (value: number) => void }
     constructor(props: IAmountFieldProps) {
         super(props);
         this.state = { value: '0' }
         this.handle_change = this.handle_change.bind(this)
     }
-
     handle_change(event: React.FormEvent<EventTarget>): void {
-        // XXX: This is probably not the redux way. Come back to this when we
-        // wire everything up...
         let target = event.target as HTMLInputElement;
         // Only accept input if it's a non-negative numeric value
         if (number_re.exec(target.value)) {
@@ -27,14 +23,9 @@ export class AmountField extends React.Component<IAmountFieldProps, {}> {
             this.props.callback(parseFloat(target.value))
         }
     }
-
     render() {
-        return (<div> <input type="text" value={this.state.value}
-            className="amountField" onChange={this.handle_change} /> </div>);
-    }
-
-    get_value(): number {
-        return parseFloat(this.state.value)
+        return <input type="text" value={this.state.value}
+            className="amountField" onChange={this.handle_change} />
     }
 }
 
