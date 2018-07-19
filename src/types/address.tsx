@@ -1,4 +1,4 @@
-var address_regexp = RegExp("^0x([0-9A-Fa-f]{2}){20}$|^$");
+export const address_regexp = RegExp("^0x([0-9A-Fa-f]{2}){20}$|^$");
 
 /**
  * Represents the public address for an onchain/sidechain account.
