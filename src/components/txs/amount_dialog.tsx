@@ -13,13 +13,16 @@ export interface IAmountDialog {
 /** Form for specifying an amount */
 export const AmountDialog = (
     { header, amountDescription, submitCallback }: IAmountDialog) => {
-    var amount: number = 0;  // Record the state here as it changes...
+    let amount: number = 0;  // Record the state here as it changes...
+    const setAmount = (v: number) => { amount = v }
+    const onSubmit = (e: React.FormEvent<HTMLFormElement>) =>
+        submitCallback(amount)
     return (<div>
         <h1>{header}</h1>
-        <form onSubmit={e => submitCallback(amount)}>
+        <form onSubmit={onSubmit}>
             <label>{amountDescription}
                 <AmountField
-                    callback={(v) => { amount = v }} className="amtField" />
+                    callback={setAmount} className="amtField" />
             </label>
             <input type="submit" value="Submit" />
         </form>

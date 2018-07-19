@@ -1,12 +1,13 @@
-import * as React from 'react';
 import { mount } from 'enzyme';
+import * as React from 'react';
 import { AmountDialog } from './amount_dialog'
 
 describe('AmountDialog tests', () => {
     it('Accepts a sensible input, renders it, and reports it to the call back',
         () => {
-            var amount: number = -1
+            let amount: number = -1
             const dialog = mount( /* Not shallow; need to access <input> */
+                /* tslint:disable:jsx-no-lambda */
                 <AmountDialog header="foo" amountDescription="bar"
                     submitCallback={(v: number) => { amount = v }} />)
             expect(dialog.find('h1').text()).toEqual("foo")

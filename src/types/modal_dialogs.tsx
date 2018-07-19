@@ -1,6 +1,7 @@
-import { Transaction } from './tx'
+/* tslint:disable:max-classes-per-file */
 import { Address } from './address'
 import { MerkleProof } from './merkle_proof'
+import { Transaction } from './tx'
 
 // There should only ever be one of these, and they should only collect data
 // from the user. So these can afford to be mutable.
@@ -8,11 +9,11 @@ import { MerkleProof } from './merkle_proof'
 /** Information for sidechain payment dialog */
 export class PayDialog {
     /** Source address */
-    readonly from: Address;
+    public readonly from: Address;
     /** Destination address: Needs to be filled in by user */
-    to: Address;
+    public to: Address;
     /** Amount to send: Needs to be filled in by user */
-    amount: number
+    public amount: number
     constructor(a: Address) {
         Object.assign(this, { from: a, to: null, amount: 0 })
     }
@@ -20,8 +21,8 @@ export class PayDialog {
 
 /** Information for withdrawal-to-mainchain dialog */
 export class WithdrawDialog {
-    readonly from: Address;
-    amount: number;
+    public amount: number;
+    public readonly from: Address;
     constructor(a: Address) { Object.assign(this, { from: a, amount: 0 }) }
 }
 
@@ -31,14 +32,14 @@ export class DepositDialog extends WithdrawDialog { }  // Exact same info
 /** Information for Merkle-proof dialog */
 export class MerkleProofDialog {
     /** Transaction this Merkle Proof establishes */
-    readonly tx: Transaction;
-    readonly proof: MerkleProof;
+    public readonly proof: MerkleProof;
+    public readonly tx: Transaction;
     constructor(tx: Transaction, proof: MerkleProof) {
         Object.assign(this, { tx, proof })
-        if (!tx.hash.equal(proof.leaf_hash())) {
-            throw `This proof does not pertain to that transaction!
+        if (!tx.hash.equal(proof.leafHash())) {
+            throw Error(`This proof does not pertain to that transaction!
             Proof: ${proof}
-            Transaction: ${tx}`
+            Transaction: ${tx}`)
         }
     }
 }

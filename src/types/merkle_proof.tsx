@@ -1,77 +1,51 @@
 import { List } from 'immutable'
-import { keccak256 } from 'js-sha3'
-import { HashValue, empty_hash } from './hash'
-
-/** Represents one layer in a Merkle proof */
-export class MerkleProofLayer {
-    /** Left hash value at this point in the Merkle tree */
-    readonly left: HashValue;
-    /** Right hash value at this point in the Merkle tree */
-    readonly right: HashValue;
-    /** Whether the relevant child is left or right (0 means left.) */
-    readonly child: Boolean;
-
-    constructor(props: { left: HashValue; right: HashValue; child: Boolean }) {
-        Object.assign(this, props)
-        Object.freeze(this)
-    }
-
-    /** 
-     * The hash of the concatenation of these hashes.
-     *
-     * XXX: This needs to be adapted to whatever scheme is used on the backend.
-     */
-    next_hash(): HashValue {
-        return new HashValue(
-            '0x' + keccak256(this.left.hash + this.right.hash))
-    }
-
-    /** The parent/leaf hash in the path through the tree */
-    target_hash(): HashValue { return this.child ? this.right : this.left }
-}
+import { emptyHash, HashValue } from './hash'
+import { MerkleProofLayer } from './merkle_proof_layer'
 
 /** Represents a Merkle proof */
 export class MerkleProof {
 
+    /**
+     * Layers in the Merkle proof that root contains the leaf
+     *
+     * Leaf is the indicated HashValue in the first entry in the proof entry,
+     * via the`child` attribute.
+     */
+    public readonly proof: List<MerkleProofLayer>;
     /** The root Merkle tree commitment */
-    readonly root: HashValue;
-    /** Layers in the Merkle proof that root contains the leaf
-      *
-      * Leaf is the indicated HashValue in the first entry in the proof entry,
-      * via the`child` attribute. */
-    readonly proof: List<MerkleProofLayer>;
-
+    public readonly root: HashValue;
     constructor(props: { root: HashValue; proof: List<MerkleProofLayer> }) {
         // Check that the Merkle proof is valid
-        var current_hash: HashValue = empty_hash
+        let currentHash: HashValue = emptyHash
         props.proof.forEach((layer: MerkleProofLayer) => {
             // `child` true means right child, false means left child.
-            if (!current_hash.equal(empty_hash) &&
-                !current_hash.equal(layer.target_hash())) {
-                this.throw_bad_proof(layer, current_hash, layer.target_hash())
+            if (!currentHash.equal(emptyHash) &&
+                !currentHash.equal(layer.targetHash())) {
+                this.throwBadProof(layer, currentHash, layer.targetHash())
             }
-            current_hash = layer.next_hash()
+            currentHash = layer.nextHash()
         })
-        if (!current_hash.equal(props.root)) {
-            throw `Bad Merkle proof; root does not match:
+        if (!currentHash.equal(props.root)) {
+            throw Error(`Bad Merkle proof; root does not match:
             ${ this}
-            Current hash: ${ current_hash} `
+            Current hash: ${ currentHash} `)
         }
         Object.assign(this, props)
         Object.freeze(this)
     }
 
-    throw_bad_proof(
+    public leafHash(): HashValue { return this.proof.get(0).targetHash() }
+
+    private throwBadProof(
         layer: MerkleProofLayer,
-        current_hash: HashValue,
-        target_hash: HashValue
+        currentHash: HashValue,
+        targetHash: HashValue
     ): void {
-        throw `Bad Merkle proof:
+        throw Error(`Bad Merkle proof:
                 ${ this}
             Current layer: ${ layer}
-            Current hash: ${ current_hash}
-            Target hash: ${target_hash}`
+            Current hash: ${ currentHash}
+            Target hash: ${targetHash}`)
     }
 
-    leaf_hash(): HashValue { return this.proof.get(0).target_hash() }
 }

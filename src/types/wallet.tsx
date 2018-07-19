@@ -1,6 +1,6 @@
-import { Record, List } from 'immutable'
+import { List, Record } from 'immutable'
+import { Address, emptyAddress } from './address'
 import { Transaction } from './tx'
-import { Address, empty_address } from './address'
 
 /* *****************************************************************************
  * Wallet boilerplate
@@ -11,22 +11,22 @@ import { Address, empty_address } from './address'
  * MerkleProof */
 
 interface IWallet {
-    readonly username: string;
     readonly address: Address;
-    readonly onchain_balance: number;
-    readonly offchain_balance: number;
+    readonly offchainBalance: number;
+    readonly onchainBalance: number;
     readonly txs: List<Transaction>;
+    readonly username: string
 }
 
-const default_wallet: IWallet = {  // Ensure alignment with IWallet attributes
-    username: '',
-    address: empty_address,
-    onchain_balance: 0,
-    offchain_balance: 0,
-    txs: List()
+const defaultWallet: IWallet = {  // Ensure alignment with IWallet attributes
+    address: emptyAddress,
+    offchainBalance: 0,
+    onchainBalance: 0,
+    txs: List(),
+    username: ''
 }
 
-const WalletRecord = Record(default_wallet)
+const WalletRecord = Record(defaultWallet)
 
 /* End wallet boilerplate
  ******************************************************************************/
@@ -37,23 +37,19 @@ const WalletRecord = Record(default_wallet)
  */
 export class Wallet extends WalletRecord implements IWallet {
     /** Human-readable username for this account */
-    readonly username: string;
+    public readonly username: string;
     /** Cryptographic public address for this account */
-    readonly address: Address;
+    public readonly address: Address;
     /** Balance in this address on-chain. Cannot be negative. */
-    readonly onchain_balance: number;
+    public readonly onchainBalance: number;
     /** Balance in this address in the side chain. Cannot be negative. */
-    readonly offchain_balance: number;
+    public readonly offchainBalance: number;
     /** Known transactions for this account */
-    readonly txs: List<Transaction>;
+    public readonly txs: List<Transaction>;
     constructor(props: IWallet) {
         super(props);
-        if (this.onchain_balance < 0) { throw "Onchain balance negative!" }
-        if (this.offchain_balance < 0) { throw "Offchain balance negative!" }
+        if (this.onchainBalance < 0) { throw Error("Onchain balance negative!") }
+        if (this.offchainBalance < 0) { throw Error("Offchain balance negative!") }
         // XXX: Check that all transactions belong to `address`?
-    }
-    /** Force typechecking on get */
-    get<T extends keyof IWallet>(value: T): IWallet[T] {
-        return super.get(value)
     }
 }

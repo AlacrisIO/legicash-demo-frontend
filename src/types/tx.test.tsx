@@ -1,6 +1,6 @@
-import { Transaction } from './tx'
 import { Address } from './address'
 import { HashValue } from './hash'
+import { Transaction } from './tx'
 
 const addr1 = new Address('0x5050505050505050505050505050505050505050')
 const addr2 = new Address('0x0505050505050505050505050505050505050505')
@@ -10,7 +10,7 @@ const hash = new HashValue(
 describe('Tests of Transaction type', () => {
     it('Accepts and stores a sensible transaction', () => {
         const tx = new Transaction({
-            chain: 'main', from: addr1, to: addr2, amount: 1, hash
+            amount: 1, chain: 'main', from: addr1, hash, to: addr2,
         })
         expect(tx.from).toEqual(addr1)
     })
@@ -21,9 +21,8 @@ describe('Tests of Transaction type', () => {
     })
 
     it('Is closed to extension or modification', () => {
-        var t = new Transaction({
-            chain: 'main', from: addr1, to: addr2, amount: 1,
-            hash
+        const t = new Transaction({
+            amount: 1, chain: 'main', from: addr1, hash, to: addr2
         })
         // @ts-ignore
         expect(() => { t.foo = 1 }).toThrow()

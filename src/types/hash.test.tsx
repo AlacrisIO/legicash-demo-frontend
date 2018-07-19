@@ -1,24 +1,24 @@
-import { random_hash_string } from './common'
+import { randomHashString } from './common'
 import { HashValue } from './hash'
 
 describe('Tests of hash type', () => {
     it('Accepts and stores a sensible hash', () => {
-        new HashValue(random_hash_string())
+        return new HashValue(randomHashString()) && undefined
     })
 
     it('Rejects malformed hash strings', () => {
-        expect(() => { new HashValue('foo') }).toThrow()
+        expect(() => new HashValue('foo')).toThrow()
     })
 
     it('Matches equal hash strings', () => {
-        var hash_string = random_hash_string();
-        expect(new HashValue(hash_string).equal(new HashValue(hash_string)))
+        const hashString = randomHashString();
+        expect(new HashValue(hashString).equal(new HashValue(hashString)))
     })
 
     it('Does not match unequal strings', () => {
-        var hash1 = new HashValue(random_hash_string());
-        var hash2 = new HashValue(random_hash_string());
-        if (hash1.hash == hash2.hash) { throw "Should never be equal!" }
+        const hash1 = new HashValue(randomHashString());
+        const hash2 = new HashValue(randomHashString());
+        if (hash1.hash === hash2.hash) { throw Error("Should never be equal!") }
         expect(!hash1.equal(hash2))
     })
 })

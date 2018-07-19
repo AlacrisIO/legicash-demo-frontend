@@ -1,9 +1,9 @@
+import { shallow } from 'enzyme';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { shallow } from 'enzyme';
 import { AmountField } from './amount_field'
 
-const noOp = (x: number): void => { }
+const noOp = (x: number): void => { /* Does nothing */ }
 
 describe('AmountField tests', () => {
     it('Accepts a sensible input, and renders', () => {
@@ -32,7 +32,8 @@ describe('AmountField tests', () => {
     })
 
     it("Does what it's supposed to with its callback", () => {
-        var value = -1
+        let value = -1
+        /* tslint:disable:jsx-no-lambda */
         const field = shallow(<AmountField callback={v => { value = v }} />)
         field.find('input').simulate('change', { target: { value: '3.5' } })
         expect(value).toEqual(3.5)

@@ -1,29 +1,30 @@
 import { List } from 'immutable'
+import { randomHashString } from './common'
 import { HashValue } from './hash'
-import { MerkleProofLayer, MerkleProof } from './merkle_proof'
-import { random_hash_string } from './common'
+import { MerkleProof } from './merkle_proof'
+import { MerkleProofLayer } from './merkle_proof_layer'
 
-const random_hash = () => new HashValue(random_hash_string())
+const randomHash = () => new HashValue(randomHashString())
 
-var first_layer = new MerkleProofLayer({
-    left: random_hash(), right: random_hash(), child: false
+const firstLayer = new MerkleProofLayer({
+    child: false, left: randomHash(), right: randomHash()
 })
 
-var second_layer = new MerkleProofLayer({
-    left: random_hash(), right: first_layer.next_hash(), child: true
+const secondLayer = new MerkleProofLayer({
+    child: true, left: randomHash(), right: firstLayer.nextHash()
 })
 
 describe('Tests of Merkle proof types', () => {
     it('Accepts and stores a sensible Merkle proof', () => {
-        new MerkleProof({
-            root: second_layer.next_hash(),
-            proof: List([first_layer, second_layer])
-        })
+        return new MerkleProof({
+            proof: List([firstLayer, secondLayer]),
+            root: secondLayer.nextHash()
+        }) && undefined
     })
 
     it('Rejects bad Merkle proofs', () => {
         expect(() => new MerkleProof({
-            root: random_hash(), proof: List([first_layer, second_layer])
+            proof: List([firstLayer, secondLayer]), root: randomHash()
         })).toThrow()
     })
 })

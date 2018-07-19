@@ -2,9 +2,9 @@ import { Address } from './address'
 
 describe('Tests of address types', () => {
     it('Accepts and stores a sensible ethereum address', () => {
-        const address_string = '0x5050505050505050505050505050505050505050';
-        const address = new Address(address_string);
-        expect(address.toString()).toEqual(address_string);
+        const addressString = '0x5050505050505050505050505050505050505050';
+        const address = new Address(addressString);
+        expect(address.toString()).toEqual(addressString);
     })
 
     it('Accepts an empty address', () => {
