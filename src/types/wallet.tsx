@@ -1,14 +1,15 @@
 import { Record, List } from 'immutable'
 import { Transaction } from './tx'
-import { Address } from './address'
+import { Address, empty_address } from './address'
 
 /* *****************************************************************************
- * Wallet boilerplate boilerplate
+ * Wallet boilerplate
  *
  * We want Wallet to be a record, because we expect it to change, so having it
  * backed by a persistent data structure will allow for efficient real-time
  * updates. Otherwise, it could just extend Object, like Transaction and
  * MerkleProof */
+
 interface IWallet {
     readonly username: string;
     readonly address: Address;
@@ -17,9 +18,16 @@ interface IWallet {
     readonly txs: List<Transaction>;
 }
 
-const WalletRecord = Record({
-    username: '', onchain_balance: 0, offchain_balance: 0, txs: List()
-})
+const default_wallet: IWallet = {  // Ensure alignment with IWallet attributes
+    username: '',
+    address: empty_address,
+    onchain_balance: 0,
+    offchain_balance: 0,
+    txs: List()
+}
+
+const WalletRecord = Record(default_wallet)
+
 /* End wallet boilerplate
  ******************************************************************************/
 
