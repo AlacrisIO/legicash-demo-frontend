@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-const numberRe = RegExp("^[0-9]+(\.[0-9]*)?$")  // Matches +ve decimals only.
+const numberRe = RegExp("^[0-9]+(\\.[0-9]*)?$")  // Matches +ve decimals only.
 
 interface IAmountFieldProps { callback: (value: number) => void; className?: "amtField" }
 
@@ -23,7 +23,7 @@ export class AmountField extends React.Component<IAmountFieldProps, {}> {
         const target = event.target as HTMLInputElement;
         // Only accept input if it's a non-negative numeric value
         if (numberRe.exec(target.value)) {
-            this.setState({ value: target.value });
+            this.setState({ value: target.value })
             this.props.callback(parseFloat(target.value))
         }
     }
