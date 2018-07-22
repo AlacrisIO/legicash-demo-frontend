@@ -15,8 +15,9 @@ export const AmountDialog = (
     { header, amountDescription, submitCallback }: IAmountDialog) => {
     let amount: number = 0;  // Record the state here as it changes...
     const setAmount = (v: number) => { amount = v }
-    const onSubmit = (e: React.FormEvent<HTMLFormElement>) =>
-        submitCallback(amount)
+    const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault(); submitCallback(amount)
+    }
     return (<div>
         <h1>{header}</h1>
         <form onSubmit={onSubmit}>

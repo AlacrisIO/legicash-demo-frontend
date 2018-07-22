@@ -4,7 +4,9 @@ import * as ReactDOM from 'react-dom';
 import { AmountField } from './amount_field'
 
 const noOp = (x: number): void => { /* Does nothing */ }
-const changeEvent = (value: string) => ({ target: { value } })
+const changeEvent = (value: string) => ({
+    preventDefault: noOp, target: { value }
+})
 
 describe('AmountField tests', () => {
     it('Accepts a sensible input, and renders', () => {
@@ -29,8 +31,7 @@ describe('AmountField tests', () => {
         expect(field.find('input').props().value).toEqual('3.5')
     })
     it('Rejects input with a single trailing non-numeric input', () => {
-        // This is a regression test. This failed before, because the backslash
-        // in numberRe was unquoted.
+        // Regression test. Failed due to unquoted backslash in numberRe.
         const field = shallow(<AmountField callback={noOp} />)
         field.find('input').simulate('change', changeEvent('3.5'))
         field.find('input').simulate('change', changeEvent('3.5a'))
