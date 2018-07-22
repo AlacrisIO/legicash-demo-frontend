@@ -34,7 +34,7 @@ export class MerkleProof {
         Object.freeze(this)
     }
 
-    public leafHash(): HashValue { return this.proof.get(0).targetHash() }
+    public leafHash = () => this.proof.get(0).targetHash()
 
     private throwBadProof(
         layer: MerkleProofLayer,
