@@ -18,7 +18,9 @@ describe('Tests of hash type', () => {
     it('Does not match unequal strings', () => {
         const hash1 = new HashValue(randomHashString());
         const hash2 = new HashValue(randomHashString());
-        if (hash1.hash === hash2.hash) { throw Error("Should never be equal!") }
+        if (hash1.toString() === hash2.toString()) {
+            throw Error("Should never be equal!")
+        }
         expect(!hash1.equal(hash2))
     })
 })
