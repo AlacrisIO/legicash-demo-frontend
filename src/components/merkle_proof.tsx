@@ -13,23 +13,28 @@ const alignCSS: React.CSSProperties = { 'textAlign': 'center' }
 /* Red styling if true, none otherwise */
 const hashColor = (c: boolean) => (c ? targetCSS : undefined)
 
+const truncateHash = (h: HashValue) => h.toRawString().substring(0, 10)
+
 /* Start and end rows of table, like | Root |  <root hash> | */
 const boundaryLevel = (name: string, hash: HashValue) =>
     <tr>
-        <td>{name}</td><td colSpan={2} style={targetCSS}>{hash.toString()}</td>
+        <td>{name}</td>
+        <td colSpan={2} style={targetCSS}>{truncateHash(hash)}</td>
     </tr>
 
-/* Internal level of Merkle tree. Red for target node, plain for sibling */
+/* Internal level of Merkle tree. Target nodes with hashColor style, sibling
+ * nodes plain
+ */
 const renderLayer = (l: MerkleProofLayer, idx: number) =>
     <tr key={idx}>
         <td />
-        <td style={hashColor(!l.child)}> {l.left.toString()}</td>
-        <td style={hashColor(l.child)}> {l.right.toString()}</td>
+        <td style={hashColor(!l.child)}> {truncateHash(l.left)}</td>
+        <td style={hashColor(l.child)}> {truncateHash(l.right)}</td>
     </tr>
 
 export interface IMerkleProofDisplay { proof: MerkleProof }
 
-/** Renders a Merkle proof */
+/** Renders a MerkleProof for display to the user */
 export const MerkleProofDisplay = ({ proof }: IMerkleProofDisplay) =>
     <table className="merkleTable" style={alignCSS} >
         <tbody>
@@ -40,28 +45,23 @@ export const MerkleProofDisplay = ({ proof }: IMerkleProofDisplay) =>
     </table>
 
 interface IMerkleProofWait {
-    proofPromise: Promise<MerkleProof>
+    /** Description of the data for which a proof is being sought */
+    eventInfo: React.ReactElement<any> | string;
+    /** Holds the proof result, or an error, if available. */
+    result: MerkleProof | Error | null | undefined | false
 }
 
-/** Renders a Merkle proof, once it's available from a promise */
-export class MerkleProofWait extends React.Component<IMerkleProofWait, {}> {
-    public state: { proof?: MerkleProof; error?: Error }
-    constructor(props: IMerkleProofWait) {
-        super(props)
-        props.proofPromise
-            .then(r => this.setState({ proof: r }))
-            .catch(e => {
-                this.setState({ error: e })
-            })
-    }
-    public render() {
-        if (this.state && this.state.proof) {
-            return <MerkleProofDisplay proof={this.state.proof} />
-        } else if (this.state && this.state.error) {
-            return <p>{this.state.error.message}</p>
-        } else {
-            return <Spinner name="circle"
-                overrideSpinnerClassName="load-merkle" />
-        }
-    }
-}
+/**
+ * Renders a Merkle proof, once it's available via relevant redux state
+ *
+ * Or reports an error, if that happens, and spins until one or the other.
+ */
+export const MerkleProofWait = ({ eventInfo, result }: IMerkleProofWait) =>
+    <div className="merkleProofWait">
+        <p>"Proof for " {eventInfo}</p>
+        {(result instanceof MerkleProof) && <MerkleProofDisplay proof={result} />}
+        {(result instanceof Error) &&
+            <p className="load-merkle-error">"Error: " {result.message}</p>}
+        {(!result) &&
+            <Spinner name="circle" overrideSpinnerClassName="load-merkle" />}
+    </div>
