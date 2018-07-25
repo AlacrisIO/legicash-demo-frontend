@@ -18,4 +18,11 @@ describe('Tests of address types', () => {
         expect(() => new Address('0x50505050505050505050505050505050505050505')
         ).toThrow()
     })
+    const a1 = new Address('0x5050505050505050505050505050505050505050')
+    const a2 = new Address('0x5050505050505050505050505050505050505050')
+    const a3 = new Address('0x0505050505050505050505050505050505050505')
+    it('Matches on equal addresses', () => { expect(a1.equal(a2)).toBe(true) })
+    it('Does not match on unequal addresses', () => {
+        expect(a1.equal(a3)).toBe(false)
+    })
 })
