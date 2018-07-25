@@ -10,29 +10,42 @@ export interface IPayDialog {
     submitCallback: (amount: number, to: Address) => void
 }
 
-/** Form for payment information */
-export const PayDialog = ({ from, submitCallback }: IPayDialog) => {
-    let to: string = "0x"
-    let amount: number
-    const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+export class PayDialog extends React.Component<IPayDialog, {}> {
+    public state: { amount: number; to: string } = { amount: 0, to: '0x' }
+
+    public constructor(props: IPayDialog) {
+        super(props)
+        this.onSubmit = this.onSubmit.bind(this)
+        this.setTo = this.setTo.bind(this)
+        this.setAmount = this.setAmount.bind(this)
+    }
+
+    public onSubmit(e: React.FormEvent<HTMLFormElement>) {
+        e.preventDefault()
         // XXX: Give error message; don't just refuse.
-        if (addressRegexp.exec(to) && (amount > 0)) {
-            submitCallback(amount, new Address(to))
+        if (addressRegexp.exec(this.state.to) && (this.state.amount > 0)) {
+            const to = new Address(this.state.to)
+            this.props.submitCallback(this.state.amount, to)
         }
     }
-    const setTo = (v: string) => { to = v }
-    const setAmount = (v: number) => { amount = v }
-    return (<div>
-        <h1>Send payment from {from.toString()}</h1>
-        <form onSubmit={onSubmit}>
-            <label>
-                "To:" <AddressField callback={setTo} />
-            </label>
-            <label>
-                "Amount:" <AmountField callback={setAmount} />
-            </label>
-            <input className="paySubmitButton" type="submit" value="Submit" />
-        </form>
-    </div >
-    )
+
+    public setTo(to: string) { this.setState({ to }) }
+    public setAmount(amount: number) { this.setState({ amount }) }
+    public render() {
+        return (
+            <div>
+                <h1>Send payment from {this.props.from.toString()}</h1>
+                <form onSubmit={this.onSubmit}>
+                    <label>
+                        "To:" <AddressField callback={this.setTo} />
+                    </label>
+                    <label>
+                        "Amount:" <AmountField callback={this.setAmount} />
+                    </label>
+                    <input className="paySubmitButton" type="submit"
+                        value="Submit" />
+                </form>
+            </div >
+        )
+    }
 }

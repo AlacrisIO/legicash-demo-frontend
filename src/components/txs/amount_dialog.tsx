@@ -11,21 +11,33 @@ export interface IAmountDialog {
 }
 
 /** Form for specifying an amount */
-export const AmountDialog = (
-    { header, amountDescription, submitCallback }: IAmountDialog) => {
-    let amount: number = 0;  // Record the state here as it changes...
-    const setAmount = (v: number) => { amount = v }
-    const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault(); submitCallback(amount)
+export class AmountDialog extends React.Component<IAmountDialog, {}> {
+
+    public state: { amount: number } = { amount: 0 }
+
+    public constructor(props: IAmountDialog) {
+        super(props)
+        this.setAmount = this.setAmount.bind(this)
+        this.onSubmit = this.onSubmit.bind(this)
     }
-    return (<div>
-        <h1>{header}</h1>
-        <form onSubmit={onSubmit}>
-            <label>{amountDescription}
-                <AmountField
-                    callback={setAmount} className="amtField" />
-            </label>
-            <input type="submit" value="Submit" />
-        </form>
-    </div>)
+
+    public setAmount(amount: number) { this.setState({ amount }) }
+
+    public onSubmit(e: React.FormEvent<HTMLFormElement>) {
+        e.preventDefault()
+        this.props.submitCallback(this.state.amount)
+    }
+
+    public render() {
+        return (<div>
+            <h1>{this.props.header}</h1>
+            <form onSubmit={this.onSubmit}>
+                <label>{this.props.amountDescription}
+                    <AmountField
+                        callback={this.setAmount} className="amtField" />
+                </label>
+                <input type="submit" value="Submit" />
+            </form>
+        </div>)
+    }
 }
