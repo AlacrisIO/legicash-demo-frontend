@@ -9,6 +9,7 @@ export class HashValue {
         this.hash = hash
     }
     public toString(): string { return `HashValue(${this.hash})` }
+    public toRawString(): string { return this.hash }
     public equal(o: HashValue): boolean { return (this.hash === o.hash) }
 }
 
