@@ -6,26 +6,26 @@ const addr1 = new Address('0x5050505050505050505050505050505050505050')
 const addr2 = new Address('0x0505050505050505050505050505050505050505')
 const hash = new HashValue(
     '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff')
+const defaultTransaction = {
+    amount: 1, dstChain: 'side', failureMessage: '', from: addr1,
+    hash, rejected: undefined, srcChain: 'main', to: addr2, validated: false,
+}
 
 describe('Tests of Transaction type', () => {
     it('Accepts and stores a sensible transaction', () => {
-        const tx = new Transaction({
-            amount: 1, chain: 'main', from: addr1, hash, to: addr2,
-        })
+        const tx = new Transaction(defaultTransaction)
         expect(tx.from).toEqual(addr1)
     })
 
     it('Rejects transactions with a negative amount', () => {
-        expect(() => new Transaction(
-            { chain: '', from: addr1, to: addr2, amount: -1, hash })).toThrow()
+        expect(() => new Transaction({ ...defaultTransaction, amount: -1 }))
+            .toThrow()
     })
 
     it('Is closed to extension or modification', () => {
-        const t = new Transaction({
-            amount: 1, chain: 'main', from: addr1, hash, to: addr2
-        })
+        const t = new Transaction(defaultTransaction)
         // @ts-ignore
-        expect(() => { t.foo = 1 }).toThrow()
+        expect(() => { t.foo = 2 }).toThrow()
         // @ts-ignore
         expect(() => { t.amount = 12 }).toThrow()
     })
