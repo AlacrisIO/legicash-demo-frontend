@@ -1,23 +1,19 @@
+import { Set } from 'immutable'
 import * as React from 'react';
-/* import { render } from 'react-dom' */
 
 /*
  * import { ContractState } from './contract_state';
  * import { MainTxList } from './main_tx_list';
  * import { AddAccount } from './txs/add_account';
  * import { WalletList } from './wallet_list'; */
+// import { merkleProof } from '../types/common'
+// import { MerkleProofDisplay } from './merkle_proof'
 
-import { Address } from '../types/address'
-import { PayDialog } from './txs/pay_dialog'
+import { AddAccount } from './add_account'
 
 /* tslint:disable:no-console */
+/* tslint:disable:jsx-no-lambda */
 /* tslint:disable:no-var-keyword */
-export const App = () => {
-    const noOp = (a: number, t: Address) => {
-        console.log(JSON.stringify([a, t]))
-    }
-    return <PayDialog
-        from={new Address("0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")}
-        submitCallback={noOp} />
-}
-
+export const App = () =>
+    <AddAccount presentAccounts={Set()}
+        add={e => { console.log('result', JSON.stringify(e)) }} />
