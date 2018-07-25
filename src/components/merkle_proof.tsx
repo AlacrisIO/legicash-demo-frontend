@@ -39,6 +39,8 @@ export const MerkleProofDisplay = ({ proof }: IMerkleProofDisplay) =>
     <table className="merkleTable" style={alignCSS} >
         <tbody>
             {boundaryLevel("Root", proof.root)}
+            {/* The proof starts with the leaf and heads up the tree, but here  
+              * we want the reverse. */}
             {proof.proof.reverse().map(renderLayer)}
             {boundaryLevel("Leaf", proof.leafHash())}
         </tbody>
