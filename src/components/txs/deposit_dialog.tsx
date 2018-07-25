@@ -15,6 +15,6 @@ interface IDepositDialog {
 export const DepositDialog = ({ from, submitCallback }: IDepositDialog) => (
     <AmountDialog
         header={"Deposit to main chain from " + from.toString()}
-        amountDescription="Amount to deposit:" submitCallback={submitCallback}
+        amountDescription="Amount to deposit: " submitCallback={submitCallback}
     />
 )
