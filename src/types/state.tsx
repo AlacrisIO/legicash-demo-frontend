@@ -33,5 +33,4 @@ export class UIState extends DefaultState implements IState {
     /** Modal dialog currently being displayed, or None. */
     public readonly modalDialog: ModalDialogs;
     constructor(props: IState) { super(props) }
-    /** Force typechecking on get */
 }
