@@ -1,6 +1,6 @@
 import { List, Record } from 'immutable'
-import { Address, empty_address } from './address'
-import { empty_hash, HashValue } from './hash'
+import { Address, emptyAddress } from './address'
+import { emptyHash, HashValue } from './hash'
 
 /* XXX: What about knowledge of facilitator misbehavior? */
 
@@ -13,10 +13,10 @@ interface IContractState {
 }
 
 export const DefaultContractState = Record({
-    facilitatorAddress: empty_address,
+    facilitatorAddress: emptyAddress,
     fundsInCustody: 0,
     fundsInSidechain: 0,
-    merkleCommitment: empty_hash,
+    merkleCommitment: emptyHash,
     sidechainAccounts: List()
 })
 
