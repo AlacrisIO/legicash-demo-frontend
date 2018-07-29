@@ -1,11 +1,23 @@
+import * as Immutable from 'immutable'
 import { Record } from './record'
+
+
+/* tslint:disable:interface-over-type-literal */
+type A = { a: number, b: Record<B> & B, d: Immutable.Map<string, any> }
+type B = { c: number }
+
+const bDefault = { c: 2 }
+
+const aDefault: A = {
+    a: 1, b: new (Record<{ c: number }>(bDefault))(bDefault),
+    d: Immutable.Map({ e: 5 })
+}
+
+const AFactory = Record(aDefault, 'foo')
+const m = new AFactory({ 'a': 3 })
 
 describe('Checks on Record shim', () => {
     it('Can create a record, update it, and still have a Record', () => {
-        const bDefault = { 'c': 2 }
-        const aDefault = { 'a': 1, 'b': new (Record<{ c: number }>(bDefault))(bDefault) }
-        const AFactory = Record(aDefault, 'foo')
-        const m = new AFactory({ 'a': 3 })
         expect(m.a).toBe(3)  // Resets on creation take effect
         expect(m.b.c).toBe(2)  // Can reach deep into structure
         const n = m.update('a', () => 2)
@@ -16,4 +28,11 @@ describe('Checks on Record shim', () => {
         expect(p.b.c).toBe(3)
         expect(m.b.c).toBe(2)
     })
+    it('deleteIn throws when asked to misbehave', () => {
+        expect(m.d.has('e')).toBe(true)
+        expect(m.deleteIn(['d', 'e']).d.has('e')).toBe(false)
+        expect(m.deleteIn(['d'])).toThrow()
+    })
 })
+
+

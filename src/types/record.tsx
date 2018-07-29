@@ -19,7 +19,65 @@ export interface Record<IArgs extends IRecord> {
     deleteIn(keys: any[]): Record<IArgs> & IArgs
 }
 
+let rPrototype = Immutable.Record.prototype
+
 export function Record<IArgs>(args: IArgs, name?: string): Record<IArgs> & IArgs {
-    const rv = (Immutable.Record(args, name) as any)
-    return rv
+    let hasInitialized: boolean
+    function RecordType(this: any, values: IArgs): any {
+        if (values instanceof RecordType) {
+            return values;
+        }
+        if (!(this instanceof RecordType)) {
+            return new (RecordType as any)(values);
+        }
+        if (!hasInitialized) {
+            hasInitialized = true
+            const keys = Object.keys(args)
+            setProps(RecordTypePrototype, keys)
+            RecordTypePrototype.size = keys.length
+            RecordTypePrototype._name = name
+            RecordTypePrototype._keys = keys
+            RecordTypePrototype._defaultValues = args
+        }
+        this._map = Immutable.Map(values)
+    }
+
+    const RecordTypePrototype = Object.create(rPrototype)
+    RecordType.prototype = RecordTypePrototype
+    RecordTypePrototype.constructor = RecordType;
+
+    return (RecordType as any)
+}
+
+function setProps(prototype: object, names: string[]): void {
+    names.forEach(setProp.bind(undefined, prototype))
+}
+
+function _setProp(prototype: object, name: string) {
+    Object.defineProperty(prototype, name, {
+        get(): any { return this.get(name) },
+        set(value): void {
+            if (!this.__ownerID) {
+                throw Error('Cannot set on an immutable record.')
+            }
+            this.set(name, value);
+        }
+    })
+}
+
+function setProp(prototype: object, name: string) {
+    try { _setProp(prototype, name) } catch (error) {
+        /* tslint:disable:no-console */
+        console.log(`Failed to set prop ${name}: ${error}`)
+    }
+}
+
+rPrototype.deleteIn = function <IArgs>(keys: any[]): Record<IArgs> & IArgs {
+    if (keys.length === 0) { return this }
+    if (keys.length === 1) {
+        throw Error(`Attempt to delete ${keys[0]} from ${this}`)
+    }
+    const [key, ...rest] = keys
+    if (!this.has(key)) { throw Error(`Missing ${key} from ${this}`) }
+    return this.set(key, this.get(key).deleteIn(rest))
 }
