@@ -1,16 +1,15 @@
-import * as Immutable from 'immutable'
-import { Record } from './record'
+import { fromJS, is, Map, Record } from './immutable'
 
 
 /* tslint:disable:interface-over-type-literal */
-type A = { a: number, b: Record<B> & B, d: Immutable.Map<string, any> }
+type A = { a: number, b: Record<B> & B, d: Map<string, any> }
 type B = { c: number }
 
 const bDefault = { c: 2 }
 
 const aDefault: A = {
     a: 1, b: new (Record<{ c: number }>(bDefault))(bDefault),
-    d: Immutable.Map({ e: 5 })
+    d: Map({ e: 5 })
 }
 
 const AFactory = Record(aDefault, 'foo')
@@ -39,5 +38,16 @@ describe('Checks on Record shim', () => {
             [['d', 'e'], () => 10]])
         expect(n.a).toBe(m.a + 1)
         expect(n.d.get('e')).toBe(10)
+        const p: Map<string, any> = fromJS({ a: { b: { c: 1 } } })
+        const path = ['a', 'b', 'c']
+        const q = p.multiUpdateIn([[path, x => x + 1]])
+        expect(q.getIn(path)).toBe(p.getIn(path) + 1)
+    })
+    it('Works with Immutable.is', () => {
+        // Works for standard Immutable objects
+        expect(is(Map({ e: 5 }), Map({ e: 5 }))).toBe(true)
+        const mCopy = new AFactory({ a: 3 })
+        // expect(aCopy.equals(aDefault)).toBe(true)
+        expect(is(mCopy, m)).toBe(true)
     })
 })

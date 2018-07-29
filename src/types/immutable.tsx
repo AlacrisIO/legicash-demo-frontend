@@ -3,12 +3,25 @@
  */
 
 import * as Immutable from 'immutable'
+export { List, is, fromJS } from 'immutable'
 
 type anyFunc = (v: any) => any
 
+/* tslint:disable:interface-name */
+export interface Map<K, V> extends Immutable.Map<K, V> {
+    (): Map<K, V>
+    new(a: object): Map<K, V> & null
+    multiUpdateIn(updates: Array<[any, anyFunc]>): this
+}
+
+// Note that you don't use `new` with this... It's a pain... Lots of holes, here.
+export function Map<K, V>(obj?: object): Map<K, V> {
+    if (obj === undefined) { return Immutable.Map() as any }
+    return Immutable.fromJS(obj)
+}
+
 interface IRecord { [s: string]: any }
 
-/* tslint:disable:interface-name */
 export interface Record<IArgs extends IRecord> {
     new(args: Partial<IArgs>): Record<IArgs> & IArgs
     update(key: (keyof IArgs), updater: anyFunc): this
@@ -19,6 +32,8 @@ export interface Record<IArgs extends IRecord> {
     has(key: string): boolean
     deleteIn(keys: any[]): this
     withMutations(mutator: (mutable: Record<IArgs>) => any): this
+    equals(this: Record<IArgs>, o: typeof this): boolean
+    hashCode(this: Record<IArgs>): number
 }
 
 const rPrototype = Immutable.Record.prototype
@@ -86,12 +101,15 @@ rPrototype.deleteIn = function <IArgs>(this: Record<IArgs> & IArgs, keys: any[])
     return this.set(key, this.get(key).deleteIn(rest))
 }
 
-rPrototype.multiUpdateIn = function <IArgs, T extends Record<IArgs> & IArgs>(
+export const multiUpdateIn = function <T>(
     this: T, updates: Array<[any, anyFunc]>): T {
-    return this.withMutations((r: T): T => {
+    return (this as any).withMutations((r: T): T => {
         for (const [keys, updater] of updates) {
-            r = r.updateIn(keys, updater)
+            r = (r as any).updateIn(keys, updater)
         }
         return r
     })
 }
+
+rPrototype.multiUpdateIn = multiUpdateIn
+Immutable.Map.prototype.multiUpdateIn = multiUpdateIn
