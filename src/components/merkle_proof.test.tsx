@@ -1,6 +1,6 @@
 import { mount } from 'enzyme'
 import * as React from 'react'
-import { merkleProof } from '../types/merkle_proof.test'
+import { merkleProof } from '../types/common'
 import { MerkleProofDisplay, MerkleProofWait } from './merkle_proof'
 
 describe('MerkleProofDisplay tests', () => {
