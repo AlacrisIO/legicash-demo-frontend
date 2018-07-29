@@ -1,6 +1,6 @@
-import { List, Record } from 'immutable'
 import { Address, emptyAddress } from './address'
 import { emptyHash, HashValue } from './hash'
+import { List, Record } from './immutable'
 
 /* XXX: What about knowledge of facilitator misbehavior? */
 
@@ -17,8 +17,8 @@ export const DefaultContractState = Record({
     fundsInCustody: 0,
     fundsInSidechain: 0,
     merkleCommitment: emptyHash,
-    sidechainAccounts: List()
-})
+    sidechainAccounts: List<Address>()
+}, 'ContractState')
 
 /** Represents the UI state of the Contract State panel */
 export class ContractState extends DefaultContractState
