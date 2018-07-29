@@ -21,8 +21,8 @@ describe('Tests of address types', () => {
     const a1 = new Address('0x5050505050505050505050505050505050505050')
     const a2 = new Address('0x5050505050505050505050505050505050505050')
     const a3 = new Address('0x0505050505050505050505050505050505050505')
-    it('Matches on equal addresses', () => { expect(a1.equal(a2)).toBe(true) })
+    it('Matches on equal addresses', () => { expect(a1.equals(a2)).toBe(true) })
     it('Does not match on unequal addresses', () => {
-        expect(a1.equal(a3)).toBe(false)
+        expect(a1.equals(a3)).toBe(false)
     })
 })

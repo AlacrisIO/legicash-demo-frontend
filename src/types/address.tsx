@@ -13,7 +13,7 @@ export class Address {
         this.address = address;
     }
     public toString(): string { return this.address }
-    public equal(o: Address): boolean { return this.address === o.address }
+    public equals(o: Address): boolean { return this.address === o.address }
 }
 
 export const emptyAddress = new Address('')
