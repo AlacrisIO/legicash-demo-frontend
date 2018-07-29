@@ -1,36 +1,59 @@
-import { List, Map, Record } from 'immutable'
 import { Address } from './address'
-import { ContractState, DefaultContractState } from './contract_state'
-import { HashValue } from './hash'
-import { ModalDialogs } from './modal_dialogs'
+import { DefaultContractState } from './contract_state'
+import { Guid } from './guid'
+import { List, Map, Record } from './immutable'
 import { Transaction } from './tx'
 import { Wallet } from './wallet'
 
-interface IState {
-    readonly accounts: Map<Address, Wallet>;
-    readonly displayedAccounts: List<Address>;
-    readonly transactions: Map<HashValue, Transaction>;
-    readonly contractState: ContractState;
-    readonly modalDialog: ModalDialogs
+const defaultValues = {
+    /** Wallets known to the front end */
+    accounts: Map<Address, Wallet>(),
+    /** Display of current contract state */
+    contractState: DefaultContractState,
+    /** Wallets currently displayed */
+    displayedAccounts: List<Address>(),
+    /** Transactions, indexed by various characteristics */
+    txByFromAddress: Map<Address, List<Guid>>(),
+    txByGUID: Map<Guid, Transaction>(),
+    txByToAddress: Map<Address, List<Guid>>(),
 }
 
-export const DefaultState = Record({
-    accounts: Map(),
-    contractState: DefaultContractState,
-    displayedAccounts: List(),
-    transactions: Map(),
-})
-
-export class UIState extends DefaultState implements IState {
-    /** Wallets known to the front end */
-    public readonly accounts: Map<Address, Wallet>;
-    /** Wallets currently displayed */
-    public readonly displayedAccounts: List<Address>;
-    /** Transactions known to the front end */
-    public readonly transactions: Map<HashValue, Transaction>;
-    /** Display of current contract state */
-    public readonly contractState: ContractState;
-    /** Modal dialog currently being displayed, or None. */
-    public readonly modalDialog: ModalDialogs;
-    constructor(props: IState) { super(props) }
+export class UIState extends Record(defaultValues) {
+    constructor(props: Partial<typeof defaultValues>) {
+        // XXX: Check consistency between tx* members, addresses, etc.
+        super(props)
+    }
+    /** State with wallet added */
+    public addWallet(username: string, address: Address, onchainBalance?: 0,
+        offchainBalance?: 0): this {
+        return this.updateIn(
+            ['accounts', address],
+            (w: Wallet) => {
+                const txs = List<Guid>(this.txByFromAddress.get(address).concat(
+                    this.txByToAddress.get(address)))
+                return (w || new Wallet({
+                    address, offchainBalance, onchainBalance, txs, username
+                }))
+            })
+    }
+    /** State with tx added */
+    public addTx(tx: Transaction): this {
+        // Add tx to map, ensuring compatibility with any extant tx
+        const updateTx = (otx: Transaction | undefined) =>
+            otx && (tx.assertSameTransaction(otx) || tx)
+        const updateGUID = (guid: Guid | undefined) => tx.localGUID
+        const updateWallet = (a: Address) => (w: Wallet | undefined) =>
+            (w || new Wallet({ address: a })).addTx(
+                tx.getGUID(), this.txByGUID)
+        return this.multiUpdateIn([
+            [['txByGUID', tx.localGUID], updateTx],
+            [['txByFromAddress', tx.from], updateGUID],
+            [['txByToAddress', tx.to], updateGUID],
+            [['accounts'], (wl: Map<Address, Wallet>) =>
+                wl.multiUpdateIn([
+                    [[tx.to], updateWallet(tx.to)],
+                    [[tx.from], updateWallet(tx.from)]
+                ])
+            ]])
+    }
 }

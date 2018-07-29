@@ -1,83 +1,134 @@
-import { Record } from 'immutable'
-import { Address, emptyAddress } from './address'
-import { emptyHash, HashValue } from './hash'
+import { emptyAddress } from './address'
+import { Guid } from './guid'
+import { emptyHash } from './hash'
+import { Record } from './immutable'
 
-/* XXX: Should have something in Transaction to indicate who the facilitator
- * is, for sidechain transactions? What about epistemic state?
- */
+/* XXX: Should have something in Transaction to indicate who the facilitator 
+ * is, for sidechain transactions? What about epistemic state? For now, just
+ * "validated" or "rejected". Treating server as trusted resource. */
 
-export interface ITransaction {
-    /** Amount transferred. Cannot be negative. */
-    readonly amount: number | undefined;
-    /** Name of the chain this transaction targets. */
-    readonly dstChain: string;
-    /** Human-readable explanation for any failure of the transaction */
-    readonly failureMessage: string,
-    /** Source address for transaction */
-    readonly from: Address;
-    /** Hash for identifying this tx */
-    readonly hash: HashValue
-    /** Whether the transaction has been rejected by the facilitator */
-    readonly rejected: boolean | undefined;
-    /** Name of the chain this transaction comes from */
-    readonly srcChain: string;
-    /** Destination address for transaction */
-    readonly to: Address;
-    /** Whether the transaction has been validated by the main chain. */
-    readonly validated: boolean | undefined;
+interface IOptionTypes {  // Declare types where they can't be inferred
+    amount: number | undefined
+    localGUID: Guid | undefined
+    rejected: boolean | undefined
+    validated: boolean | undefined
 }
 
-const defaultTransactionBase = {
-    amount: undefined, dstChain: '', failureMessage: '', from: emptyAddress,
-    hash: emptyHash, rejected: undefined, srcChain: '', to: emptyAddress,
+const optionValues: IOptionTypes = {
+    /** Amount transferred. Cannot be negative. */
+    amount: undefined,
+    /** Privately assigned ID for tracking within the front end */
+    localGUID: undefined,
+    /** Whether the transaction has been rejected by the facilitator */
+    rejected: undefined,
+    /** Whether the transaction has been validated by the main chain. */
     validated: undefined,
 }
 
-export const DefaultTransaction = Record(defaultTransactionBase)
-
-/** Represents a cryptographic transaction */
-export class Transaction extends DefaultTransaction {
-
-    /** Amount transferred. Cannot be negative. */
-    public readonly amount: number;
+const inferrableValues = {  // Attributes where type can be inferred directly
     /** Name of the chain this transaction targets. */
-    public readonly dstChain: string;
+    dstChain: '',
     /** Human-readable explanation for any failure of the transaction */
-    public readonly failureMessage: string;
+    failureMessage: '',
     /** Source address for transaction */
-    public readonly from: Address;
-    /** Hash for identifying this tx */
-    public readonly hash: HashValue
+    from: emptyAddress,
+    /** Transaction hash reported from server */
+    hash: emptyHash,
     /** Name of the chain this transaction comes from */
-    /** Whether the transaction has been rejected by the facilitator */
-    public readonly rejected: boolean | undefined;
-    public readonly srcChain: string;
+    srcChain: '',
     /** Destination address for transaction */
-    public readonly to: Address;
-    /** Whether the transaction has been validated by the main chain. */
-    public validated: boolean;
-
-    constructor(props: ITransaction) {
-        super(props)
-        if (props.amount && (props.amount < 0)) {
-            throw Error("Tx with negative amount!")
-        }
-        Object.freeze(this)  // Close to addition of other attributes
-    }
+    to: emptyAddress,
 }
 
-/* This is unnecessary due to Record boilerplate, which checks statically that
- * all attributes have been assigned.
- *
- * const dummyTransaction = DefaultTransaction().toSeq()
- *
- * dummyTransaction.forEach(
- *    // Check that all values are specified
- *    (v: ITransaction[keyof ITransaction], k: keyof ITransaction) => {
- *        if (v === props[k]) {  // Key still set to default value?
- *            throw Error(`Transaction key ${k} unset!`)
- *            return false
- *        }
- *        return true // forEach Halts if false is  returned.
- *    })
- */
+const defaultValues = { ...optionValues, ...inferrableValues }
+
+type txDifference = [string, (t: Transaction) => any]
+
+/** represents a cryptographic transaction */
+export class Transaction extends Record(defaultValues) {
+    constructor(props: Partial<typeof defaultValues>) {
+        super(props)
+        if (this.amount && (this.amount < 0)) {
+            throw Error("Tx with negative amount!")
+        }
+        if (this.rejected && this.validated) {
+            throw Error(
+                `Contradictory rejected/validated status in ${this.toString()}`)
+        }
+        if (this.rejected && (!this.hash.equal(emptyHash))) {
+            throw Error(
+                `Rejected tx with hash?? ${this.toString()}`)
+        }
+        if (this.validated && this.hash.equal(emptyHash)) {
+            throw Error(
+                `No hash for validated tx?? ${this.toString()}`)
+        }
+        this.localGUID = this.localGUID || new Guid()
+        Object.freeze(this)  // Close to addition of other attributes
+    }
+
+    public toString(): string { return JSON.stringify(this) }
+
+    /**
+     * Return null if transactions don't contracdict, truthy otherwise
+     * Truthy return value is [<description>, <difference accessor function>]
+     * The second return value in that case takes the one of the transactions,
+     * and returns the attribute which is different. See assertSameTransaction.
+     */
+    public txsDiffer(o: Transaction): null | txDifference {
+        if (this.amount !== o.amount) {
+            return ["Amounts", ((t: Transaction) => t.amount)]
+        }
+        if (this.dstChain !== o.dstChain) {
+            return ["Destination chains", ((t: Transaction) => t.dstChain)]
+        }
+        if (!this.from.equals(o.from)) {
+            return ["Source addresses", ((t: Transaction) => t.from.toString())]
+        }
+        if ((!this.hash.equal(emptyHash)) && (!o.hash.equal(emptyHash)) &&
+            (!this.hash.equal(o.hash))) {
+            return ["Hashes", ((t: Transaction) => t.hash.toString)]
+        }
+        if ((this.rejected !== undefined) && (o.rejected !== undefined) &&
+            (this.rejected !== o.rejected)) {
+            return ["Rejection flags", ((t: Transaction) => t.rejected)]
+        }
+        if (this.srcChain !== o.srcChain) {
+            return ["Source chains", ((t: Transaction) => t.srcChain)]
+        }
+        if (!this.to.equals(o.to)) {
+            return ["Destination addresses", ((t: Transaction) => t.to.toString())]
+        }
+        if ((this.validated !== undefined) && (o.validated !== undefined) &&
+            (this.validated !== o.validated)) {
+            return ["Validation flags", ((t: Transaction) => t.validated)]
+        }
+        if ((this.localGUID === undefined) || (o.localGUID === undefined)) {
+            return ["GUIDs", (t: Transaction) => t.localGUID]
+        }
+        if ((this.localGUID as Guid).guid !== (o.localGUID as Guid).guid) {
+            return ["Local GUIDs",
+                ((t: Transaction) => (t.localGUID as Guid).guid)]
+        }
+        return null
+    }
+
+    /** Throw if o contains contradictory information to this tx. */
+    public assertSameTransaction(o: Transaction): boolean {
+        const areDifferent = this.txsDiffer(o)
+        if (areDifferent) {
+            const [description, accessor] = areDifferent
+            throw Error(`${description} differ in transactions
+$(this.toString()} vs ${o.toString()}:
+(${accessor(this)} != ${accessor(o)})`)
+        }
+        return true
+    }
+
+    public getGUID(): Guid {
+        if (this.localGUID === undefined) {
+            throw Error(`GUID unset in ${this}`)
+        }
+        return this.localGUID
+    }
+}

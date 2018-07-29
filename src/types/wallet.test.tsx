@@ -10,18 +10,24 @@ const bobAddress = new Address('0xb0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0');
 const hash = new HashValue(
     '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff');
 
+const now = new Date()
 const aliceToTrent = new Transaction({
-    amount: 19, chain: 'main', from: aliceAddress, hash, to: trentAddress
+    amount: 19, creationDate: now, dstChain: 'side', failureMessage: '',
+    from: aliceAddress, hash, rejected: undefined, srcChain: 'main',
+    to: trentAddress, validated: true,
 })
 const aliceToBob = new Transaction({
-    amount: 1, chain: 'side', from: aliceAddress, hash, to: bobAddress,
+    amount: 1, creationDate: now, dstChain: 'side', failureMessage: '',
+    from: aliceAddress, hash, rejected: undefined, srcChain: 'main',
+    to: bobAddress, validated: true,
 })
 
 describe('Tests of wallet type', () => {
     it('Should accept and store a sensible wallet', () => {
         return new Wallet({
             address: aliceAddress, offchainBalance: 20, onchainBalance: 1,
-            txs: List([aliceToTrent, aliceToBob]), username: 'alice'
+            txs: List([aliceToTrent.getGUID(), aliceToBob.getGUID()]),
+            username: 'alice'
         }) && undefined
     })
 
@@ -29,11 +35,13 @@ describe('Tests of wallet type', () => {
         expect(() => new Wallet({
             address: aliceAddress,
             offchainBalance: 20, onchainBalance: -1,
-            txs: List([aliceToTrent, aliceToBob]), username: 'alice'
+            txs: List([aliceToTrent.getGUID(), aliceToBob.getGUID()]),
+            username: 'alice'
         })).toThrow()
         expect(() => new Wallet({
             address: aliceAddress, offchainBalance: -20, onchainBalance: 1,
-            txs: List([aliceToTrent, aliceToBob]), username: 'alice',
+            txs: List([aliceToTrent.getGUID(), aliceToBob.getGUID()]),
+            username: 'alice',
         })).toThrow()
     })
 })
