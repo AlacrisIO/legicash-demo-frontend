@@ -11,15 +11,17 @@ interface IRecord { [s: string]: any }
 /* tslint:disable:interface-name */
 export interface Record<IArgs extends IRecord> {
     new(args: Partial<IArgs>): Record<IArgs> & IArgs
-    update(key: (keyof IArgs), updater: anyFunc): Record<IArgs> & IArgs
-    updateIn(keys: any[], updater: anyFunc): Record<IArgs> & IArgs
+    update(key: (keyof IArgs), updater: anyFunc): this
+    updateIn(keys: any[], updater: anyFunc): this
+    multiUpdateIn(updates: Array<[any, anyFunc]>): this
     get(key: keyof IArgs): any
-    set(key: keyof IArgs, value: any): void
+    set(key: keyof IArgs, value: any): this
     has(key: string): boolean
-    deleteIn(keys: any[]): Record<IArgs> & IArgs
+    deleteIn(keys: any[]): this
+    withMutations(mutator: (mutable: Record<IArgs>) => any): this
 }
 
-let rPrototype = Immutable.Record.prototype
+const rPrototype = Immutable.Record.prototype
 
 export function Record<IArgs>(args: IArgs, name?: string): Record<IArgs> & IArgs {
     let hasInitialized: boolean
@@ -72,12 +74,24 @@ function setProp(prototype: object, name: string) {
     }
 }
 
-rPrototype.deleteIn = function <IArgs>(keys: any[]): Record<IArgs> & IArgs {
+rPrototype.deleteIn = function <IArgs>(this: Record<IArgs> & IArgs, keys: any[])
+    : typeof this {
     if (keys.length === 0) { return this }
-    if (keys.length === 1) {
-        throw Error(`Attempt to delete ${keys[0]} from ${this}`)
-    }
     const [key, ...rest] = keys
+    if (keys.length === 1) {
+        throw new Error(`Attempt to delete \`${key}\` (first key of \
+\`${JSON.stringify(keys)}\`) from \`${this}\``)
+    }
     if (!this.has(key)) { throw Error(`Missing ${key} from ${this}`) }
     return this.set(key, this.get(key).deleteIn(rest))
+}
+
+rPrototype.multiUpdateIn = function <IArgs, T extends Record<IArgs> & IArgs>(
+    this: T, updates: Array<[any, anyFunc]>): T {
+    return this.withMutations((r: T): T => {
+        for (const [keys, updater] of updates) {
+            r = r.updateIn(keys, updater)
+        }
+        return r
+    })
 }

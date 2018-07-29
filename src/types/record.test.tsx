@@ -31,8 +31,13 @@ describe('Checks on Record shim', () => {
     it('deleteIn throws when asked to misbehave', () => {
         expect(m.d.has('e')).toBe(true)
         expect(m.deleteIn(['d', 'e']).d.has('e')).toBe(false)
-        expect(m.deleteIn(['d'])).toThrow()
+        expect(() => m.deleteIn(['d'])).toThrow()
+    })
+    it('multiUpdateIn does multiple updates', () => {
+        const n = m.multiUpdateIn([
+            [['a'], (x: number) => x + 1],
+            [['d', 'e'], () => 10]])
+        expect(n.a).toBe(m.a + 1)
+        expect(n.d.get('e')).toBe(10)
     })
 })
-
-
