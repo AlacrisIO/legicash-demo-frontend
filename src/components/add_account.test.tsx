@@ -23,6 +23,6 @@ describe('Tests for add account dialog', () => {
         const change = { target: { value: knownAddresses.first().toString() } }
         m.find('select').simulate('change', change)
         form.simulate('submit')
-        expect((v as Address).equal(knownAddresses.first())).toBe(true)
+        expect((v as Address).equals(knownAddresses.first())).toBe(true)
     })
 })
