@@ -49,9 +49,8 @@ export class Wallet extends Record(defaultValues) {
         if (!this.knownTx(tx)) {
             // XXX: Deal with this more gracefully
             throw Error(`Server rejected a tx we haven't seen! ${tx}`)
-            return this.multiUpdateIn(this.balanceUpdates(tx, this.undoBalance))
-        }
-        return this
+        }  // OK, undo the balances
+        return this.multiUpdateIn(this.balanceUpdates(tx, this.undoBalance))
     }
     private knownTx(tx: Transaction): boolean { return this.txSet.has(tx.getGUID()) }
     /** Function for updating the tx list with the given txID. */
