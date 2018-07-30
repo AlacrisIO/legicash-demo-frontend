@@ -3,7 +3,7 @@
 import * as Actions from '../types/actions'
 import { UIState } from '../types/state'
 
-export const deposit = (state: UIState, action: Actions.IActionType)
+export const rootReducer = (state: UIState, action: Actions.IActionType)
     : UIState => {
     switch (action.type) {
         // Deposit-related actions; see ../types/actions/deposit.tsx
@@ -17,6 +17,5 @@ export const deposit = (state: UIState, action: Actions.IActionType)
         case Actions.Action.DEPOSIT_FAILED:
             return state.rejectTx((action as Actions.IDepositFailed).tx)
     }
-    return state
+    throw Error('Unkown action received!')
 }
-
