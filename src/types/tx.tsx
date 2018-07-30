@@ -1,4 +1,5 @@
 import { emptyAddress } from './address'
+import { Chain, describeChain } from './chain'
 import { Guid } from './guid'
 import { emptyHash } from './hash'
 import { Record } from './immutable'
@@ -7,35 +8,41 @@ import { Record } from './immutable'
  * is, for sidechain transactions? What about epistemic state? For now, just
  * "validated" or "rejected". Treating server as trusted resource. */
 
+/* tslint:disable:object-literal-sort-keys */
 interface IOptionTypes {  // Declare types where they can't be inferred
     amount: number | undefined
-    localGUID: Guid | undefined
+    creationDate: Date | undefined,
+                          localGUID: Guid | undefined
     rejected: boolean | undefined
     validated: boolean | undefined
+    dstChain: Chain | undefined,
+                          srcChain: Chain | undefined,
 }
 
 const optionValues: IOptionTypes = {
     /** Amount transferred. Cannot be negative. */
     amount: undefined,
+    /** LOCAL time that this tx was created. */
+    creationDate: undefined,
     /** Privately assigned ID for tracking within the front end */
     localGUID: undefined,
     /** Whether the transaction has been rejected by the facilitator */
     rejected: undefined,
     /** Whether the transaction has been validated by the main chain. */
     validated: undefined,
+    /** Name of the chain this transaction targets. */
+    dstChain: undefined,
+    /** Name of the chain this transaction comes from */
+    srcChain: undefined,
 }
 
 const inferrableValues = {  // Attributes where type can be inferred directly
-    /** Name of the chain this transaction targets. */
-    dstChain: '',
     /** Human-readable explanation for any failure of the transaction */
     failureMessage: '',
     /** Source address for transaction */
     from: emptyAddress,
     /** Transaction hash reported from server */
     hash: emptyHash,
-    /** Name of the chain this transaction comes from */
-    srcChain: '',
     /** Destination address for transaction */
     to: emptyAddress,
 }
@@ -64,7 +71,7 @@ export class Transaction extends Record(defaultValues) {
                 `No hash for validated tx?? ${this.toString()}`)
         }
         this.localGUID = this.localGUID || new Guid()
-        Object.freeze(this)  // Close to addition of other attributes
+        this.creationDate = this.creationDate || new Date()
     }
 
     public toString(): string { return JSON.stringify(this) }
@@ -80,7 +87,8 @@ export class Transaction extends Record(defaultValues) {
             return ["Amounts", ((t: Transaction) => t.amount)]
         }
         if (this.dstChain !== o.dstChain) {
-            return ["Destination chains", ((t: Transaction) => t.dstChain)]
+            return ["Destination chains", ((t: Transaction) =>
+                describeChain(t.dstChain))]
         }
         if (!this.from.equals(o.from)) {
             return ["Source addresses", ((t: Transaction) => t.from.toString())]
@@ -94,7 +102,8 @@ export class Transaction extends Record(defaultValues) {
             return ["Rejection flags", ((t: Transaction) => t.rejected)]
         }
         if (this.srcChain !== o.srcChain) {
-            return ["Source chains", ((t: Transaction) => t.srcChain)]
+            return ["Source chains", ((t: Transaction) =>
+                describeChain(t.srcChain))]
         }
         if (!this.to.equals(o.to)) {
             return ["Destination addresses", ((t: Transaction) => t.to.toString())]
