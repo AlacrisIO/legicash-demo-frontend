@@ -20,6 +20,9 @@ const defaultValues = {
     username: ''
 }
 
+// type balanceUpdateFn = (balance: number) => number
+type balanceUpdateFn = (balance: any) => any
+
 export class Wallet extends Record(defaultValues) {
     constructor(props: Partial<typeof defaultValues>) {
         super(props)
@@ -30,19 +33,27 @@ export class Wallet extends Record(defaultValues) {
     /** Wallet with this tx added */
     public addTx(txID: Guid, txs: Map<Guid, Transaction>): this {
         const tx = txs.get(txID)
-        const updates: Array<[string[], (a: any) => any]> = [
+        const updates: Array<[any[], (a: any) => any]> = [
             // To be applied in a big batch at the end
             [['txs'], this.updateTxs(txID, tx, txs)],
             [['txSet'], (s: Set<Guid>) => s.add(txID)],
         ]
-        if (!this.txSet.has(txID)) {
-            // First time we're seeing this tx; optimistically update balances.
-            updates.push(
-                [['offchainBalance'], this.updateBalance(tx, Chain.Side)],
-                [['onchainBalance'], this.updateBalance(tx, Chain.Main)])
+        if (!this.knownTx(tx)) {
+            // First time we're seeing this tx; optimistically adjust balances
+            // XXX: bug in typescript? These types look compatible to me...
+            updates.push(this.balanceUpdates(tx, this.updateBalance) as any)
         }
         return this.multiUpdateIn(updates)
     }
+    public rejectTx(tx: Transaction): this {
+        if (!this.knownTx(tx)) {
+            // XXX: Deal with this more gracefully
+            throw Error(`Server rejected a tx we haven't seen! ${tx}`)
+            return this.multiUpdateIn(this.balanceUpdates(tx, this.undoBalance))
+        }
+        return this
+    }
+    private knownTx(tx: Transaction): boolean { return this.txSet.has(tx.getGUID()) }
     /** Function for updating the tx list with the given txID. */
     private updateTxs(txID: Guid, tx: Transaction, txs: Map<Guid, Transaction>
     ): (l: List<Guid>) => List<Guid> {
@@ -63,7 +74,19 @@ export class Wallet extends Record(defaultValues) {
         return l => List(l.push(txID).sort(cmp))
     }
     /** Function for updating balance, given tx direction. */
-    private updateBalance(tx: Transaction, c: Chain): (balance: number) => number {
-        return balance => balance + balanceUpdate(tx, this.address, c)
+    private updateBalance(tx: Transaction, c: Chain): balanceUpdateFn {
+        return (balance: number) => balance + balanceUpdate(tx, this.address, c)
+    }
+    private undoBalance(tx: Transaction, c: Chain): balanceUpdateFn {
+        return (balance: number) => balance - balanceUpdate(tx, this.address, c)
+    }
+    private balanceUpdates(
+        tx: Transaction,
+        update: (tx: Transaction, chain: Chain) => balanceUpdateFn
+    ): Array<[string[], balanceUpdateFn]> {
+        return [
+            [['offchainBalance'], update(tx, Chain.Side)],
+            [['onchainBalance'], update(tx, Chain.Main)]
+        ]
     }
 }

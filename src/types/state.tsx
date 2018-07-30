@@ -59,8 +59,16 @@ export class UIState extends Record(defaultValues) {
     }
     /** State with tx marked as rejected */
     public rejectTx(tx: Transaction): this {
-
         return this
+            .addTx(tx) // Add the new information about the tx
+            // Adjust balances on affected wallets, which were optimistically
+            .update('accounts',             // updated when tx was created.
+                (wl: Map<Address, Wallet>) => {
+                    const updateWallet = (w: Wallet) => w.rejectTx(tx)
+                    return wl.multiUpdateIn([
+                        [[tx.to], updateWallet],
+                        [[tx.from], updateWallet]
+                    ])
+                })
     }
-
 }
