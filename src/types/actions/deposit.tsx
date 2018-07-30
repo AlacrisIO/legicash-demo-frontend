@@ -1,7 +1,10 @@
+/** Actions related to making a deposit on the front end. */
+
 import { Address } from '../address'
 import { Transaction } from '../tx'
 import { Action, IActionType, IServerResponse } from './base_actions'
 
+/** Represents a request to display the wallet associated with `address` */
 export interface IAddAddress extends IActionType {
     readonly address: Address;
     readonly username: string;
@@ -10,15 +13,21 @@ export interface IAddAddress extends IActionType {
 export const addAddress = (address: Address, username: string): IAddAddress =>
     ({ address, type: Action.ADD_ADDRESS, username })
 
+/** Base class for actions during deposit from the main chain to the side chain
+ *
+ *  Deposit details are represented by `tx`
+ */
 export interface IDeposit extends IActionType {
     readonly address: Address;
     readonly tx: Transaction
 }
 
+/** Represents a request to make a deposit */
 export interface IMakeDeposit extends IDeposit {
     readonly type: Action.MAKE_DEPOSIT;
 }
 export const makeDeposit = (address: Address, tx: Transaction): IMakeDeposit => {
+    /* Deposits are always tx's between same address on the main/side chain */
     if ((!address.equals(tx.to)) || (!address.equals(tx.from)) ||
         (tx.srcChain !== 'main') || (tx.dstChain !== 'side')) {
         throw Error('Transaction is not a deposit!')
@@ -26,6 +35,7 @@ export const makeDeposit = (address: Address, tx: Transaction): IMakeDeposit => 
     return { type: Action.MAKE_DEPOSIT, address, tx }
 }
 
+/** Represents that deposit has been validated by server. */
 export interface IDepositValidated extends IDeposit, IServerResponse {
     readonly serverResponse: Transaction;
     readonly type: Action.DEPOSIT_VALIDATED;
@@ -41,6 +51,7 @@ export const depositValidated =
         return { type: Action.DEPOSIT_VALIDATED, address, tx, serverResponse }
     }
 
+/** Represents rejection of deposit by server. */
 export interface IDepositFailed extends IDeposit, IServerResponse {
     readonly type: Action.DEPOSIT_FAILED;
     readonly serverResponse: Error
