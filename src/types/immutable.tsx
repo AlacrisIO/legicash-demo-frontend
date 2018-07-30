@@ -3,7 +3,7 @@
  */
 
 import * as Immutable from 'immutable'
-export { List, is, fromJS } from 'immutable'
+export { List, is, fromJS, Set } from 'immutable'
 
 type anyFunc = (v: any) => any
 
@@ -27,8 +27,10 @@ export interface Record<IArgs extends IRecord> {
     update(key: (keyof IArgs), updater: anyFunc): this
     updateIn(keys: any[], updater: anyFunc): this
     multiUpdateIn(updates: Array<[any, anyFunc]>): this
-    get(key: keyof IArgs): any
+    get(key: keyof IArgs): any  // XXX: Should be able to tighten return type
     set(key: keyof IArgs, value: any): this
+    getIn(keys: any[]): any
+    setIn(keys: any[], val: any): this
     has(key: string): boolean
     deleteIn(keys: any[]): this
     withMutations(mutator: (mutable: Record<IArgs>) => any): this
