@@ -1,6 +1,7 @@
 /** Actions related to making a deposit on the front end. */
 
 import { Address } from '../address'
+import { isDeposit } from '../chain'
 import { Transaction } from '../tx'
 import { Action, IActionType, IServerResponse } from './base_actions'
 
@@ -28,8 +29,7 @@ export interface IMakeDeposit extends IDeposit {
 }
 export const makeDeposit = (address: Address, tx: Transaction): IMakeDeposit => {
     /* Deposits are always tx's between same address on the main/side chain */
-    if ((!address.equals(tx.to)) || (!address.equals(tx.from)) ||
-        (tx.srcChain !== 'main') || (tx.dstChain !== 'side')) {
+    if ((!address.equals(tx.to)) || (!address.equals(tx.from)) || !isDeposit(tx)) {
         throw Error('Transaction is not a deposit!')
     }
     return { type: Action.MAKE_DEPOSIT, address, tx }

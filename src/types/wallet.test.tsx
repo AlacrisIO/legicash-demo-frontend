@@ -1,5 +1,6 @@
 import { List } from 'immutable'
 import { Address } from './address'
+import { Chain } from './chain'
 import { HashValue } from './hash'
 import { Transaction } from './tx'
 import { Wallet } from './wallet'
@@ -12,13 +13,13 @@ const hash = new HashValue(
 
 const now = new Date()
 const aliceToTrent = new Transaction({
-    amount: 19, creationDate: now, dstChain: 'side', failureMessage: '',
-    from: aliceAddress, hash, rejected: undefined, srcChain: 'main',
+    amount: 19, creationDate: now, dstChain: Chain.Side, failureMessage: '',
+    from: aliceAddress, hash, rejected: undefined, srcChain: Chain.Main,
     to: trentAddress, validated: true,
 })
 const aliceToBob = new Transaction({
-    amount: 1, creationDate: now, dstChain: 'side', failureMessage: '',
-    from: aliceAddress, hash, rejected: undefined, srcChain: 'main',
+    amount: 1, creationDate: now, dstChain: Chain.Side, failureMessage: '',
+    from: aliceAddress, hash, rejected: undefined, srcChain: Chain.Main,
     to: bobAddress, validated: true,
 })
 

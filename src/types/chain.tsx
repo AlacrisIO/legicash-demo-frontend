@@ -28,3 +28,6 @@ export const describeChain = (chain: Chain | undefined) => {
     if (!rv) { throw Error(`Unknown chain! ${chain}`) }
     return rv
 }
+
+export const isDeposit = (tx: Transaction) =>
+    (tx.srcChain !== Chain.Main) || (tx.dstChain !== Chain.Side)
