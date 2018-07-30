@@ -24,5 +24,5 @@ export interface IActionType {
 
 /** Actions which require a server response */
 export interface IServerResponse {
-    readonly serverResponse: ServerResponse /* XXX: */
+    readonly serverResponse: ServerResponse
 }
