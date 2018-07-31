@@ -3,12 +3,12 @@ import { Set } from 'immutable'
 import * as React from 'react';
 import { addresses } from '../server/ethereum_addresses'
 import { Address } from '../types/address'
-import { AddAccount, knownAddresses } from './add_account'
+import { DumbAddAccount, knownAddresses } from './add_account'
 
 describe('Tests for add account dialog', () => {
     let v: Address | undefined
-    const m = mount( /* tslint:disable:jsx-no-lambda */
-        <AddAccount presentAccounts={Set()} add={(e) => { v = e }} />)
+    const add = (e: Address) => { v = e }
+    const m = mount(<DumbAddAccount presentAccounts={Set()} add={add} />)
     it('Renders without crashing', () => {
         const defaultOption = m.find('.accountDefaultOption')
         expect(defaultOption.length).toBe(1)
