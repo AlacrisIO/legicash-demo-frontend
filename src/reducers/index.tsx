@@ -17,5 +17,5 @@ export const rootReducer = (state: UIState, action: Actions.IActionType)
         case Actions.Action.DEPOSIT_FAILED:
             return state.rejectTx((action as Actions.IDepositFailed).tx)
     }
-    throw Error('Unkown action received!')
+    return state
 }
