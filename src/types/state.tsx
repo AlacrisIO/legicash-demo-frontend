@@ -26,14 +26,17 @@ export class UIState extends Record(defaultValues) {
     }
     /** State with wallet added, if necessary. */
     public addWallet(username: string, address: Address): this {
-        return this.updateIn(
-            ['accounts', address],
+        return this.multiUpdateIn([
+            [['accounts', address],
             (w: Wallet) => {
-                const txs = List<Guid>(this.txByFromAddress.get(address).concat(
-                    this.txByToAddress.get(address)))
+                const txs = List<Guid>(List<Guid>(
+                    this.txByFromAddress.get(address))
+                    .concat(this.txByToAddress.get(address)))
                 return (w || new Wallet({ address, txs }))
                     .set('username', username)  // Allow update of username
-            })
+            }],
+            [['displayedAccounts'], (l: List<Address>) => l.push(address)]
+        ])
     }
     /** State with tx added */
     public addTx(tx: Transaction): this {
