@@ -38,3 +38,14 @@ export const dispatchPromise = <T extends any>(
     return p.then(finalization).catch(error)
 }
 
+export interface IThreadResponse { result: string }
+/**
+ * Return the thread number reported by this thread response.
+ * https://gitlab.com/legicash/legicash-facts/blob/endpoints-demo/src/endpoints/endpoints.md#depositwithdrawal-threads
+ */
+export const readThread = (response: IThreadResponse): number => {
+    // response.result should be of the form "api/thread?id=nn" 
+    const assignSplit = response.result.split('=')
+    if (assignSplit.length !== 2) { throw Error(`Bad thread response! ${response}`) }
+    return parseInt(assignSplit[1], 10)
+}
