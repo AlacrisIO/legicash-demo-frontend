@@ -26,8 +26,6 @@ describe('Tests of Transaction type', () => {
     it('Is closed to extension or modification', () => {
         const t = new Transaction(defaultTransaction)
         // @ts-ignore
-        expect(() => { t.foo = 2 }).toThrow()
-        // @ts-ignore
         expect(() => { t.amount = 12 }).toThrow()
     })
 })

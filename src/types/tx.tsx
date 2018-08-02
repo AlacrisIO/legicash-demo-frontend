@@ -12,11 +12,11 @@ import { Record } from './immutable'
 interface IOptionTypes {  // Declare types where they can't be inferred
     amount: number | undefined
     creationDate: Date | undefined,
-                          localGUID: Guid | undefined
+    localGUID: Guid | undefined
     rejected: boolean | undefined
     validated: boolean | undefined
     dstChain: Chain | undefined,
-                          srcChain: Chain | undefined,
+    srcChain: Chain | undefined,
 }
 
 const optionValues: IOptionTypes = {
@@ -54,7 +54,7 @@ type txDifference = [string, (t: Transaction) => any]
 /** represents a cryptographic transaction */
 export class Transaction extends Record(defaultValues) {
     constructor(props: Partial<typeof defaultValues>) {
-        super(props)
+        super({ localGUID: new Guid(), creationDate: new Date(), ...props })
         if (this.amount && (this.amount < 0)) {
             throw Error("Tx with negative amount!")
         }
@@ -70,8 +70,6 @@ export class Transaction extends Record(defaultValues) {
             throw Error(
                 `No hash for validated tx?? ${this.toString()}`)
         }
-        this.localGUID = this.localGUID || new Guid()
-        this.creationDate = this.creationDate || new Date()
     }
 
     public toString(): string { return JSON.stringify(this) }
