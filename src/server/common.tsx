@@ -24,28 +24,19 @@ export const get = (endpoint: string, params: object): Promise<Response> => {
     return fetch(url.toString())
 }
 
-/**
- * Attach handlers to a promise.
- *
- * XXX: This is probably a bad idea. Just use the Promise API directly?
- */
-export const dispatchPromise = <T extends any>(
-    p: Promise<T>,
-    initiation: ((p: Promise<T>) => void),
-    finalization: ((r: T) => void),
-    error: ((e: Error) => void)): Promise<void> => {
-    initiation(p)
-    return p.then(finalization).catch(error)
-}
-
-export interface IThreadResponse { result: string }
+export interface IThreadResponse { result: string | object }
 /**
  * Return the thread number reported by this thread response.
  * https://gitlab.com/legicash/legicash-facts/blob/endpoints-demo/src/endpoints/endpoints.md#depositwithdrawal-threads
  */
 export const readThread = (response: IThreadResponse): number => {
     // response.result should be of the form "api/thread?id=nn" 
-    const assignSplit = response.result.split('=')
+    const assignSplit = (response.result as string).split('=')
     if (assignSplit.length !== 2) { throw Error(`Bad thread response! ${response}`) }
     return parseInt(assignSplit[1], 10)
 }
+
+export const pendingResult = { result: "The operation is pending" }
+export const resultPending = (r: IThreadResponse) =>
+    r.result === pendingResult.result
+
