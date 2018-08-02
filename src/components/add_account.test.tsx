@@ -1,9 +1,12 @@
 import { mount } from 'enzyme'
 import { List } from 'immutable'
 import * as React from 'react';
+
 import { addresses } from '../server/ethereum_addresses'
 import { Address } from '../types/address'
-import { IAddAccountState, DumbAddAccount, knownAddresses, name } from './add_account'
+import {
+    DumbAddAccount, IAddAccountState, knownAddresses, name
+} from './add_account'
 
 describe('Tests for add account dialog', () => {
     let v: Address | undefined
