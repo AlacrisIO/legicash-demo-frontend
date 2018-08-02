@@ -32,11 +32,11 @@ function* awaitThread(server: any, threadResponse: IThreadResponse) {
     return threadCheck
 }
 
-const updateHash = (rawHash: string) => (h: HashValue) => {
+const updateHash = (rawHash: string) => {
     const newHash = new HashValue(rawHash)
-    return (h: HashValue): HashValue => {
-        if ((!h.equals(emptyHash)) && (!h.equals(newHash))) {
-            throw Error(`Conflicting hashes! ${h} vs ${newHash}`)
+    return (oldH: HashValue): HashValue => {
+        if (oldH && (!oldH.equals(emptyHash)) && (!oldH.equals(newHash))) {
+            throw Error(`Conflicting hashes! ${oldH} vs ${newHash}`)
         }
         return newHash
     }

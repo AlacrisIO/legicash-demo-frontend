@@ -55,6 +55,13 @@ describe('Deposit saga tests', () => {
     it('Hits the deposit endpoint, then the thread endpoint and returns the \
 result', () => {
             return expectSaga(makeDeposit, Actions.makeDeposit(address, tx))
-                .provide(depositMocks).run()
+                .provide(depositMocks)
+                .run().then((result: any) => {
+                    const r = result.returnValue
+                    expect(r.type).toBe(Actions.Action.DEPOSIT_VALIDATED)
+                    expect(r.address).toBe(address)
+                    expect(r.tx).toBe(tx)
+                    expect(r.serverResponse.txsDiffer(tx)).toBeFalsy()
+                })
         })
 })
