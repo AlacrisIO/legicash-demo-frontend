@@ -30,4 +30,4 @@ export const describeChain = (chain: Chain | undefined) => {
 }
 
 export const isDeposit = (tx: Transaction) =>
-    (tx.srcChain !== Chain.Main) || (tx.dstChain !== Chain.Side)
+    (tx.srcChain === Chain.Main) && (tx.dstChain === Chain.Side)
