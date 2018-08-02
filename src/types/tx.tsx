@@ -91,8 +91,8 @@ export class Transaction extends Record(defaultValues) {
         if (!this.from.equals(o.from)) {
             return ["Source addresses", ((t: Transaction) => t.from.toString())]
         }
-        if ((!this.hash.equal(emptyHash)) && (!o.hash.equal(emptyHash)) &&
-            (!this.hash.equal(o.hash))) {
+        if ((!this.hash.equals(emptyHash)) && (!o.hash.equals(emptyHash)) &&
+            (!this.hash.equals(o.hash))) {
             return ["Hashes", ((t: Transaction) => t.hash.toString)]
         }
         if ((this.rejected !== undefined) && (o.rejected !== undefined) &&
