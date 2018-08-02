@@ -19,13 +19,13 @@ export class MerkleProof {
         let currentHash: HashValue = emptyHash
         props.proof.forEach((layer: MerkleProofLayer) => {
             // `child` true means right child, false means left child.
-            if (!currentHash.equal(emptyHash) &&
-                !currentHash.equal(layer.targetHash())) {
+            if (!currentHash.equals(emptyHash) &&
+                !currentHash.equals(layer.targetHash())) {
                 this.throwBadProof(layer, currentHash, layer.targetHash())
             }
             currentHash = layer.nextHash()
         })
-        if (!currentHash.equal(props.root)) {
+        if (!currentHash.equals(props.root)) {
             throw Error(`Bad Merkle proof; root does not match:
             ${ this}
             Current hash: ${ currentHash} `)

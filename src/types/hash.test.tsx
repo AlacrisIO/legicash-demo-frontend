@@ -12,7 +12,7 @@ describe('Tests of hash type', () => {
 
     it('Matches equal hash strings', () => {
         const hashString = randomHashString();
-        expect(new HashValue(hashString).equal(new HashValue(hashString)))
+        expect(new HashValue(hashString).equals(new HashValue(hashString)))
     })
 
     it('Does not match unequal strings', () => {
@@ -21,6 +21,6 @@ describe('Tests of hash type', () => {
         if (hash1.toString() === hash2.toString()) {
             throw Error("Should never be equal!")
         }
-        expect(!hash1.equal(hash2))
+        expect(!hash1.equals(hash2))
     })
 })

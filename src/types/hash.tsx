@@ -10,7 +10,7 @@ export class HashValue {
     }
     public toString(): string { return `HashValue(${this.hash})` }
     public toRawString(): string { return this.hash }
-    public equal(o: HashValue): boolean { return (this.hash === o.hash) }
+    public equals(o: HashValue): boolean { return (this.hash === o.hash) }
 }
 
 export const emptyHash = new HashValue('')

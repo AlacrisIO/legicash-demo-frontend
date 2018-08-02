@@ -62,11 +62,11 @@ export class Transaction extends Record(defaultValues) {
             throw Error(
                 `Contradictory rejected/validated status in ${this.toString()}`)
         }
-        if (this.rejected && (!this.hash.equal(emptyHash))) {
+        if (this.rejected && (!this.hash.equals(emptyHash))) {
             throw Error(
                 `Rejected tx with hash?? ${this.toString()}`)
         }
-        if (this.validated && this.hash.equal(emptyHash)) {
+        if (this.validated && this.hash.equals(emptyHash)) {
             throw Error(
                 `No hash for validated tx?? ${this.toString()}`)
         }
