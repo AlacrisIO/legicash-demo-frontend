@@ -1,7 +1,7 @@
 import { Address } from './address'
 import { DefaultContractState } from './contract_state'
 import { Guid } from './guid'
-import { List, Map, Record } from './immutable'
+import { List, Map, Record, Set, update } from './immutable'
 import { Transaction } from './tx'
 import { Wallet } from './wallet'
 /* tslint:disable:object-literal-sort-keys */
@@ -10,8 +10,10 @@ const defaultValues = {
     accounts: Map<Address, Wallet>(),
     /** Display of current contract state */
     contractState: DefaultContractState,
-    /** Wallets currently displayed */
+    /** Wallets currently displayed, in order */
     displayedAccounts: List<Address>(),
+    /** Wallets currently displayed, for fast checking */
+    displayedAccountsSet: Set<Address>(),
     /** Transactions, indexed by various characteristics */
     txByFromAddress: Map<Address, List<Guid>>(),
     txByToAddress: Map<Address, List<Guid>>(),
@@ -26,17 +28,22 @@ export class UIState extends Record(defaultValues) {
     }
     /** State with wallet added, if necessary. */
     public addWallet(username: string, address: Address): this {
-        return this.multiUpdateIn([
-            [['accounts', address],
+        const updates: update[] = [
+            [['accounts', address],  // Add the wallet to the accounts list
             (w: Wallet) => {
-                const txs = List<Guid>(List<Guid>(
+                const txs = List<Guid>(List<Guid>(  // txs from/to this address
                     this.txByFromAddress.get(address))
                     .concat(this.txByToAddress.get(address)))
                 return (w || new Wallet({ address, txs }))
                     .set('username', username)  // Allow update of username
-            }],
-            [['displayedAccounts'], (l: List<Address>) => l.push(address)]
-        ])
+            }]
+        ]
+        if (!this.displayedAccountsSet.has(address)) {
+            updates.push(
+                [['displayedAccounts'], (l: List<Address>) => l.push(address)],
+                [['displayedAccountsSet'], (s: Set<Address>) => s.add(address)])
+        }
+        return this.multiUpdateIn(updates)
     }
     /** State with tx added */
     public addTx(tx: Transaction): this {

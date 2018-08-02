@@ -7,11 +7,14 @@ export { List, is, fromJS, Set } from 'immutable'
 
 type anyFunc = (v: any) => any
 
+/* Set of keys for deep access, and update function to be applied there */
+export type update = [any[], anyFunc]
+
 /* tslint:disable:interface-name */
 export interface Map<K, V> extends Immutable.Map<K, V> {
     (): Map<K, V>
     new(a: object): Map<K, V> & null
-    multiUpdateIn(updates: Array<[any, anyFunc]>): this
+    multiUpdateIn(updates: update[]): this
 }
 
 // Note that you don't use `new` with this... It's a pain... Lots of holes, here.
@@ -26,7 +29,7 @@ export interface Record<IArgs extends IRecord> {
     new(args: Partial<IArgs>): Record<IArgs> & IArgs
     update(key: (keyof IArgs), updater: anyFunc): this
     updateIn(keys: any[], updater: anyFunc): this
-    multiUpdateIn(updates: Array<[any, anyFunc]>): this
+    multiUpdateIn(updates: update[]): this
     get(key: keyof IArgs): any  // XXX: Should be able to tighten return type
     set(key: keyof IArgs, value: any): this
     getIn(keys: any[]): any
