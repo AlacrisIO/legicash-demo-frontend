@@ -38,10 +38,10 @@ const depositMocks = {
                     },
                     side_chain_tx_revision: 256,
                     main_chain_confirmation: {
-                        transaction_hash: hash.toString(),
+                        transaction_hash: hash.toRawString(),
                         transaction_index: 651,
                         block_number: 50,
-                        block_hash: hash.toString()
+                        block_hash: hash.toRawString()
                     }
 
                 }

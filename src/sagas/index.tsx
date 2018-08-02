@@ -52,5 +52,9 @@ export function* makeDeposit(action: Actions.IMakeDeposit) {
         return depositFailed(address, action.tx, Error("Timed out!"))
     }
     // Update the transaction with the new information
-    return Actions.depositValidated(address, action.tx, result)
+    const newTx = action.tx.multiUpdateIn([
+        [['validated'], () => true],
+        [['hash'], updateHash(result.main_chain_confirmation.transaction_hash)],
+    ])
+    return Actions.depositValidated(address, action.tx, newTx)
 }
