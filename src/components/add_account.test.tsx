@@ -3,7 +3,7 @@ import { List } from 'immutable'
 import * as React from 'react';
 import { addresses } from '../server/ethereum_addresses'
 import { Address } from '../types/address'
-import { DumbAddAccount, knownAddresses, name } from './add_account'
+import { IAddAccountState, DumbAddAccount, knownAddresses, name } from './add_account'
 
 describe('Tests for add account dialog', () => {
     let v: Address | undefined
@@ -21,18 +21,22 @@ describe('Tests for add account dialog', () => {
         form.simulate('submit')
         expect(v).toBe(undefined)
     })
-    const initialIndex = sortedAddresses.size - 1  // Choose bottom entry
-    const initialAddress = new Address(sortedAddresses.get(initialIndex))
-    it('Submits when something is chosen', () => {
-        // Following https://github.com/airbnb/enzyme/issues/389#issuecomment-401582776
-        const option = m.find(`option [value="${initialAddress}"]`)
-        const optionNode = option.getDOMNode() as any
-        optionNode.selectedIndex = initialIndex + 1
-        option.simulate('change', { target: optionNode })
+    function getAddress(idx: number): Address {
+        return new Address(sortedAddresses.get(idx))
+    }
+    function hitSelection(idx: number): number {
+        const option = m.find(`option [value="${getAddress(idx)}"]`)
+        option.simulate('change', { target: { selectedIndex: idx + 1 } })
         form.simulate('submit')
-        expect((v as Address).equals(initialAddress)).toBe(true)
+        return (m.state() as IAddAccountState).optIdx
+    }
+    it('Submits when something is chosen', () => {
+        const address = getAddress(8)
+        expect(getAddress(hitSelection(8) - 1).equals(address)).toBe(true)
+        expect(address.equals(v as Address)).toBe(true)
     })
     it('Moves to the next entry up, when there is one, if at bottom', () => {
-        expect((m.state() as any).optIdx).toBe(sortedAddresses.size - 1)
+        const finalIndex = sortedAddresses.size - 1
+        expect(hitSelection(finalIndex)).toBe(finalIndex)
     })
 })
