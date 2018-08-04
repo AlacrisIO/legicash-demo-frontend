@@ -56,5 +56,6 @@ export function* makeDeposit(action: Actions.IMakeDeposit) {
         [['validated'], () => true],
         [['hash'], updateHash(result.main_chain_confirmation.transaction_hash)],
     ])
-    return Actions.depositValidated(action.address, action.tx, newTx)
+    return Actions.depositValidated(
+        action.address, result.user_account_state.balance, action.tx, newTx)
 }

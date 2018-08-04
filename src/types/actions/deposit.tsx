@@ -37,18 +37,23 @@ export const makeDeposit = (address: Address, tx: Transaction): IMakeDeposit => 
 
 /** Represents that deposit has been validated by server. */
 export interface IDepositValidated extends IDeposit, IServerResponse {
+    // New balance for the depositing user, per the server.
+    readonly newBalance: number;
     readonly serverResponse: Transaction;
     readonly type: Action.DEPOSIT_VALIDATED;
 }
 
 export const depositValidated =
-    (address: Address, tx: Transaction, serverResponse: Transaction
-    ): IDepositValidated => {
+    (address: Address, newBalance: number, tx: Transaction,
+        serverResponse: Transaction): IDepositValidated => {
         if (!serverResponse.validated) {
             throw Error('Received unvalidated tx!')
         }
         tx.assertSameTransaction(serverResponse)  // Same tx, w/ more info?
-        return { type: Action.DEPOSIT_VALIDATED, address, tx, serverResponse }
+        return {
+            address, newBalance, serverResponse, tx,
+            type: Action.DEPOSIT_VALIDATED,
+        }
     }
 
 /** Represents rejection of deposit by server. */

@@ -13,7 +13,11 @@ export const rootReducer = (state: UIState, action: Actions.IActionType)
         case Actions.Action.MAKE_DEPOSIT:
             return state.addTx((action as Actions.IMakeDeposit).tx)
         case Actions.Action.DEPOSIT_VALIDATED:
-            return state.addTx((action as Actions.IDepositValidated).tx)
+            const a = (action as Actions.IDepositValidated)
+            return state.addTx(a.tx)
+                // Take the balance as reported by the server as canonical, EVEN
+                // IF it doesn't match our perceptions. XXX:? 
+                .setIn(['accounts', a.address, 'offchainBalance'], a.newBalance)
         case Actions.Action.DEPOSIT_FAILED:
             return state.rejectTx((action as Actions.IDepositFailed).tx)
     }
