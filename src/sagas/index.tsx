@@ -7,7 +7,7 @@ import {
 import * as Actions from '../types/actions'
 import { depositFailed } from '../types/actions';
 import { Address } from '../types/address'
-import { HashValue, emptyHash } from '../types/hash'
+import { emptyHash, HashValue } from '../types/hash'
 import { Transaction } from '../types/tx'
 
 /** Hit server with given args, and report deposit failure on exception */
@@ -43,18 +43,18 @@ const updateHash = (rawHash: string) => {
 }
 
 export function* makeDeposit(action: Actions.IMakeDeposit) {
-    const address = action.address
+    const address = action.address.toString()
     const amount = action.tx.amount
-    const server = serverWithErrorHandling(address, action.tx)
+    const server = serverWithErrorHandling(action.address, action.tx)
     const threadResponse = yield* server(post, 'deposit', { address, amount })
-    const result: any = yield awaitThread(server, threadResponse)
+    const result: any = yield* awaitThread(server, threadResponse)
     if (resultPending(result)) {
-        return depositFailed(address, action.tx, Error("Timed out!"))
+        return depositFailed(action.address, action.tx, Error("Timed out!"))
     }
     // Update the transaction with the new information
     const newTx = action.tx.multiUpdateIn([
         [['validated'], () => true],
         [['hash'], updateHash(result.main_chain_confirmation.transaction_hash)],
     ])
-    return Actions.depositValidated(address, action.tx, newTx)
+    return Actions.depositValidated(action.address, action.tx, newTx)
 }
