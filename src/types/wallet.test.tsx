@@ -5,11 +5,10 @@ import { HashValue } from './hash'
 import { Transaction } from './tx'
 import { Wallet } from './wallet'
 
-const aliceAddress = new Address('0xa11cea11cea11cea11cea11cea11cea11cea11ce');
+const aliceAddress = new Address('0x' + 'a11ce'.repeat(8));
 const trentAddress = new Address('0x7472656e747472656e747472656e747472656e74');
 const bobAddress = new Address('0xb0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0');
-const hash = new HashValue(
-    '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff');
+const hash = new HashValue('0x' + 'ff'.repeat(32))
 
 const now = new Date()
 const aliceToTrent = new Transaction({

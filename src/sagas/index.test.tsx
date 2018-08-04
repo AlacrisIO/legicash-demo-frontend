@@ -19,8 +19,7 @@ const tx = new Transaction({
     amount: 5, dstChain: Chain.Side, from: address,
     srcChain: Chain.Main, to: address
 })
-const hash = new HashValue(
-    '0x0000000000000000000000000000000000000000000000000000000000000000')
+const hash = new HashValue('0x' + '00'.repeat(32))
 
 /** Mocks for server interactions */
 const depositMocks = {
@@ -48,7 +47,6 @@ const depositMocks = {
                         block_number: 50,
                         block_hash: hash.toRawString()
                     }
-
                 }
             default:
                 return next()
