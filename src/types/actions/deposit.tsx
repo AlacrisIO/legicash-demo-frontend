@@ -1,18 +1,9 @@
 /** Actions related to making a deposit on the front end. */
 
 import { Address } from '../address'
-import { isDeposit } from '../chain'
+import { depositTransaction } from '../chain'
 import { Transaction } from '../tx'
 import { Action, IActionType, IServerResponse } from './base_actions'
-
-/** Represents a request to display the wallet associated with `address` */
-export interface IAddAddress extends IActionType {
-    readonly address: Address;
-    readonly username: string;
-    readonly type: Action.ADD_ADDRESS;
-}
-export const addAddress = (address: Address, username: string): IAddAddress =>
-    ({ address, type: Action.ADD_ADDRESS, username })
 
 /** Base class for actions during deposit from the main chain to the side chain
  *
@@ -27,11 +18,8 @@ export interface IDeposit extends IActionType {
 export interface IMakeDeposit extends IDeposit {
     readonly type: Action.MAKE_DEPOSIT;
 }
-export const makeDeposit = (address: Address, tx: Transaction): IMakeDeposit => {
-    /* Deposits are always tx's between same address on the main/side chain */
-    if ((!address.equals(tx.to)) || (!address.equals(tx.from)) || !isDeposit(tx)) {
-        throw Error('Transaction is not a deposit!')
-    }
+export const makeDeposit = (address: Address, amount: number): IMakeDeposit => {
+    const tx = depositTransaction(address, amount)
     return { type: Action.MAKE_DEPOSIT, address, tx }
 }
 

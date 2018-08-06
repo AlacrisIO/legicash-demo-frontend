@@ -31,3 +31,11 @@ export const describeChain = (chain: Chain | undefined) => {
 
 export const isDeposit = (tx: Transaction) =>
     (tx.srcChain === Chain.Main) && (tx.dstChain === Chain.Side)
+
+/** Constructions a deposit from side chain to main chain, as Transaction */
+export const depositTransaction =
+    (address: Address, amount: number): Transaction => {
+        const details = { amount, from: address, to: address }
+        const direction = { dstChain: Chain.Side, srcChain: Chain.Main }
+        return new Transaction({ ...details, ...direction })
+    }
