@@ -5,9 +5,12 @@ import { depositTransaction } from '../chain'
 import { Transaction } from '../tx'
 import { Action, IActionType, IServerResponse } from './base_actions'
 
-/** Base class for actions during deposit from the main chain to the side chain
+/**
+ * Base class for actions during deposit from the main chain to the side chain
  *
- *  Deposit details are represented by `tx`
+ * Deposit details are represented by `tx`. We take a Transaction here, rather
+ * than just an address and amount, because we want to optimistically update the
+ * UI with the deposit, prior to server validation.
  */
 export interface IDeposit extends IActionType {
     readonly address: Address;
