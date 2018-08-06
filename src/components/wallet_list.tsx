@@ -6,9 +6,9 @@ import { UIState } from '../types/state'
 import { Wallet } from './wallet'
 
 export const DumbWalletList = ({ wl }: { wl: List<Address> }) =>
-    <div>{...wl.map((address: Address, i: number) => {
+    <div>{...wl.map((address: Address, key: number) => {
         const WalletComponent = Wallet({ address })
-        return <WalletComponent key={i} />
+        return <WalletComponent key={key} />
     }).toArray()}</div>
 
 export const WalletList = connect(
