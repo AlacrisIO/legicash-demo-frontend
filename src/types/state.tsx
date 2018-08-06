@@ -15,8 +15,8 @@ const defaultValues = {
     /** Wallets currently displayed, for fast checking */
     displayedAccountsSet: Set<Address>(),
     /** Transactions, indexed by various characteristics */
-    txByFromAddress: Map<Address, List<Guid>>(),
-    txByToAddress: Map<Address, List<Guid>>(),
+    txByFromAddress: Map<Address, Set<Guid>>(),
+    txByToAddress: Map<Address, Set<Guid>>(),
     /** Actual store for transactions */
     txByGUID: Map<Guid, Transaction>(),
 }
@@ -31,11 +31,12 @@ export class UIState extends Record(defaultValues) {
         const updates: update[] = [
             [['accounts', address],  // Add the wallet to the accounts list
             (w: Wallet) => {
-                const txs = List<Guid>(List<Guid>(  // txs from/to this address
-                    this.txByFromAddress.get(address))
-                    .concat(this.txByToAddress.get(address)))
-                return (w || new Wallet({ address, txs }))
-                    .set('username', username)  // Allow update of username
+                const fromTxs = this.txByFromAddress.get(address) || List()
+                const toTxs = this.txByToAddress.get(address) || List()
+                /* tslint:disable:no-console */
+                console.log(fromTxs)
+                const txs = List<Guid>(fromTxs.concat(toTxs))
+                return (w || new Wallet({ address, txs, username }))
             }]
         ]
         if (!this.displayedAccountsSet.has(address)) {
@@ -45,16 +46,25 @@ export class UIState extends Record(defaultValues) {
         }
         return this.multiUpdateIn(updates)
     }
+    public removeWallet(address: Address): this {
+        return this.multiUpdateIn([
+            [['displayedAccounts'], (l: List<Address>) =>
+                l.remove(l.findIndex((a: Address) => a === address))],
+            [['displayedAccountsSet'], (s: Set<Address>) => s.remove(address)]
+        ])
+    }
     /** State with tx added */
     public addTx(tx: Transaction): this {
+        if (tx === undefined) { throw Error("Attempt to add undefined tx") }
         // Add tx to map, ensuring compatibility with any extant tx
-        const updateTx = (otx: Transaction | undefined) =>
+        const updateTx = (otx: Transaction | undefined): Transaction => {
             // XXX: Fail more gracefully on contradiction? Some kind of warning?
-            otx && (tx.assertSameTransaction(otx) || tx)
-        const updateGUID = (guid: Guid | undefined) => tx.localGUID
+            if (otx !== undefined) { tx.assertSameTransaction(otx) }
+            return tx
+        }
+        const updateGUID = (s: Guid | undefined) => tx.localGUID
         const updateWallet = (a: Address) => (w: Wallet | undefined) =>
-            (w || new Wallet({ address: a })).addTx(
-                tx.getGUID(), this.txByGUID)
+            (w || new Wallet({ address: a })).addTx(tx, this.txByGUID)
         return this.multiUpdateIn([
             [['txByGUID', tx.localGUID], updateTx],
             [['txByFromAddress', tx.from], updateGUID],
