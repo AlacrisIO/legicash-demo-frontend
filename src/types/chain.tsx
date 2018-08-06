@@ -1,4 +1,10 @@
-/** Try to encapsulate chain logic in this module */
+/**
+ * Try to encapsulate chain logic in this module
+ *
+ * Only the Wallet and Transaction modules should reference Chain.{Main,Side}
+ * and then only sparingly.
+ *
+ */
 
 import { Address } from './address'
 import { Transaction } from './tx'
