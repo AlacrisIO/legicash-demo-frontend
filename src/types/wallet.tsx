@@ -31,17 +31,14 @@ export class Wallet extends Record(defaultValues) {
         // XXX: Check that all transactions belong to `address`?
     }
     /** Wallet with this tx added */
-    public addTx(txID: Guid, txs: Map<Guid, Transaction>): this {
-        const tx = txs.get(txID)
+    public addTx(tx: Transaction, txs: Map<Guid, Transaction>): this {
         const updates: Array<[any[], (a: any) => any]> = [
             // To be applied in a big batch at the end
-            [['txs'], this.updateTxs(txID, tx, txs)],
-            [['txSet'], (s: Set<Guid>) => s.add(txID)],
+            [['txs'], this.updateTxs(tx.localGUID as Guid, tx, txs)],
+            [['txSet'], (s: Set<Guid>) => s.add(tx.localGUID as Guid)],
         ]
-        if (!this.knownTx(tx)) {
-            // First time we're seeing this tx; optimistically adjust balances
-            // XXX: bug in typescript? These types look compatible to me...
-            updates.push(this.balanceUpdates(tx, this.updateBalance) as any)
+        if ((tx === undefined) || (!this.knownTx(tx))) {
+            updates.push(...this.balanceUpdates(tx, this.updateBalance.bind(this)))
         }
         return this.multiUpdateIn(updates)
     }
@@ -50,7 +47,7 @@ export class Wallet extends Record(defaultValues) {
             // XXX: Deal with this more gracefully
             throw Error(`Server rejected a tx we haven't seen! ${tx}`)
         }  // OK, undo the balances
-        return this.multiUpdateIn(this.balanceUpdates(tx, this.undoBalance))
+        return this.multiUpdateIn(this.balanceUpdates(tx, this.undoBalance.bind(this)))
     }
     private knownTx(tx: Transaction): boolean { return this.txSet.has(tx.getGUID()) }
     /** Function for updating the tx list with the given txID. */
@@ -58,26 +55,22 @@ export class Wallet extends Record(defaultValues) {
     ): (l: List<Guid>) => List<Guid> {
         /* Logic for ensuring txs are sorted... */
         // XXX: Add more sorting options, not just reverse chronological
-        const txDate = (t: Guid) => {
-            if (tx) { return tx.creationDate }
-            throw Error(`Unrecorded transaction: ${t.guid}`)
-        }
-        const cmp = (t1: Guid, t2: Guid) => {
-            const [d1, d2] = [txDate(t1), txDate(t2)] as [Date, Date]
-            if ((d1 !== undefined) || (d2 !== undefined)) {
-                throw Error(`Date undefined in ${t1} or ${t2}!`)
-            }
-            return ((d1 > d2) && 1) || ((d1 < d2) && -1) || 0
-        }
         // XXX: This is n*log(n), needs to be log(n) (binary search.)
-        return l => List(l.push(txID).sort(cmp))
+        // Maybe add a date index to UIState?
+        const txa = txs.set(tx.localGUID as Guid, tx)
+        return l => {
+            return List(
+                l.push(txID).sortBy((txid: Guid) => txa.get(txid).creationDate))
+        }
     }
     /** Function for updating balance, given tx direction. */
     private updateBalance(tx: Transaction, c: Chain): balanceUpdateFn {
-        return (balance: number) => balance + balanceUpdate(tx, this.address, c)
+        const address = this.address
+        return (balance: number) => balance + balanceUpdate(tx, address, c)
     }
     private undoBalance(tx: Transaction, c: Chain): balanceUpdateFn {
-        return (balance: number) => balance - balanceUpdate(tx, this.address, c)
+        const address = this.address
+        return (balance: number) => balance - balanceUpdate(tx, address, c)
     }
     private balanceUpdates(
         tx: Transaction,
