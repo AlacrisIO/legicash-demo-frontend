@@ -25,7 +25,9 @@ export class AmountDialog extends React.Component<IAmountDialog, {}> {
 
     public onSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault()
-        this.props.submitCallback(this.state.amount)
+        if (this.state.amount > 0) {
+            this.props.submitCallback(this.state.amount)
+        }
     }
 
     public render() {
