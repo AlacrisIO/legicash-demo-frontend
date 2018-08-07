@@ -8,10 +8,9 @@ import { addresses } from '../server/ethereum_addresses'
 import * as Actions from '../types/actions'
 // import { depositFailed } from '../types/actions';
 import { Address } from '../types/address'
-import { depositTransaction } from '../types/chain'
 import { HashValue } from '../types/hash'
 
-const serverRunning = false
+const serverRunning = true
 
 const address = new Address(addresses.Alice)
 const amount = 5
@@ -23,10 +22,7 @@ const depositMocks = {
         switch (effect.fn) {
             case post:
                 if (!is(fromJS(effect.args), fromJS(
-                    ["deposit", {
-                        address: address.toString(),
-                        amount: amount
-                    }]))) {
+                    ["deposit", { address: address.toString(), amount }]))) {
                     // Throwing has no effect, here!
                     /* tslint:disable:no-console */
                     console.log(`Bad post call! ${JSON.stringify(effect)}`)
@@ -76,7 +72,7 @@ if (serverRunning) {
         it('Hits the deposit endpoint, and returns a DEPOSIT_VALIDATED action',
             () => {
                 return expectSaga(makeDeposit, makeDepositAction)
-                    .run(1500)
+                    .run(2500)
                     .then(r => expect(r.returnValue.serverResponse.validated
                     ).toBe(true))  // XXX: More validation, here?
             })
