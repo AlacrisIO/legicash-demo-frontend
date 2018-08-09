@@ -1,4 +1,4 @@
-import { delay } from 'redux-saga'
+import { delay, takeEvery } from 'redux-saga'
 import { call, put } from 'redux-saga/effects'
 
 import {
@@ -49,13 +49,21 @@ export function* makeDeposit(action: Actions.IMakeDeposit) {
     const threadResponse = yield* server(post, 'deposit', { address, amount })
     const result: any = yield* awaitThread(server, threadResponse)
     if (resultPending(result)) {
-        return depositFailed(action.address, action.tx, Error("Timed out!"))
+        yield put(depositFailed(action.address, action.tx, Error("Timed out!")))
+        yield undefined  // Otherwise the above event is dropped??
     }
     // Update the transaction with the new information
     const newTx = action.tx.multiUpdateIn([
         [['validated'], () => true],
         [['hash'], updateHash(result.main_chain_confirmation.transaction_hash)],
     ])
-    return Actions.depositValidated(
-        action.address, result.user_account_state.balance, action.tx, newTx)
+    yield put(Actions.depositValidated(
+        action.address, result.user_account_state.balance, action.tx, newTx))
+    return undefined  // Otherwise the above event is dropped??
+}
+
+export function* depositListener() {
+    yield takeEvery((action: Actions.IActionType) =>
+        action.type === Actions.Action.MAKE_DEPOSIT,
+        makeDeposit)
 }
