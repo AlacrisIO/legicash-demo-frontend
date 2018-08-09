@@ -10,11 +10,12 @@ import * as Actions from '../types/actions'
 import { Address } from '../types/address'
 import { HashValue } from '../types/hash'
 
-const serverRunning = true
+const serverRunning = false
 
 const address = new Address(addresses.Alice)
 const amount = 5
 const hash = new HashValue('0x' + '00'.repeat(32))
+const balance = 50
 
 /** Mocks for server interactions */
 const depositMocks = {
@@ -32,7 +33,7 @@ const depositMocks = {
                 return {
                     /* tslint:disable:object-literal-sort-keys */
                     user_account_state: {
-                        address, user_name: "Alice", balance: 50
+                        address, user_name: "Alice", balance
                     },
                     side_chain_tx_revision: 256,
                     main_chain_confirmation: {
@@ -56,13 +57,14 @@ describe('Deposit saga tests', () => {
 result', () => {
             return expectSaga(makeDeposit, makeDepositAction)
                 .provide(depositMocks)
-                .run().then((result: any) => { // Check return value.
-                    const r = result.returnValue
-                    expect(r.type).toBe(Actions.Action.DEPOSIT_VALIDATED)
-                    expect(r.address).toBe(address)
-                    expect(r.tx).toBe(tx)
-                    expect(r.serverResponse.txsDiffer(tx)).toBeFalsy()
-                })
+                .put.like({
+                    action: {
+                        type: Actions.Action.DEPOSIT_VALIDATED,
+                        address, newBalance: balance, tx,
+                        serverResponse: tx.set('validated', true).set(
+                            'hash', hash)
+                    }
+                }).run()
         })
 })
 
@@ -72,9 +74,11 @@ if (serverRunning) {
         it('Hits the deposit endpoint, and returns a DEPOSIT_VALIDATED action',
             () => {
                 return expectSaga(makeDeposit, makeDepositAction)
+                    .put.like({
+                        action: { type: Actions.Action.DEPOSIT_FAILED, tx }
+                    })
                     .run(2500)
-                    .then(r => expect(r.returnValue.serverResponse.validated
-                    ).toBe(true))  // XXX: More validation, here?
+                // XXX: More validation, here?
             })
     })
 }
