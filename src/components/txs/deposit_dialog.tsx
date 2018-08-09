@@ -11,10 +11,15 @@ interface IDepositDialog {
     submitCallback: (v: number) => void
 }
 
+const header = (a: Address) => (
+    <h4>{"Deposit to main chain from " + a.toString()}</h4>
+)
+
+
 /** Form for specifying how much to deposit from main chain */
 export const DepositDialog = ({ from, submitCallback }: IDepositDialog) => (
     <AmountDialog
-        header={"Deposit to main chain from " + from.toString()}
+        header={header(from)}
         amountDescription="Amount to deposit: " submitCallback={submitCallback}
     />
 )

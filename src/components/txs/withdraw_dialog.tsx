@@ -11,10 +11,14 @@ interface IWithdrawDialog {
     submitCallback: (v: number) => void
 }
 
+const header = (a: Address) => (
+    <h3>{"Withdraw to main chain from " + a.toString()}</h3>
+)
+
 /** Form for specifying how much to withdraw from main chain */
 export const WithdrawDialog = ({ from, submitCallback }: IWithdrawDialog) => (
     <AmountDialog
-        header={"Withdraw to main chain from " + from.toString()}
+        header={header(from)}
         amountDescription="Amount to withdraw:" submitCallback={submitCallback}
     />
 )
