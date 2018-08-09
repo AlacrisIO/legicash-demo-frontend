@@ -15,4 +15,8 @@ function uuidv4() {
  * https://stackoverflow.com/a/2117523 . It is not widely implemented yet,
  * though.
  */
-export class Guid { public guid: string; constructor() { this.guid = uuidv4() } }
+export class Guid {
+    public guid: string;
+    constructor() { this.guid = uuidv4() }
+    public toString(): string { return this.guid }
+}
