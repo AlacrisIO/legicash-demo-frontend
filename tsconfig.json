@@ -26,7 +26,8 @@
     "webpack",
     "jest",
     "src/setupTests.ts",
-    "src/*/flycheck_*.tsx",
-    "junk"
+    "src/components/flycheck_*.tsx",
+    "src/types/flycheck_*.tsx",
+    "src/junk/*"
   ]
 }
