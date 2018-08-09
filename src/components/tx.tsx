@@ -39,7 +39,8 @@ interface ITx { tx: Transaction; colOrder?: headers }
 // XXX: Do something prettier with pending Txs. Maybe a spinner...
 export const Tx = ({ tx, colOrder }: ITx) =>
     <tr className={txClass(tx)}>
-        {...concreteColOrder(colOrder, (k: header) => <p>{`${tx.get(k)}`}</p>)}
+        {...concreteColOrder(colOrder, (k: header) =>
+            <p>{`${(tx.get(k) || '').toString().slice(0, 15)}`}</p>)}
     </tr>
 
 export const txHeader = ({ colOrder }: { colOrder?: headers }) =>
