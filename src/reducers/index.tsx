@@ -2,6 +2,7 @@
 
 import * as Actions from '../types/actions'
 import { UIState } from '../types/state'
+import { Transaction } from '../types/tx'
 
 export const rootReducer = (state: UIState, action: Actions.IActionType)
     : UIState => {
@@ -11,13 +12,12 @@ export const rootReducer = (state: UIState, action: Actions.IActionType)
             return state.addTx((action as Actions.IMakeDeposit).tx)
         case Actions.Action.DEPOSIT_VALIDATED:
             const a = (action as Actions.IDepositValidated)
-            return state.addTx(a.tx)
+            return state.addTx(a.serverResponse as Transaction)
                 // Take the balance as reported by the server as canonical, EVEN
                 // IF it doesn't match our perceptions. XXX:? 
                 .setIn(['accounts', a.address, 'offchainBalance'], a.newBalance)
         case Actions.Action.DEPOSIT_FAILED:
             return state.rejectTx((action as Actions.IDepositFailed).tx)
-
         // UI-related actions; see ../types/actions/ui.tsx
         case Actions.Action.ADD_WALLET:
             const addAction = (action as Actions.IAddWallet)
