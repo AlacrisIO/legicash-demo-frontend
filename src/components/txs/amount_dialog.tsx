@@ -3,7 +3,7 @@ import { AmountField } from './amount_field';
 
 export interface IAmountDialog {
     /** Header describing the dialog */
-    header: string;
+    header: JSX.Element;
     /** Human-readable description of the amount being entered */
     amountDescription: string;
     /** What to do with the amount when "submit" is hit */
@@ -32,7 +32,7 @@ export class AmountDialog extends React.Component<IAmountDialog, {}> {
 
     public render() {
         return (<div>
-            <h1>{this.props.header}</h1>
+            {this.props.header}
             <form onSubmit={this.onSubmit}>
                 <label>{this.props.amountDescription}
                     <AmountField
