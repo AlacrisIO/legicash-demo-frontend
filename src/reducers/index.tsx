@@ -17,7 +17,12 @@ export const rootReducer = (state: UIState, action: Actions.IActionType)
                 // IF it doesn't match our perceptions. XXX:? 
                 .setIn(['accounts', a.address, 'offchainBalance'], a.newBalance)
         case Actions.Action.DEPOSIT_FAILED:
-            return state.rejectTx((action as Actions.IDepositFailed).tx)
+            const af = (action as Actions.IDepositFailed)
+            const tx = af.tx.multiUpdateIn([
+                [['rejected'], (x: any) => true],
+                [['failureMessage'], (x: any) => af.serverResponse.message]
+            ])
+            return state.rejectTx(tx)
         // UI-related actions; see ../types/actions/ui.tsx
         case Actions.Action.ADD_WALLET:
             const addAction = (action as Actions.IAddWallet)
