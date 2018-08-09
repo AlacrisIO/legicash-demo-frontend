@@ -22,4 +22,3 @@ export const WithdrawDialog = ({ from, submitCallback }: IWithdrawDialog) => (
         amountDescription="Amount to withdraw:" submitCallback={submitCallback}
     />
 )
-
