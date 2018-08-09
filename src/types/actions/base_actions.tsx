@@ -9,6 +9,11 @@ export enum Action {
     DEPOSIT_VALIDATED, // Deposit has been added
     DEPOSIT_FAILED, // Deposit was not added
 
+    /* Actions related to making a deposit. */
+    MAKE_WITHDRAWAL, // Withdrawal to this address on side chain
+    WITHDRAWAL_VALIDATED, // Withdrawal has been added
+    WITHDRAWAL_FAILED, // Deposit was not added
+
     /* UI actions */
     ADD_WALLET, // Add this address to the list of displayed wallets
     REMOVE_WALLET,  // Remove this address from the list of displayed wallets.

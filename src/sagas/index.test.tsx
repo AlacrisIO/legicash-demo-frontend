@@ -60,9 +60,8 @@ result', () => {
                 .put.like({
                     action: {
                         type: Actions.Action.DEPOSIT_VALIDATED,
-                        address, newBalance: balance, tx,
-                        serverResponse: tx.set('validated', true).set(
-                            'hash', hash)
+                        newBalance: balance, tx, serverResponse: tx.set(
+                            'validated', true).set('hash', hash)
                     }
                 }).run()
         })

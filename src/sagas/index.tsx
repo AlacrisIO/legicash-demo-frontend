@@ -5,7 +5,6 @@ import {
     get, IThreadResponse, post, readThread, resultPending
 } from '../server/common'
 import * as Actions from '../types/actions'
-import { depositFailed } from '../types/actions';
 import { Address } from '../types/address'
 import { emptyHash, HashValue } from '../types/hash'
 import { Transaction } from '../types/tx'
@@ -42,28 +41,54 @@ const updateHash = (rawHash: string) => {
     }
 }
 
-export function* makeDeposit(action: Actions.IMakeDeposit) {
-    const address = action.address.toString()
-    const amount = action.tx.amount
-    const server = serverWithErrorHandling(action.address, action.tx)
-    const threadResponse = yield* server(post, 'deposit', { address, amount })
-    const result: any = yield* awaitThread(server, threadResponse)
-    if (resultPending(result)) {
-        yield put(depositFailed(action.address, action.tx, Error("Timed out!")))
-        yield undefined  // Otherwise the above event is dropped??
+/** Return a generator for a cross-chain server interaction */
+const crossChainTx = (
+    /** The endpoint to hit on the server */
+    endpoint: string,
+    /** Constructor for  message to send on success */
+    success: Actions.crossChainValidationMessage,
+    /** Constructor for message to send on failure. */
+    failure: Actions.crossChainFailureMessage) =>
+    function* (action: Actions.ICrossChainInitiate) {
+        const address = action.tx.from.toString()
+        const amount = action.tx.amount
+        const server = serverWithErrorHandling(action.tx.from, action.tx)
+        const threadResponse = yield* server(post, endpoint, { address, amount })
+        const result: any = yield* awaitThread(server, threadResponse)
+        if (resultPending(result)) {
+            yield put(failure(action.tx.from, action.tx, Error("Timed out!")))
+            yield undefined  // Otherwise the above event is dropped??
+        }
+        // Update the transaction with the new information
+        /* tslint:disable:no-console */
+        console.log('does this work, now?', result.toString())
+        const hash = result.main_chain_confirmation.transaction_hash
+        const newTx = action.tx.multiUpdateIn([
+            [['validated'], () => true],
+            [['hash'], updateHash(hash)],
+        ])
+        yield put(success(
+            action.tx.from, result.user_account_state.balance, action.tx, newTx))
+        return undefined  // Otherwise the above event is dropped??
     }
-    // Update the transaction with the new information
-    const newTx = action.tx.multiUpdateIn([
-        [['validated'], () => true],
-        [['hash'], updateHash(result.main_chain_confirmation.transaction_hash)],
-    ])
-    yield put(Actions.depositValidated(
-        action.address, result.user_account_state.balance, action.tx, newTx))
-    return undefined  // Otherwise the above event is dropped??
-}
 
-export function* depositListener() {
-    yield takeEvery((action: Actions.IActionType) =>
-        action.type === Actions.Action.MAKE_DEPOSIT,
-        makeDeposit)
-}
+/** Return a generator which kicks off given generator on given action  */
+const crossChainListener = (actionType: Actions.Action, generator: any) =>
+    function* () {
+        const actionMatcher = (action: Actions.IActionType) =>
+            action.type === actionType
+        yield takeEvery(actionMatcher, generator)
+    }
+
+/** Generator for deposit server interaction */
+export const makeDeposit = crossChainTx('deposit', Actions.depositValidated,
+    Actions.depositFailed)
+
+export const depositListener = crossChainListener(
+    Actions.Action.MAKE_DEPOSIT, makeDeposit)
+
+export const makeWithdrawal = crossChainTx(
+    'withdrawal', Actions.withdrawalValidated, Actions.withdrawalFailed)
+
+export const withdrawalListener = crossChainListener(
+    Actions.Action.MAKE_WITHDRAWAL, makeWithdrawal)

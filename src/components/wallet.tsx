@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { connect } from 'react-redux'
-import { makeDeposit, removeWallet } from '../types/actions'
+import { makeDeposit, makeWithdrawal, removeWallet } from '../types/actions'
 import { Address } from '../types/address'
 import { Guid } from '../types/guid'
 import { UIState } from '../types/state'
@@ -8,15 +8,17 @@ import { Transaction } from '../types/tx'
 import { Wallet as WalletType } from '../types/wallet'
 import { TxList } from './tx_list'  // Will need this later...
 import { DepositDialog } from './txs/deposit_dialog'
+import { WithdrawDialog } from './txs/withdraw_dialog'
 
 interface IWallet {
     depositCallback: (amount: number) => void
+    withdrawCallback: (amount: number) => void
     killCallback: () => void;
     wallet: WalletType;
     txs: Transaction[];
 }
 export const DumbWallet =
-    ({ depositCallback, killCallback, wallet, txs }: IWallet) =>
+    ({ depositCallback, withdrawCallback, killCallback, wallet, txs }: IWallet) =>
         <div>
             <h2>
                 { /* Clicking on this deletes display of the wallet */}
@@ -24,10 +26,12 @@ export const DumbWallet =
                 Username: {wallet.username}
             </h2>
             <p>Address: {wallet.address.toString()}</p>
-            <DepositDialog from={wallet.address}
-                submitCallback={depositCallback} />
             <p>Offchain balance: {wallet.offchainBalance}</p>
             <p>Onchain balance: {wallet.onchainBalance}</p>
+            <DepositDialog from={wallet.address}
+                submitCallback={depositCallback} />
+            <WithdrawDialog from={wallet.address}
+                submitCallback={withdrawCallback} />
             <p>Transaction list:</p>
             <TxList txs={txs} />
         </div>
@@ -46,11 +50,10 @@ ${address}`)
                 return { txs, wallet }
             },
             (dispatch: (a: any) => any) => ({
-                depositCallback: (a: number) => {
-                    /* tslint:disable:no-console */
-                    console.log('Depositing', a)
-                    dispatch(makeDeposit(address, a))
-                },
+                depositCallback:
+                    (a: number) => dispatch(makeDeposit(address, a)),
                 killCallback: () => dispatch(removeWallet(address)),
+                withdrawCallback:
+                    (a: number) => dispatch(makeWithdrawal(address, a)),
             })
         )(DumbWallet) 
