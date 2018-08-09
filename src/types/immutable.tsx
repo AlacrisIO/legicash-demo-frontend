@@ -14,7 +14,10 @@ export type update = [any[], anyFunc]
 export interface Map<K, V> extends Immutable.Map<K, V> {
     (): Map<K, V>
     new(a: object): Map<K, V> & null
+    set(k: K, v: V): this
     multiUpdateIn(updates: update[]): this
+    fromPairs(pairs: Array<[K, V]>): this
+    withMutations(mutator: (mutable: this) => this): this
 }
 
 // Note that you don't use `new` with this... It's a pain... Lots of holes, here.
@@ -116,5 +119,14 @@ export const multiUpdateIn = function <T>(
     })
 }
 
+export const fromPairs = function <K, V>(
+    this: Map<K, V>, pairs: Array<[K, V]>): typeof this {
+    return this.withMutations((m: typeof this) => {
+        pairs.forEach(([key, value]: [K, V]) => m = m.set(key, value))
+        return m
+    })
+}
+
 rPrototype.multiUpdateIn = multiUpdateIn
+Immutable.Map.prototype.fromPairs = fromPairs
 Immutable.Map.prototype.multiUpdateIn = multiUpdateIn
