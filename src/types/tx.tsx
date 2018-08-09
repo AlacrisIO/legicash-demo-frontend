@@ -47,7 +47,7 @@ const inferrableValues = {  // Attributes where type can be inferred directly
     to: emptyAddress,
 }
 
-const defaultValues = { ...optionValues, ...inferrableValues }
+export const defaultValues = { ...optionValues, ...inferrableValues }
 
 type txDifference = [string, (t: Transaction) => any]
 
