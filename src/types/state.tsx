@@ -2,6 +2,7 @@ import { Address } from './address'
 import { DefaultContractState } from './contract_state'
 import { Guid } from './guid'
 import { List, Map, Record, Set, update } from './immutable'
+import { SortedList } from './sorted_list'
 import { Transaction } from './tx'
 import { Wallet } from './wallet'
 /* tslint:disable:object-literal-sort-keys */
@@ -31,11 +32,20 @@ export class UIState extends Record(defaultValues) {
         const updates: update[] = [
             [['accounts', address],  // Add the wallet to the accounts list
             (w: Wallet) => {
-                const fromTxs = this.txByFromAddress.get(address) || List()
-                const toTxs = this.txByToAddress.get(address) || List()
-                /* tslint:disable:no-console */
-                console.log(fromTxs)
-                const txs = List<Guid>(fromTxs.concat(toTxs))
+                const fromTxs = Set(this.txByFromAddress.get(address) || List())
+                const allTxs = fromTxs.union(this.txByToAddress.get(address) || List())
+                const keyFn = (g: Guid) => {
+                    const tx = this.txByGUID.get(g)
+                    if (tx === undefined) {
+                        throw Error(`Could not find Guid ${g} in \
+${this.txByGUID}. You probably need to pass the sort key explicitly in whatever \
+SortedList method you called, because you have the wrong \`this\` value.`)
+                    }
+                    return tx.creationDate as Date
+                }
+                const txs = new SortedList<Guid, Date>({
+                    elements: List(allTxs), keyFn
+                })
                 return (w || new Wallet({ address, txs, username }))
             }]
         ]
@@ -63,8 +73,10 @@ export class UIState extends Record(defaultValues) {
             return tx
         }
         const updateGUID = (s: Guid | undefined) => tx.localGUID
-        const updateWallet = (a: Address) => (w: Wallet | undefined) =>
-            (w || new Wallet({ address: a })).addTx(tx, this.txByGUID)
+        const updateWallet = (a: Address) => (w: Wallet | undefined) => {
+            const rv = (w || new Wallet({ address: a })).addTx(tx, this.txByGUID)
+            return rv
+        }
         return this.multiUpdateIn([
             [['txByGUID', tx.localGUID], updateTx],
             [['txByFromAddress', tx.from], updateGUID],

@@ -1,8 +1,11 @@
 import { emptyAddress } from './address'
 import { balanceUpdate, Chain } from './chain'
 import { Guid } from './guid'
-import { List, Map, Record, Set } from './immutable'
+import { List, Map, Record } from './immutable'
+import { SortedList } from './sorted_list'
 import { Transaction } from './tx'
+
+type TxList = SortedList<Guid, Date>
 
 /* tslint:disable:object-literal-sort-keys */
 const defaultValues = {
@@ -13,9 +16,9 @@ const defaultValues = {
     /** Balance in this address on-chain. Cannot be negative. */
     // XXX: We are effectively agnostic about onchainBalance, at this point.
     onchainBalance: Infinity,
-    /** Known transactions for this account. Append only! */
-    txs: List<Guid>(),
-    txSet: Set<Guid>(),
+    /** Known transactions for this account */
+    // XXX: Key function is broken, because we don't have access to the Txs here
+    txs: new SortedList<Guid, Date>({ elements: List(), keyFn: (x: any) => x }),
     /** Human-readable username for this account */
     username: ''
 }
@@ -26,41 +29,44 @@ type balanceUpdateFn = (balance: any) => any
 export class Wallet extends Record(defaultValues) {
     constructor(props: Partial<typeof defaultValues>) {
         super(props)
-        if (this.onchainBalance < 0) { throw Error("Onchain balance negative!") }
-        if (this.offchainBalance < 0) { throw Error("Offchain balance negative!") }
+        this.checkBalances()
         // XXX: Check that all transactions belong to `address`?
     }
     /** Wallet with this tx added */
     public addTx(tx: Transaction, txs: Map<Guid, Transaction>): this {
+        if (tx === undefined) {
+            throw Error(`Attempt to add undefined Tx to ${this}!`)
+        }
+        // To be applied in a big batch at the end
         const updates: Array<[any[], (a: any) => any]> = [
-            // To be applied in a big batch at the end
-            [['txs'], this.updateTxs(tx.localGUID as Guid, tx, txs)],
-            [['txSet'], (s: Set<Guid>) => s.add(tx.localGUID as Guid)],
+            [['txs'], this.updateTxs(tx.localGUID as Guid, tx)]
         ]
-        if ((tx === undefined) || (!this.knownTx(tx))) {
+        if (!this.knownTx(tx)) {
             updates.push(...this.balanceUpdates(tx, this.updateBalance.bind(this)))
         }
-        return this.multiUpdateIn(updates)
+        const rv = this.multiUpdateIn(updates)
+        rv.checkBalances()
+        return rv
     }
     public rejectTx(tx: Transaction): this {
         if (!this.knownTx(tx)) {
             // XXX: Deal with this more gracefully
             throw Error(`Server rejected a tx we haven't seen! ${tx}`)
         }  // OK, undo the balances
-        return this.multiUpdateIn(this.balanceUpdates(tx, this.undoBalance.bind(this)))
+        const updates = this.balanceUpdates(tx, this.undoBalance.bind(this))
+        const rv = this.multiUpdateIn(updates)
+        // XXX: Provide a means to remove rejected Txs from the display?
+        rv.checkBalances()
+        return rv
     }
-    private knownTx(tx: Transaction): boolean { return this.txSet.has(tx.getGUID()) }
+    private knownTx(tx: Transaction): boolean {
+        return this.txs.hasElt(tx.localGUID as Guid, tx.creationDate)
+    }
+
     /** Function for updating the tx list with the given txID. */
-    private updateTxs(txID: Guid, tx: Transaction, txs: Map<Guid, Transaction>
-    ): (l: List<Guid>) => List<Guid> {
-        /* Logic for ensuring txs are sorted... */
-        // XXX: Add more sorting options, not just reverse chronological
-        // XXX: This is n*log(n), needs to be log(n) (binary search.)
-        // Maybe add a date index to UIState?
-        const txa = txs.set(tx.localGUID as Guid, tx)
-        return l => {
-            return List(
-                l.push(txID).sortBy((txid: Guid) => txa.get(txid).creationDate))
+    private updateTxs(txID: Guid, tx: Transaction): (l: TxList) => typeof l {
+        return (l: TxList): typeof l => {
+            return l.add(txID, tx.creationDate)
         }
     }
     /** Function for updating balance, given tx direction. */
@@ -80,5 +86,9 @@ export class Wallet extends Record(defaultValues) {
             [['offchainBalance'], update(tx, Chain.Side)],
             [['onchainBalance'], update(tx, Chain.Main)]
         ]
+    }
+    private checkBalances(): void {
+        if (this.onchainBalance < 0) { throw Error("Onchain balance negative!") }
+        if (this.offchainBalance < 0) { throw Error("Offchain balance negative!") }
     }
 }
