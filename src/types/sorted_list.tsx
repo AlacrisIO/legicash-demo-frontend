@@ -1,19 +1,22 @@
+import * as Immutable from 'immutable'
 import { is, List, Map, Record } from './immutable'
 
 type comparisonResults = -1 | 0 | 1
 
 export interface ISortedList<T, K> {
     elements: List<T>;
+    keyFn: (this: ISortedList<T, K>, e: T) => K;
     readonly cmp?: (k1: K, k2: K) => comparisonResults;
     keys?: List<K>;
-    size?: number;
+    lSize?: number;
 }
 
 const defaultValues = {
     cmp: (x: any, y: any) => x < y ? -1 : (x > y ? 1 : 0),
     elements: List(),
+    keyFn: (x: any) => x,  // XXX: This will break things.
     keys: List(),
-    size: 0,
+    lSize: 0,
 }
 
 export class SortedList<T, K> extends Record(defaultValues) implements ISortedList<T, K> {
@@ -22,19 +25,15 @@ export class SortedList<T, K> extends Record(defaultValues) implements ISortedLi
     public keyFn: (e: T) => K
     public cmp: (k1: K, k2: K) => comparisonResults
     public keys: List<K>
-    public length: number
-    constructor(props: ISortedList<T, K> & { keyFn: (e: T) => K }) {
+    constructor(props: ISortedList<T, K>) {
         const unsortedElements = List(props.elements)
         const keyMemo = Map<T, K>().fromPairs(
             unsortedElements.map((e: T): [T, K] => [e, props.keyFn(e)]).toArray())
         const elements = List(unsortedElements.sortBy(
             (e: T) => keyMemo.get(e) as K, props.cmp))
         const keys = List(elements.map((e: T) => keyMemo.get(e) as K))
-        const sanProps = Object.assign({}, props)
-        delete sanProps.keyFn
-        super({ ...sanProps as ISortedList<T, K>, elements, keys, size: keys.size })
-        this.keyFn = props.keyFn
-        console.log("Ze Key", this.elements.get(0))
+        const nProps = { ...props as ISortedList<T, K>, elements, keys, lSize: keys.size }
+        super(nProps)
     }
     public add(e: T, key?: K): this {
         if (key === undefined) {
@@ -50,13 +49,14 @@ export class SortedList<T, K> extends Record(defaultValues) implements ISortedLi
             // XXX: This is going to happen, though hopefully not with the demo
             throw Error(`Elements with matching keys! ${key}, ${e}, ${locElt}`)
         }
+        if (is(locKey, key) && is(locElt, e)) { return this }  // Already present
         function insert<U>(elt: U) {
             return (l: List<U>) => l.insert(insertIdx as number, elt)
         }
         return this.multiUpdateIn([
             [['elements'], insert(e)],
             [['keys'], insert(key)],
-            [['size'], (s: number) => s + 1]
+            [['lSize'], (s: number) => s + 1]
         ])
     }
     /** Returns true if `e` is in list, falsey otherwise */
@@ -65,6 +65,9 @@ export class SortedList<T, K> extends Record(defaultValues) implements ISortedLi
         const insertIdx = this.binarySearch(key)
         return ((is(key, this.keys.get(insertIdx)))
             && (is(this.elements.get(insertIdx), e)))
+    }
+    public map<V>(f: (e: T) => V): Immutable.Iterable<number, V> {
+        return this.elements.map(f)
     }
     /** The index where this key should be inserted, or undefined if present */
     private binarySearch(key: K): number {

@@ -10,8 +10,8 @@ class DateR extends Record({ date: new Date }) implements IDate {
     }
 }
 
-const start = new Date(1900, 1, 1).getTime()
-const end = new Date(2050, 1, 1).getTime()
+const start = new Date(1000, 1, 1).getTime()
+const end = new Date(3000, 1, 1).getTime()
 const duration = end - start
 const randomDate = (): DateR => new DateR(start + Math.random() * duration)
 
@@ -42,6 +42,7 @@ describe('SortedList tests', () => {
             expect(s.hasElt(nd, nd.date)).toBeTruthy()
             const rd = randomDate()
             expect(s.hasElt(rd, rd.date)).toBeFalsy()
+            expect(s.lSize).toEqual(elements.size + i + 1)
         }
     })
 })
