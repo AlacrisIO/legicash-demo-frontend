@@ -1,7 +1,7 @@
 import { fromJS, is } from 'immutable'
 import { expectSaga } from 'redux-saga-test-plan'
 
-import { makeDeposit } from '../sagas'
+import { makeDeposit } from '../sagas/cross_chain'
 import { get, post } from '../server/common'
 import { addresses } from '../server/ethereum_addresses'
 
@@ -49,7 +49,7 @@ const depositMocks = {
     }
 }
 
-const makeDepositAction = Actions.makeDeposit(address, amount as number)
+const makeDepositAction = Actions.makeDeposit(address, amount)
 const tx = makeDepositAction.tx
 
 describe('Deposit saga tests', () => {
@@ -73,10 +73,16 @@ if (serverRunning) {
         it('Hits the deposit endpoint, and returns a DEPOSIT_VALIDATED action',
             () => {
                 return expectSaga(makeDeposit, makeDepositAction)
-                    .put.like({
-                        action: { type: Actions.Action.DEPOSIT_FAILED, tx }
+                    .run(4500).then((result: any) => {
+                        const put = result.effects.put[0].PUT
+                        const action = put.action
+                        const newTx = action.serverResponse
+                        expect(action.newBalance).toBeGreaterThanOrEqual(0)
+                        expect(tx.txsDiffer.bind(tx)(newTx)).toBeFalsy()
+                        expect(newTx.validated).toBeTruthy()
+                        expect(newTx.rejected || newTx.failureMessage)
+                            .toBeFalsy()
                     })
-                    .run(2500)
                 // XXX: More validation, here?
             })
     })
