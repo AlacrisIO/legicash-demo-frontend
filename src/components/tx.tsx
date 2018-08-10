@@ -2,6 +2,8 @@ import * as React from 'react';
 
 import { defaultValues, Transaction } from '../types/tx'
 
+// XXX: Needs some indication of the direction cross-chain txs go in.
+
 /* Representation of the epistemic state of a Tx in the frontend */
 export type txCSSClass = 'pending' | 'valid' | 'invalid'
 
