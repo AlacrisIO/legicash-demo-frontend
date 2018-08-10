@@ -31,7 +31,6 @@ export const get = (endpoint: string, params: object): Promise<Response> => {
     Object.keys(params).forEach(k => url.searchParams.append(k, params[k]))
     return fetch(url.toString())
         .then(r => r.json())
-        .catch(e => { console.log(`We got an error: ${e}`); throw e })
 }
 
 export interface IThreadResponse { result: string | object }
@@ -48,4 +47,5 @@ export const readThread = (response: IThreadResponse): number => {
 
 export const pendingResult = { result: "The operation is pending" }
 export const resultPending = (r: IThreadResponse) =>
-    r.result === pendingResult.result
+    (typeof r.result === "string")
+    && r.result.valueOf() === pendingResult.result.valueOf()
