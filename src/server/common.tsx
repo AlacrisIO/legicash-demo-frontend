@@ -22,8 +22,6 @@ export const post = (endpoint: string, body: object): Promise<Response | void> =
         method: "POST",
     })
         .then(rv => rv.json())
-        /* tslint:disable:no-console */
-        .catch(e => { console.log(`We got an error: ${e}`); throw e })
 }
 
 /** Post get query to legicash endpoint */
