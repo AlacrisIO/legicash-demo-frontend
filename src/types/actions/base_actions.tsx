@@ -14,6 +14,10 @@ export enum Action {
     WITHDRAWAL_VALIDATED, // Withdrawal has been added
     WITHDRAWAL_FAILED, // Deposit was not added
 
+    PAYMENT_INITIATED,  // Side-chain cross-account payment
+    PAYMENT_VALIDATED,
+    PAYMENT_FAILED,
+
     /* UI actions */
     ADD_WALLET, // Add this address to the list of displayed wallets
     REMOVE_WALLET,  // Remove this address from the list of displayed wallets.
