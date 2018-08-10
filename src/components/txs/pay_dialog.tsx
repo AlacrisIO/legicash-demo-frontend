@@ -1,43 +1,50 @@
 import * as React from 'react';
-import { Address, addressRegexp } from '../../types/address'
-import { AddressField } from './address_field'
+import { connect } from 'react-redux'
+import * as Actions from '../../types/actions'
+import { Address, emptyAddress } from '../../types/address'
+import { knownAddresses, name, SelectAccount } from '../select_account'
 import { AmountField } from './amount_field'
 
 export interface IPayDialog {
     /** The address the payment will be sent from */
     from: Address;
     /** Submit receiver. `amount`: how much to send, `to`: who to send to */
-    submitCallback: (amount: number, to: Address) => void
+    submitCallback: (to: Address, amount: number) => void
 }
 
-export class PayDialog extends React.Component<IPayDialog, {}> {
-    public state: { amount: number; to: string } = { amount: 0, to: '0x' }
-
+export class DumbPayDialog extends React.Component<IPayDialog, {}> {
+    public state: { amount: number; to: Address } = {
+        amount: 0, to: emptyAddress
+    }
     public constructor(props: IPayDialog) {
         super(props)
         this.onSubmit = this.onSubmit.bind(this)
         this.setTo = this.setTo.bind(this)
         this.setAmount = this.setAmount.bind(this)
     }
-
     public onSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault()
         // XXX: Give error message; don't just refuse.
-        if (addressRegexp.exec(this.state.to) && (this.state.amount > 0)) {
+        if (!this.state.to.equals(emptyAddress) && (this.state.amount > 0)) {
             const to = new Address(this.state.to)
-            this.props.submitCallback(this.state.amount, to)
+            this.props.submitCallback(to, this.state.amount)
         }
     }
-
-    public setTo(to: string) { this.setState({ to }) }
+    public setTo(optIdx: number, to: Address) { this.setState({ to }) }
     public setAmount(amount: number) { this.setState({ amount }) }
     public render() {
+        const recipients = knownAddresses.remove(this.props.from).toList()
+            .sortBy(name).toList()
         return (
             <div>
-                <h1>Send payment from {this.props.from.toString()}</h1>
+                <h3>Send payment</h3>
                 <form onSubmit={this.onSubmit}>
                     <label>
-                        "To:" <AddressField callback={this.setTo} />
+                        To: <SelectAccount
+                            displayedAddresses={recipients}
+                            initialMessage="Choose recipient"
+                            select={this.setTo}
+                        />
                     </label>
                     <label>
                         "Amount:" <AmountField callback={this.setAmount} />
@@ -49,3 +56,11 @@ export class PayDialog extends React.Component<IPayDialog, {}> {
         )
     }
 }
+
+export const PayDialog = connect(
+    null, /* No need to map state to component properties */
+    (dispatch: (a: any) => any, props: IPayDialog) => ({
+        submitCallback: (to: Address, amount: number) =>
+            dispatch(Actions.makePayment(to, props.from, amount))
+    }))(DumbPayDialog)
+
