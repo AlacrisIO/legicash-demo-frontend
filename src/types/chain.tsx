@@ -4,6 +4,9 @@
  * Only the Wallet and Transaction modules should reference Chain.{Main,Side}
  * and then only sparingly.
  *
+ * The point is to as much as possible have a single location for changes,
+ * to ease future adaptation to multiple sidechains.
+ *
  */
 
 import { Address } from './address'
@@ -53,3 +56,9 @@ export const withdrawTransaction =
         const direction = { dstChain: Chain.Main, srcChain: Chain.Side }
         return new Transaction({ ...details, ...direction })
     }
+
+export const isSideChain = (tx: Transaction) =>
+    (tx.dstChain === Chain.Side) && (tx.srcChain === Chain.Side)
+
+export const makeSideChain = (tx: Transaction) =>
+    tx.set('dstChain', Chain.Side).set('srcChain', Chain.Side)
