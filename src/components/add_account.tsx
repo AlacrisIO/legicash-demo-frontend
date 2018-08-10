@@ -1,32 +1,10 @@
 import { List, Set } from 'immutable'
 import * as React from 'react'
 import { connect } from 'react-redux'
-import { addresses as allAddresses } from '../server/ethereum_addresses'
 import { addAddress } from '../types/actions'
 import { Address, emptyAddress } from '../types/address'
 import { UIState } from '../types/state'
-
-export const knownAddresses = Set(Object.keys(allAddresses).map(
-    n => allAddresses[n]))
-export const addressNames: { Address: string } = {} as any
-Object.keys(allAddresses).forEach(n => addressNames[allAddresses[n]] = n)
-
-const defaultOption: JSX.Element = (
-    <option key={-1} className="accountDefaultOption addOpt"
-        value={emptyAddress.toString()}>
-        Please pick a wallet to display
-    </option>
-)
-
-export const name = (a: Address) => addressNames[a.toString()]
-
-/* Render available addresses as options for a dropdown menu */
-const addressOptions = (addresses: List<Address>) =>
-    List<JSX.Element>([defaultOption]).concat(
-        addresses.map((address: Address, i: number): JSX.Element =>
-            <option key={i} value={address.toString()} className="addOpt">
-                {name(address)}
-            </option>))
+import { knownAddresses, name, SelectAccount } from './select_account'
 
 export interface IAddAccount {
     /** Callback when account-add is requested */
@@ -35,38 +13,29 @@ export interface IAddAccount {
     displayedAddresses: List<Address>;
 }
 
-export interface IAddAccountState { optIdx: number }
+export interface IAddAccountState { optIdx: number, address: Address }
 /* tslint:disable:max-classes-per-file */
 class BaseComponent extends React.Component<IAddAccount, IAddAccountState>{ }
 
 /** Form for adding an account to the side chain */
 export class DumbAddAccount extends BaseComponent {
-    public state: IAddAccountState = { optIdx: 0 }
+    public state: IAddAccountState = { optIdx: 0, address: emptyAddress }
     public constructor(props: IAddAccount) {
         super(props)
-        this.onChange = this.onChange.bind(this)
         this.onSubmit = this.onSubmit.bind(this)
-    }
-    public onChange(e: React.ChangeEvent<HTMLSelectElement>) {
-        const optIdx = (e.target as HTMLSelectElement).selectedIndex
-        if (optIdx === undefined) {
-            throw Error("No index into <select> options!")
-        }
-        this.setState({ optIdx })
+        this.selectChange = this.selectChange.bind(this)
     }
     public onSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
         if (this.state.optIdx !== 0) {
-            const address = this.currentDisplayedAddress()
-            if (address.equals(emptyAddress)) {
-                /* tslint:disable:no-console */
+            if (this.state.address.equals(emptyAddress)) {
                 // XXX: This happened once, but I haven't been able to reproduce
                 throw Error(`OptIdx is ${this.state.optIdx}, which is outside \
 the range for the current options list, \
 ${this.props.displayedAddresses.toArray()} of length \
 ${this.props.displayedAddresses.size}.`)
             } else {
-                this.props.add(address)
+                this.props.add(this.state.address)
             }
         }
         if (this.state.optIdx === this.props.displayedAddresses.size) {
@@ -74,24 +43,23 @@ ${this.props.displayedAddresses.size}.`)
             this.setState({ optIdx: Math.max(0, this.state.optIdx - 1) })
         }
     }
-    public currentDisplayedAddress(): Address {
-        return ((this.state.optIdx > 0)
-            && this.props.displayedAddresses.get(this.state.optIdx - 1))
-            || emptyAddress
-    }
     public render() {
         return (
             <div className="addAccount">
-                <form className="addAccountMenue" onSubmit={this.onSubmit}>
+                <form className="addAccountMenu" onSubmit={this.onSubmit}>
                     Add account:
-                    <select onChange={this.onChange}
-                        value={this.currentDisplayedAddress().toString()} >
-                        {addressOptions(this.props.displayedAddresses)}
-                    </select>
+                    <SelectAccount
+                        displayedAddresses={this.props.displayedAddresses}
+                        initialMessage="Please pick a wallet to display"
+                        select={this.selectChange}
+                    />
                     <input type="submit" value="Submit" />
                 </form>
             </div >
         )
+    }
+    private selectChange(optIdx: number, address: Address): void {
+        this.setState({ optIdx, address })
     }
 }
 

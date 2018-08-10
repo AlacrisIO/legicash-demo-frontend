@@ -4,9 +4,8 @@ import * as React from 'react';
 
 import { addresses } from '../server/ethereum_addresses'
 import { Address } from '../types/address'
-import {
-    DumbAddAccount, IAddAccountState, knownAddresses, name
-} from './add_account'
+import { DumbAddAccount, IAddAccountState } from './add_account'
+import { knownAddresses, name } from './select_account'
 
 describe('Tests for add account dialog', () => {
     let v: Address | undefined
@@ -35,7 +34,7 @@ describe('Tests for add account dialog', () => {
     }
     it('Submits when something is chosen', () => {
         const address = getAddress(8)
-        expect(getAddress(hitSelection(8) - 1).equals(address)).toBe(true)
+        expect(getAddress(hitSelection(8) - 1)).toEqual(address)
         expect(address.equals(v as Address)).toBe(true)
     })
     it('Moves to the next entry up, when there is one, if at bottom', () => {
