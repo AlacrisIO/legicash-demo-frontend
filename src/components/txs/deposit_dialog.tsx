@@ -12,7 +12,7 @@ interface IDepositDialog {
 }
 
 const header = (a: Address) => (
-    <h4>{"Deposit to main chain from " + a.toString()}</h4>
+    <h4>{"Deposit to main chain"}</h4>
 )
 
 

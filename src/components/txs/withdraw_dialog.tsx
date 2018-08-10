@@ -12,7 +12,7 @@ interface IWithdrawDialog {
 }
 
 const header = (a: Address) => (
-    <h3>{"Withdraw to main chain from " + a.toString()}</h3>
+    <h3>{"Withdraw to main chain"}</h3>
 )
 
 /** Form for specifying how much to withdraw from main chain */
