@@ -2,6 +2,7 @@ import * as Actions from '../types/actions'
 import { UIState } from '../types/state'
 import { Transaction } from '../types/tx'
 
+// XXX: Add onchain balance here, when it is available
 export const addTx = (state: UIState, a: Actions.ICrossChainValidated): UIState =>
     state.addTx(a.serverResponse as Transaction)
         // Take the balance as reported by the server as canonical, EVEN
