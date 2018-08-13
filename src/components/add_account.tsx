@@ -1,4 +1,4 @@
-import { List, Set } from 'immutable'
+import { List } from 'immutable'
 import * as React from 'react'
 import { connect } from 'react-redux'
 import { addAddress } from '../types/actions'
@@ -38,10 +38,8 @@ ${this.props.displayedAddresses.size}.`)
                 this.props.add(this.state.address)
             }
         }
-        if (this.state.optIdx === this.props.displayedAddresses.size) {
-            // Move to the next-highest entry, if at the bottom, else next-lowest
-            this.setState({ optIdx: Math.max(0, this.state.optIdx - 1) })
-        }
+        this.setState(this.stateForNewDisplay(
+            this.state, this.props.displayedAddresses))
     }
     public render() {
         return (
@@ -61,12 +59,25 @@ ${this.props.displayedAddresses.size}.`)
     private selectChange(optIdx: number, address: Address): void {
         this.setState({ optIdx, address })
     }
+    /**
+     * Compute what the new state should be, given that the current selection
+     * will be removed on the next update. update.
+     */
+    private stateForNewDisplay(s: IAddAccountState, as: List<Address>
+    ): IAddAccountState {
+        // Note that `as` is effectively 1-indexed, since the first entry is
+        // the empty address placeholder with the menu description
+        if (s.optIdx === as.size) {
+            return { optIdx: Math.max(0, s.optIdx - 1), address: as.get(s.optIdx) }
+        }
+        return { optIdx: s.optIdx, address: as.get(s.optIdx) }
+    }
 }
 
 export const AddAccount = connect(
     (state: UIState) => ({
         displayedAddresses: List(
-            knownAddresses.subtract(Set(state.displayedAccounts)).sortBy(name))
+            knownAddresses.subtract(state.displayedAccountsSet).sortBy(name))
     }),
     (dispatch: (a: any) => any) => ({
         add: (a: Address) =>
