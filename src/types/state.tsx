@@ -32,8 +32,9 @@ export class UIState extends Record(defaultValues) {
         const updates: update[] = [
             [['accounts', address],  // Add the wallet to the accounts list
             (w: Wallet) => {
-                const fromTxs = Set(this.txByFromAddress.get(address) || List())
-                const allTxs = fromTxs.union(this.txByToAddress.get(address) || List())
+                const fromTxs = this.txByFromAddress.get(address) || Set()
+                const allTxs = fromTxs.union(this.txByToAddress.get(address)
+                                          || Set())
                 const keyFn = (g: Guid) => {
                     const tx = this.txByGUID.get(g)
                     if (tx === undefined) {
@@ -72,7 +73,8 @@ SortedList method you called, because you have the wrong \`this\` value.`)
             if (otx !== undefined) { tx.assertSameTransaction(otx) }
             return tx
         }
-        const updateGUID = (s: Guid | undefined) => tx.localGUID
+        const updateGUID = (s: Set<Guid> | undefined): Set<Guid> =>
+            (s || Set()).add(tx.getGUID())
         const updateWallet = (a: Address) => (w: Wallet | undefined) => {
             const rv = (w || new Wallet({ address: a })).addTx(tx, this.txByGUID)
             return rv
