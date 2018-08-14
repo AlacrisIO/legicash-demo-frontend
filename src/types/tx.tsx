@@ -17,6 +17,8 @@ interface IOptionTypes {  // Declare types where they can't be inferred
     validated: boolean | undefined
     dstChain: Chain | undefined,
     srcChain: Chain | undefined,
+    srcSideChainRevision: number | undefined,
+    dstSideChainRevision: number | undefined,
 }
 
 const optionValues: IOptionTypes = {
@@ -34,6 +36,10 @@ const optionValues: IOptionTypes = {
     dstChain: undefined,
     /** Name of the chain this transaction comes from */
     srcChain: undefined,
+    /** Index of revision in which this tx was validated */
+    srcSideChainRevision: undefined,
+    dstSideChainRevision: undefined,
+
 }
 
 const inferrableValues = {  // Attributes where type can be inferred directly
@@ -117,6 +123,18 @@ export class Transaction extends Record(defaultValues) {
             return ["Local GUIDs",
                 ((t: Transaction) => (t.localGUID as Guid).guid)]
         }
+        if ((this.srcSideChainRevision !== o.srcSideChainRevision)
+            && ((this.srcSideChainRevision !== undefined)
+                && (o.srcSideChainRevision !== undefined))) {
+            return ["Source side chain revision indices",
+                (t: Transaction) => t.srcSideChainRevision]
+        }
+        if ((this.dstSideChainRevision !== o.dstSideChainRevision)
+            && ((this.dstSideChainRevision !== undefined)
+                && (o.dstSideChainRevision !== undefined))) {
+            return ["Destination side chain revision indices",
+                (t: Transaction) => t.dstSideChainRevision]
+        }
         return null
     }
 
@@ -126,7 +144,7 @@ export class Transaction extends Record(defaultValues) {
         if (areDifferent) {
             const [description, accessor] = areDifferent
             throw Error(`${description} differ in transactions
-$(this.toString()} vs ${o.toString()}:
+${this.toString()} vs ${o.toString()}:
 (${accessor(this)} != ${accessor(o)})`)
         }
         return true

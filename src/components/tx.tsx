@@ -22,7 +22,7 @@ const txClass = (tx: Transaction) => {
 type header = keyof (typeof defaultValues)
 type headers = header[]
 const defaultColumns: headers =
-    ['from', 'to', 'amount', 'validated', 'rejected', 'failureMessage']
+    ['srcSideChainRevision', 'dstSideChainRevision', 'creationDate', 'from', 'to', 'amount', 'validated', 'rejected', 'failureMessage']
 
 // Verify that columns are all keys of transactions
 const t = new Transaction({})

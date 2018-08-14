@@ -18,6 +18,10 @@ export enum Action {
     PAYMENT_VALIDATED,
     PAYMENT_FAILED,
 
+    RECENT_TRANSACTIONS_INITIATED,  // Request for recent txs
+    RECENT_TRANSACTIONS_RECEIVED,  // Request for recent txs
+    RECENT_TRANSACTIONS_FAILED,  // Request for recent txs
+
     /* UI actions */
     ADD_WALLET, // Add this address to the list of displayed wallets
     REMOVE_WALLET,  // Remove this address from the list of displayed wallets.

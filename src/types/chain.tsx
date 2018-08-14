@@ -41,18 +41,24 @@ export const describeChain = (chain: Chain | undefined) => {
 export const isDeposit = (tx: Transaction) =>
     (tx.srcChain === Chain.Main) && (tx.dstChain === Chain.Side)
 
+/* tslint:disable:object-literal-sort-keys */
+
 /** Constructs a deposit from side chain to main chain, as Transaction */
 export const depositTransaction =
-    (address: Address, amount: number): Transaction => {
-        const details = { amount, from: address, to: address }
+    (address: Address, amount: number, revision?: number): Transaction => {
+        const details = {
+            amount, from: address, to: address, dstSideChainRevision: revision
+        }
         const direction = { dstChain: Chain.Side, srcChain: Chain.Main }
         return new Transaction({ ...details, ...direction })
     }
 
 /** Constructs a withdrawl from side chain to main chain, as Transaction */
 export const withdrawTransaction =
-    (address: Address, amount: number): Transaction => {
-        const details = { amount, from: address, to: address }
+    (address: Address, amount: number, revision?: number): Transaction => {
+        const details = {
+            amount, from: address, to: address, srcSideChainRevision: revision
+        }
         const direction = { dstChain: Chain.Main, srcChain: Chain.Side }
         return new Transaction({ ...details, ...direction })
     }

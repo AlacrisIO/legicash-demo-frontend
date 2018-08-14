@@ -5,7 +5,9 @@ import { List, Map, Record } from './immutable'
 import { SortedList } from './sorted_list'
 import { Transaction } from './tx'
 
-type TxList = SortedList<Guid, Date>
+export type sortKey = [number, Date]
+
+export type TxList = SortedList<Guid, sortKey>
 
 /* tslint:disable:object-literal-sort-keys */
 const defaultValues = {
@@ -18,7 +20,7 @@ const defaultValues = {
     onchainBalance: Infinity,
     /** Known transactions for this account */
     // XXX: Key function is broken, because we don't have access to the Txs here
-    txs: new SortedList<Guid, Date>({ elements: List(), keyFn: (x: any) => x }),
+    txs: new SortedList<Guid, sortKey>({ elements: List(), keyFn: (x: any) => x }),
     /** Human-readable username for this account */
     username: ''
 }
@@ -27,6 +29,10 @@ const defaultValues = {
 type balanceUpdateFn = (balance: any) => any
 
 export class Wallet extends Record(defaultValues) {
+    public static keyFn(tx: Transaction): sortKey {
+        return [tx.srcSideChainRevision || tx.dstSideChainRevision || -1,
+        tx.creationDate as Date]
+    }
     constructor(props: Partial<typeof defaultValues>) {
         super(props)
         this.checkBalances()
@@ -60,13 +66,13 @@ export class Wallet extends Record(defaultValues) {
         return rv
     }
     private knownTx(tx: Transaction): boolean {
-        return this.txs.hasElt(tx.localGUID as Guid, tx.creationDate)
+        return this.txs.hasElt(tx.localGUID as Guid, Wallet.keyFn(tx))
     }
 
     /** Function for updating the tx list with the given txID. */
     private updateTxs(txID: Guid, tx: Transaction): (l: TxList) => typeof l {
         return (l: TxList): typeof l => {
-            return l.add(txID, tx.creationDate)
+            return l.add(txID, Wallet.keyFn(tx))
         }
     }
     /** Function for updating balance, given tx direction. */

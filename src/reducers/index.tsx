@@ -3,6 +3,7 @@
 import * as Actions from '../types/actions'
 import { UIState } from '../types/state'
 import * as Crosschain from './crosschain'
+import * as RecentTxs from './recent_txs'
 
 export const rootReducer = (state: UIState, action: Actions.IActionType)
     : UIState => {
@@ -33,6 +34,16 @@ export const rootReducer = (state: UIState, action: Actions.IActionType)
             return state.addTx((action as Actions.IPaymentValidated).tx)
         case Actions.Action.PAYMENT_FAILED:
             return state.rejectTx((action as Actions.IPaymentFailed).tx)
+
+        // Transaction query-related actions
+        case Actions.Action.RECENT_TRANSACTIONS_INITIATED:
+            return state  // XXX: Reflect this in the UI, somehow?
+        case Actions.Action.RECENT_TRANSACTIONS_RECEIVED:
+            return RecentTxs.addTxs(
+                state, (action as Actions.IRecentTxsReceived).txs)
+        case Actions.Action.RECENT_TRANSACTIONS_FAILED:
+            return RecentTxs.recentTxsFailed(state) // XXX: Reflect in UI??
+
 
         // UI-related actions; see ../types/actions/ui.tsx
         case Actions.Action.ADD_WALLET:

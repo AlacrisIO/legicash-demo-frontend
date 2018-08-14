@@ -1,10 +1,10 @@
 import { Address } from './address'
 import { DefaultContractState } from './contract_state'
 import { Guid } from './guid'
-import { List, Map, Record, Set, update } from './immutable'
+import { List, Map, Record, Set } from './immutable'
 import { SortedList } from './sorted_list'
 import { Transaction } from './tx'
-import { Wallet } from './wallet'
+import { sortKey, Wallet } from './wallet'
 /* tslint:disable:object-literal-sort-keys */
 const defaultValues = {
     /** Wallets known to the front end */
@@ -18,9 +18,14 @@ const defaultValues = {
     /** Transactions, indexed by various characteristics */
     txByFromAddress: Map<Address, Set<Guid>>(),
     txByToAddress: Map<Address, Set<Guid>>(),
+    txBySrcSideChainRevision: Map<number, Guid>(),  // Revisions strictly monotonic
+    txByDstSideChainRevision: Map<number, Guid>(),
     /** Actual store for transactions */
     txByGUID: Map<Guid, Transaction>(),
 }
+
+/** Updates to portions of the state are stored as thunks of this form */
+type updatesType = Array<[any[], (a: any) => any]>
 
 export class UIState extends Record(defaultValues) {
     constructor(props: Partial<typeof defaultValues>) {
@@ -29,12 +34,13 @@ export class UIState extends Record(defaultValues) {
     }
     /** State with wallet added, if necessary. */
     public addWallet(username: string, address: Address): this {
-        const updates: update[] = [
+        const updates: updatesType = [
             [['accounts', address],  // Add the wallet to the accounts list
             (w: Wallet) => {
+                if (w) { return w }
                 const fromTxs = this.txByFromAddress.get(address) || Set()
                 const allTxs = fromTxs.union(this.txByToAddress.get(address)
-                                          || Set())
+                    || Set())
                 const keyFn = (g: Guid) => {
                     const tx = this.txByGUID.get(g)
                     if (tx === undefined) {
@@ -42,12 +48,12 @@ export class UIState extends Record(defaultValues) {
 ${this.txByGUID}. You probably need to pass the sort key explicitly in whatever \
 SortedList method you called, because you have the wrong \`this\` value.`)
                     }
-                    return tx.creationDate as Date
+                    return Wallet.keyFn(tx)
                 }
-                const txs = new SortedList<Guid, Date>({
+                const txs = new SortedList<Guid, sortKey>({
                     elements: List(allTxs), keyFn
                 })
-                return (w || new Wallet({ address, txs, username }))
+                return new Wallet({ address, txs, username })
             }]
         ]
         if (!this.displayedAccountsSet.has(address)) {
@@ -67,7 +73,9 @@ SortedList method you called, because you have the wrong \`this\` value.`)
     /** State with tx added */
     public addTx(tx: Transaction): this {
         if (tx === undefined) { throw Error("Attempt to add undefined tx") }
-        // Add tx to map, ensuring compatibility with any extant tx
+        const localGUID = this.checkLocalGUID(tx)
+        if (localGUID) { tx = tx.set('localGUID', localGUID) }
+        // Add tx to GUID map, ensuring compatibility with any extant tx
         const updateTx = (otx: Transaction | undefined): Transaction => {
             // XXX: Fail more gracefully on contradiction? Some kind of warning?
             if (otx !== undefined) { tx.assertSameTransaction(otx) }
@@ -79,17 +87,19 @@ SortedList method you called, because you have the wrong \`this\` value.`)
             const rv = (w || new Wallet({ address: a })).addTx(tx, this.txByGUID)
             return rv
         }
-        return this.multiUpdateIn([
-            [['txByGUID', tx.localGUID], updateTx],
-            [['txByFromAddress', tx.from], updateGUID],
-            [['txByToAddress', tx.to], updateGUID],
+        const updates: updatesType = [
+            [['txByGUID', tx.localGUID], updateTx],  // Store tx
+            [['txByFromAddress', tx.from], updateGUID],  // Update `from` idx
+            [['txByToAddress', tx.to], updateGUID],  // Update `to` idx
             [['accounts'], (wl: Map<Address, Wallet>) =>
-                wl.multiUpdateIn([
+                wl.multiUpdateIn([  // Update wallets for `from` & `to` addresses
                     [[tx.to], updateWallet(tx.to)],
                     [[tx.from], updateWallet(tx.from)]
                 ])
             ]
-        ])
+        ]
+        updates.push(...this.sideChainRevisions(tx)) // Update sidechain indices
+        return this.multiUpdateIn(updates)  // Actually do the updates
     }
     /** State with tx marked as rejected */
     public rejectTx(tx: Transaction): this {
@@ -104,5 +114,52 @@ SortedList method you called, because you have the wrong \`this\` value.`)
                         [[tx.from], updateWallet]
                     ])
                 })
+    }
+    /**
+     * Check whether there's already a localGUID for this based on sidechain 
+     * info, and use that if so. NB: assumes strict monotonicity of
+     * sidechain revision numbers, which is true as of this writing, per F.
+     */
+    private checkLocalGUID(tx: Transaction): Guid | undefined {
+        let localGUID
+        if (tx.srcSideChainRevision !== undefined) {
+            localGUID = this.txBySrcSideChainRevision.get(
+                tx.srcSideChainRevision)
+        }
+        if (tx.dstSideChainRevision !== undefined) {
+            const dstGUID = this.txByDstSideChainRevision.get(
+                tx.dstSideChainRevision)
+            if (localGUID && (!localGUID.equals(dstGUID))) {
+                throw Error('Incompatible src/dst GUIDs!')
+            }
+            localGUID = dstGUID
+        }
+        return localGUID
+    }
+    /** Calculate updates for the sidechain revision-index indices */
+    private sideChainRevisions(tx: Transaction): updatesType {
+        const updateSCRevision = (g: Guid | undefined): Guid => {
+            if (g !== undefined) {
+                const oldTx = this.txByGUID.get(g)
+                if (oldTx === undefined) {
+                    throw Error(`No tx found for ${g} in ${this.txByGUID} while \
+searching for ${tx}!`)
+                }
+                // Here we are using the fact that the GUID is updated in `addTx`,'
+                // when the tx side-chain revisions have been found in the state.
+                if (g) { oldTx.assertSameTransaction(tx) }
+            }
+            return tx.getGUID()
+        }
+        const updates: updatesType = []
+        if (tx.srcSideChainRevision !== undefined) {
+            updates.push([['txBySrcSideChainRevision', tx.srcSideChainRevision],
+                updateSCRevision])
+        }
+        if (tx.dstSideChainRevision !== undefined) {
+            updates.push([['txByDstSideChainRevision', tx.dstSideChainRevision],
+                updateSCRevision])
+        }
+        return updates
     }
 }

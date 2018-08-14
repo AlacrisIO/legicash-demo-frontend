@@ -1,7 +1,7 @@
 import { List } from 'immutable'
 import * as React from 'react'
 import { connect } from 'react-redux'
-import { addAddress } from '../types/actions'
+import { addAddress, recentTxsInitiated } from '../types/actions'
 import { Address, emptyAddress } from '../types/address'
 import { UIState } from '../types/state'
 import { knownAddresses, name, SelectAccount } from './select_account'
@@ -80,7 +80,9 @@ export const AddAccount = connect(
             knownAddresses.subtract(state.displayedAccountsSet).sortBy(name))
     }),
     (dispatch: (a: any) => any) => ({
-        add: (a: Address) =>
+        add: (a: Address) => {
             dispatch(addAddress(a, name(a)))
+            dispatch(recentTxsInitiated(a))
+        }
     })
 )(DumbAddAccount)
