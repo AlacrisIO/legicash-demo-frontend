@@ -69,7 +69,6 @@ export function* recentTxs(action: Actions.IRecentTxsInitiated) {
             action.address, response.map(txFromResponse).filter(
                 (t: Transaction): boolean => (t.amount as number) > 0)))
     } catch (e) {
-        throw e
         return yield put(Actions.recentTxsFailed(action.address, e))
     }
 }
