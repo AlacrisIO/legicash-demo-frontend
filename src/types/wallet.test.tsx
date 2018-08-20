@@ -2,12 +2,12 @@ import { List } from 'immutable'
 import { aliceAddress, aliceToBob, aliceToTrent } from './chain.test'
 import { Guid } from './guid'
 import { SortedList } from './sorted_list'
-import { sortKey, Wallet } from './wallet'
+import { keyFn, sortKey, Wallet } from './wallet'
 
 const txs = new SortedList<Guid, sortKey>({
     elements: List([aliceToTrent.getGUID(), aliceToBob.getGUID()]),
     keyFn: (g: Guid): sortKey =>
-        Wallet.keyFn((g === aliceToTrent.getGUID()) ? aliceToTrent : aliceToBob)
+        keyFn((g === aliceToTrent.getGUID()) ? aliceToTrent : aliceToBob)
 })
 
 describe('Tests of wallet type', () => {

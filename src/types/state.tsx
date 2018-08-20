@@ -2,9 +2,8 @@ import { Address } from './address'
 import { DefaultContractState } from './contract_state'
 import { Guid } from './guid'
 import { List, Map, Record, Set } from './immutable'
-import { SortedList } from './sorted_list'
 import { Transaction } from './tx'
-import { sortKey, Wallet } from './wallet'
+import { makeWalletWithTxList, Wallet } from './wallet'
 /* tslint:disable:object-literal-sort-keys */
 const defaultValues = {
     /** Wallets known to the front end */
@@ -41,19 +40,8 @@ export class UIState extends Record(defaultValues) {
                 const fromTxs = this.txByFromAddress.get(address) || Set()
                 const allTxs = fromTxs.union(this.txByToAddress.get(address)
                     || Set())
-                const keyFn = (g: Guid) => {
-                    const tx = this.txByGUID.get(g)
-                    if (tx === undefined) {
-                        throw Error(`Could not find Guid ${g} in \
-${this.txByGUID}. You probably need to pass the sort key explicitly in whatever \
-SortedList method you called, because you have the wrong \`this\` value.`)
-                    }
-                    return Wallet.keyFn(tx)
-                }
-                const txs = new SortedList<Guid, sortKey>({
-                    elements: List(allTxs), keyFn
-                })
-                return new Wallet({ address, txs, username })
+                return makeWalletWithTxList(
+                    address, allTxs, this.txByGUID, username)
             }]
         ]
         if (!this.displayedAccountsSet.has(address)) {
