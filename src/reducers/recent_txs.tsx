@@ -12,7 +12,6 @@ export const addTxs = (state: UIState, txs: Transaction[]): UIState => {
         state = state.addTx(tx)
         numTxs += 1
     }
-
     return state
 }
 
