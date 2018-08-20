@@ -1,13 +1,14 @@
 /** Logic related to validation of merkle proofs */
 
-import { keccak256 } from 'js-sha3'
-
 import * as S from '../../util/serialization'
 import * as M from './proof_marshaling'
 import * as T from './proof_types'
 
+const sixty_four_bit: number = 2 ** 64
+
 /** True iff `s` has the right shape for a skip step. */
-const skipWellFormed = (s: T.ISkip) => S.uInt(s.bits, 64) && S.uInt(s.length, 16)
+const skipWellFormed = (s: T.ISkip) =>
+    S.uInt(s.bits, 64) && (s.length < sixty_four_bit)
 
 /** True iff `b` has the right shape for a left-branch step. */
 const leftBranchWellFormed = (b: T.ILeftBranch): boolean =>
@@ -40,22 +41,45 @@ const stepsIntermediateDigests =
         let height = 0
         for (const cstep of steps) {
             height += T.isSkip(cstep) ? parseInt((cstep as T.ISkip).length, 16) : 1
-            digest = keccak256(M.stepMarshal(cstep, height, digest))
+            digest = M.stepDigest(cstep, height, digest)
             digests.push(digest)
         }
         return digests
     }
 
-/** True iff `steps` are well-formed and lead to `root` digest */
-const stepsWellFormed = (
-    steps: T.step[], initialDigest: string, root: string): boolean => {
-    if (!steps.every(stepWellFormed)) { return false }
-    const intermediateDigests = stepsIntermediateDigests(steps, initialDigest)
-    return intermediateDigests.slice(-1)[0].toString() === root.toString()
+/**
+ * Validated proof iif `steps` are well-formed and lead to `trie` digest.
+ * False, otherwise.
+ */
+const validProof = (r: T.IResponse): false | T.IValidatedResponse => {
+    const intermediateDigests = stepsIntermediateDigests(r.steps, r.leaf)
+    return (intermediateDigests.slice(-1)[0].toString() === r.trie)
+        && { ...r, validationSteps: intermediateDigests }
 }
 
-/** True iff server response `r` is well-formed and valid. */
-export const responseWellFormed = (r: T.IResponse, iDigests: string[]): boolean =>
+/**
+ * Validated proof iff server response `r` is well-formed and valid.
+ * False otherwise.
+ */
+export const responseWellFormed = (r: T.IResponse): T.IValidatedResponse | Error => {
     // XXX: Need to validate that `r.leaf` comes from expected tx!
-    S.uInt(r.key, 64) && S.uInt(r.leaf, 256) && S.uInt(r.trie, 256)
-    && stepsWellFormed(r.steps, /* iDigests, */ r.leaf, r.trie)
+    if (!S.uInt(r.key, 64)) {
+        return Error(`key ${r.key} not a 64-bit hexadecimal`)
+    }
+    if (!S.uInt(r.leaf, 256)) {
+        return Error(`leaf ${r.leaf} not a 256-bit hexadecimal`)
+    }
+    if (!S.uInt(r.trie, 256)) {
+        return Error(`trie ${r.trie} not a 256-bit hexadecimal`)
+    }
+    if (!r.steps.every(stepWellFormed)) {
+        return Error(`steps ill-formed!
+${JSON.stringify(r.steps.filter(s => !stepWellFormed(s)))}`)
+    }
+    const proof = validProof(r)  /* Last because real work! (langsec) */
+    if (!proof) {
+        const digests = stepsIntermediateDigests(r.steps, r.leaf)
+        return Error(`Final digest in ${digests} does not match root ${r.trie}`)
+    }
+    return proof
+}
