@@ -22,6 +22,11 @@ export enum Action {
     RECENT_TRANSACTIONS_RECEIVED,  // Request for recent txs
     RECENT_TRANSACTIONS_FAILED,  // Request for recent txs
 
+    PROOF_REQUESTED,  // Request for a Merkle proof
+    PROOF_RECEIVED_AND_VALID,  // Valid proof has been returned
+    PROOF_RECEIVED_BUT_INVALID,  // Invalid proof has been returned!
+    PROOF_ERROR,  // Error during proof retrieval / validation
+
     /* UI actions */
     ADD_WALLET, // Add this address to the list of displayed wallets
     REMOVE_WALLET,  // Remove this address from the list of displayed wallets.
