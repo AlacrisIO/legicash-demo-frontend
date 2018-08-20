@@ -45,4 +45,8 @@ describe('SortedList tests', () => {
             expect(s.lSize).toEqual(elements.size + i + 1)
         }
     })
+    it("Doesn't revise when an extant element is added", () => {
+        const s = new SortedList({ elements, keyFn })
+        expect(s.add(elements.first())).toBe(s)
+    })
 })

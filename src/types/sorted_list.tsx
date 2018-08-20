@@ -32,7 +32,9 @@ export class SortedList<T, K> extends Record(defaultValues) implements ISortedLi
         const elements = List(unsortedElements.sortBy(
             (e: T) => keyMemo.get(e) as K, props.cmp))
         const keys = List(elements.map((e: T) => keyMemo.get(e) as K))
-        const nProps = { ...props as ISortedList<T, K>, elements, keys, lSize: keys.size }
+        const nProps = {
+            ...props as ISortedList<T, K>, elements, keys, lSize: keys.size
+        }
         super(nProps)
     }
     public add(e: T, key?: K): this {
@@ -49,7 +51,7 @@ export class SortedList<T, K> extends Record(defaultValues) implements ISortedLi
             // XXX: This is going to happen, though hopefully not with the demo
             throw Error(`Elements with matching keys! ${key}, ${e}, ${locElt}`)
         }
-        if (is(locKey, key) && is(locElt, e)) { return this }  // Already present
+        if (!this.keysDiffer(locKey, key) && is(locElt, e)) { return this }
         function insert<U>(elt: U) {
             return (l: List<U>) => l.insert(insertIdx as number, elt)
         }
@@ -69,6 +71,8 @@ export class SortedList<T, K> extends Record(defaultValues) implements ISortedLi
     public map<V>(f: (e: T) => V): Immutable.Iterable<number, V> {
         return this.elements.map(f)
     }
+    /** True if k1 is not k2. (`===` is unreliable for arrays).  */
+    private keysDiffer(k1: K, k2: K): boolean { return (k1 < k2) || (k1 > k2) }
     /** The index where this key should be inserted, or undefined if present */
     private binarySearch(key: K): number {
         // Cribbed from https://stackoverflow.com/questions/22697936/binary-search-in-javascript#29018745
