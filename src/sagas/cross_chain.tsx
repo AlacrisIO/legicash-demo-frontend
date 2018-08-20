@@ -80,7 +80,8 @@ const crossChainTx = (
         const threadResponse = yield* server(post, endpoint, { address, amount })
         const result: any = yield* awaitThread(server, threadResponse)
         if (resultPending(result)) {
-            yield put(failure(action.tx.from, action.tx, Error("Timed out!")))
+            return yield put(
+                failure(action.tx.from, action.tx, Error("Timed out!")))
         }
         log.push([result, action])
         // Update the transaction with the new information
