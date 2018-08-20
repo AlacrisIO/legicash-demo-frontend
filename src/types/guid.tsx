@@ -19,4 +19,5 @@ export class Guid {
     public guid: string;
     constructor() { this.guid = uuidv4() }
     public toString(): string { return this.guid }
+    public equals(o: Guid): boolean { return this.guid === o.guid }
 }
