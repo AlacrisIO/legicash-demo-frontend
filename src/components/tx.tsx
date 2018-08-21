@@ -58,7 +58,7 @@ export const DumbTx = ({ tx, requestProof }: ITx): JSX.Element => {
     return <tr className={txClass(tx)}>{...txVals}</tr>
 }
 
-export const Tx = ({ tx }: ITx) => {
+export const Tx = ({ tx }: { tx: Transaction }) => {
     const guid = tx.getGUID()
     return connect(
         (state: UIState) => ({ tx: state.txByGUID.get(guid) }),

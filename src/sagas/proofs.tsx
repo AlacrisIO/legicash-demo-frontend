@@ -9,7 +9,7 @@ import { listener } from './common'
 export function* proof(action: Actions.IProofRequested) {
     const id = sidechainIdx(action.tx)
     try {
-        const r = yield call(get, 'proof', { id })
+        const r = yield call(get, 'proof', { 'tx-revision': id })
         if (r.steps && r.leaf) {
             // XXX: Constructing a "valid" proof without validation!!!
             const validationSteps = stepsIntermediateDigests(r.steps, r.leaf)

@@ -33,8 +33,8 @@ const doubleHashEntry =
     (key: number, left: HashValue, right: HashValue, target: boolean) =>
         <tr key={key}>
             <td />
-            <td style={hashColor(target)}>truncateHash(left)</td>
-            <td style={hashColor(!target)}>truncateHash(right)</td>
+            <td style={hashColor(target)}>{truncateHash(left)}</td>
+            <td style={hashColor(!target)}>{truncateHash(right)}</td>
         </tr>
 
 const renderLeaf = (key: number, hash: HashValue) =>
@@ -120,13 +120,10 @@ export class ProofDisplay extends React.Component<IProofDisplay, {}> {
 
     public constructor(props: IProofDisplay) {
         super(props)
-        this.onClick = this.onClick.bind(this)
+        this.onToggle = this.onToggle.bind(this)
     }
 
-    public onClick() {
-        if (!this.state.display) { this.props.requestProof() }
-        this.setState({ display: !this.state.display })
-    }
+    public onToggle() { this.setState({ display: !this.state.display }) }
 
     public render() {
         let display = <span />
@@ -135,7 +132,8 @@ export class ProofDisplay extends React.Component<IProofDisplay, {}> {
             display = <div><WaitComponent /></div>
         }
         return <div>
-            <button onClick={this.onClick}>Get Merkle Proof</button>
+            <button onClick={this.props.requestProof}>Get Merkle Proof</button>
+            <button onClick={this.onToggle}>Toggle Display</button>
             {this.state.display && display}
         </div>
     }
