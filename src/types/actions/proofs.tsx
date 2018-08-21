@@ -22,7 +22,7 @@ export const proofReceivedAndValid =
 export interface IProofReceivedButInvalid extends IProofAction {
     response: IResponse
 }
-export const proofReceivedButInalid =
+export const proofReceivedButInvalid =
     (tx: Transaction, response: IResponse): IProofReceivedButInvalid => (
         { tx, response, type: Action.PROOF_RECEIVED_BUT_INVALID })
 
