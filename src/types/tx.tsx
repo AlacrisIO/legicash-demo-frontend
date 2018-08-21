@@ -39,7 +39,6 @@ const optionValues: IOptionTypes = {
     /** Index of revision in which this tx was validated */
     srcSideChainRevision: undefined,
     dstSideChainRevision: undefined,
-
 }
 
 const inferrableValues = {  // Attributes where type can be inferred directly
