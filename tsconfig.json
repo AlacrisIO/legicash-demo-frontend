@@ -29,6 +29,6 @@
     "src/components/flycheck_*.tsx",
     "src/types/flycheck_*.tsx",
     "src/junk/*",
-    "src/types/junkdir/*",
+    "src/types/junkdir/*"
   ]
 }
