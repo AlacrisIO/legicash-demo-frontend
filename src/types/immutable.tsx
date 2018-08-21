@@ -42,6 +42,7 @@ export interface Record<IArgs extends IRecord> {
     withMutations(mutator: (mutable: Record<IArgs>) => any): this
     equals(this: Record<IArgs>, o: typeof this): boolean
     hashCode(this: Record<IArgs>): number
+    removeIn(keys: any[]): this
 }
 
 const rPrototype = Immutable.Record.prototype

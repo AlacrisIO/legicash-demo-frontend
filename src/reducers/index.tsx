@@ -44,6 +44,16 @@ export const rootReducer = (state: UIState, action: Actions.IActionType)
         case Actions.Action.RECENT_TRANSACTIONS_FAILED:
             return RecentTxs.recentTxsFailed(state) // XXX: Reflect in UI??
 
+        // Proof/server interactions
+        case Actions.Action.PROOF_RECEIVED_AND_VALID:
+            const proofAction = (action as Actions.IProofReceivedAndValid)
+            return state.addProof(proofAction.tx, proofAction.proof)
+        case Actions.Action.PROOF_RECEIVED_BUT_INVALID:
+            const failAction = (action as Actions.IProofReceivedButInvalid)
+            return state.addProof(failAction.tx, failAction.response)
+        case Actions.Action.PROOF_ERROR:
+            const errorAction = action as Actions.IProofError
+            return state.addProof(errorAction.tx, errorAction.error)
 
         // UI-related actions; see ../types/actions/ui.tsx
         case Actions.Action.ADD_WALLET:
@@ -51,6 +61,8 @@ export const rootReducer = (state: UIState, action: Actions.IActionType)
             return state.addWallet(addAction.username, addAction.address)
         case Actions.Action.REMOVE_WALLET:
             return state.removeWallet((action as Actions.IRemoveWallet).address)
+        case Actions.Action.PROOF_REQUESTED:
+            return state.removeProof((action as Actions.IProofRequested).tx)
     }
     return state
 }

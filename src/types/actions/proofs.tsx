@@ -19,11 +19,11 @@ export const proofReceivedAndValid =
     (tx: Transaction, proof: IValidatedResponse): IProofReceivedAndValid => (
         { tx, type: Action.PROOF_RECEIVED_AND_VALID, proof })
 
-export interface IProofReceivedButInalid extends IProofAction {
+export interface IProofReceivedButInvalid extends IProofAction {
     response: IResponse
 }
 export const proofReceivedButInalid =
-    (tx: Transaction, response: IResponse): IProofReceivedButInalid => (
+    (tx: Transaction, response: IResponse): IProofReceivedButInvalid => (
         { tx, response, type: Action.PROOF_RECEIVED_BUT_INVALID })
 
 export interface IProofError extends IProofAction {

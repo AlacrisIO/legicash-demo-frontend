@@ -2,6 +2,7 @@ import { Address } from './address'
 import { DefaultContractState } from './contract_state'
 import { Guid } from './guid'
 import { List, Map, Record, Set } from './immutable'
+import { IResponse } from './proofs/proof_types'
 import { Transaction } from './tx'
 import { makeWalletWithTxList, Wallet } from './wallet'
 /* tslint:disable:object-literal-sort-keys */
@@ -21,6 +22,8 @@ const defaultValues = {
     txByDstSideChainRevision: Map<number, Guid>(),
     /** Actual store for transactions */
     txByGUID: Map<Guid, Transaction>(),
+    /** Record of latest proofs for each tx, if known */
+    proofByGUID: Map<Guid, IResponse | Error>(),
 }
 
 /** Updates to portions of the state are stored as thunks of this form */
@@ -102,6 +105,13 @@ export class UIState extends Record(defaultValues) {
                         [[tx.from], updateWallet]
                     ])
                 })
+    }
+    /** Remove any proof for given tx, anticipating a new one */
+    public removeProof(tx: Transaction): this {
+        return this.removeIn(['proofByGUID', tx.getGUID()])
+    }
+    public addProof(tx: Transaction, response: IResponse | Error): this {
+        return this.updateIn(['proofByGUID', tx.getGUID()], () => response)
     }
     /**
      * Check whether there's already a localGUID for this based on sidechain 
