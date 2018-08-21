@@ -4,11 +4,11 @@ import * as S from '../../util/serialization'
 import * as M from './proof_marshaling'
 import * as T from './proof_types'
 
-const sixty_four_bit: number = 2 ** 64
+const sixtyFourBit: number = 2 ** 64
 
 /** True iff `s` has the right shape for a skip step. */
 const skipWellFormed = (s: T.ISkip) =>
-    S.uInt(s.bits, 64) && (s.length < sixty_four_bit)
+    S.uInt(s.bits, 64) && (s.length < sixtyFourBit)
 
 /** True iff `b` has the right shape for a left-branch step. */
 const leftBranchWellFormed = (b: T.ILeftBranch): boolean =>
@@ -34,13 +34,13 @@ const stepWellFormed = (s: T.step) =>
     T.isSkip(s) ? skipWellFormed(s as T.ISkip) : branchWellFormed(s as T.IBranch)
 
 /** Digests from intermediate `steps` of proof starting with `initialDigest` */
-const stepsIntermediateDigests =
+export const stepsIntermediateDigests =
     (steps: T.step[], initialDigest: string): string[] => {
         const digests: string[] = []
         let digest = initialDigest
         let height = 0
         for (const cstep of steps) {
-            height += T.isSkip(cstep) ? parseInt((cstep as T.ISkip).length, 16) : 1
+            height += T.isSkip(cstep) ? (cstep as T.ISkip).length : 1
             digest = M.stepDigest(cstep, height, digest)
             digests.push(digest)
         }

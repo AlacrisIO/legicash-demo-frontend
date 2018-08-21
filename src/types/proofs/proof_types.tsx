@@ -1,4 +1,4 @@
-/** Types for merkle proofs from server */
+/** Types for merkle proofs *FROM SERVER* */
 
 /** Represents a skip node in the Merkle tree */
 export interface ISkip {
