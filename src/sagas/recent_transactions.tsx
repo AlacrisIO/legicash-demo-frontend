@@ -2,7 +2,9 @@ import { call, put } from 'redux-saga/effects'
 import { post } from '../server/common'
 import * as Actions from '../types/actions'
 import { Address } from '../types/address'
-import { depositTransaction, makeSideChain, withdrawTransaction } from '../types/chain'
+import {
+    depositTransaction, makeSideChain, withdrawTransaction
+} from '../types/chain'
 import { Transaction } from '../types/tx'
 import { listener } from './common'
 
