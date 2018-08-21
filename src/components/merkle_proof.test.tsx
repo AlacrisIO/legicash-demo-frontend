@@ -1,11 +1,12 @@
 import { mount } from 'enzyme'
 import * as React from 'react'
-import { merkleProof } from '../types/common'
-import { MerkleProofDisplay, MerkleProofWait } from './merkle_proof'
+
+import { exampleProof } from '../types/proofs/proof_protocol.test'
+import { DumbMerkleProofWait, MerkleProofDisplay } from './merkle_proof'
 
 describe('MerkleProofDisplay tests', () => {
     it('Renders a Merkle proof sanely', () => {
-        const m = mount(<MerkleProofDisplay proof={merkleProof} />)
+        const m = mount(<MerkleProofDisplay proof={exampleProof} />)
         const text = m.text()
         expect(text).toContain('Root')
         expect(text).toContain('Leaf')
@@ -20,16 +21,16 @@ describe('MerkleProofDisplay tests', () => {
 describe('MerkleProofWait tests', () => {
     it('Renders a MerkleProof, when provided', () => {
         const proofObject =
-            <MerkleProofWait result={merkleProof} eventInfo="foo" />
+            <DumbMerkleProofWait result={exampleProof} eventInfo="foo" />
         expect(mount(proofObject).find('table.merkleTable').length).toEqual(1)
     })
     it('Renders an error, when provided', () => {
         const proofObject =
-            <MerkleProofWait result={Error("fail!")} eventInfo="f" />
+            <DumbMerkleProofWait result={Error("fail!")} eventInfo="f" />
         expect(mount(proofObject).find('.load-merkle-error').length).toEqual(1)
     })
     it('Renders a spinner, when neither is available', () => {
-        const proofObject = <MerkleProofWait result={null} eventInfo="f" />
+        const proofObject = <DumbMerkleProofWait result={null} eventInfo="f" />
         expect(mount(proofObject).find('.load-merkle').length).toEqual(1)
     })
 })

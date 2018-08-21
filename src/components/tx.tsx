@@ -55,15 +55,17 @@ export const DumbTx = ({ tx, requestProof }: ITx): JSX.Element => {
             <ProofDisplay tx={tx} requestProof={requestProof} />
         </td>
     )
-    return <tr className={txClass(tx)}>
-        {...txVals}
-    </tr>
+    return <tr className={txClass(tx)}>{...txVals}</tr>
 }
 
-export const Tx = ({ tx }: ITx) => connect(
-    (state: UIState) => ({ tx: state.txByGUID.get(tx.getGUID()) }),
-    (dispatch: any) => ({ requestProof: dispatch(proofRequested(tx)) }))(
-        DumbTx)
+export const Tx = ({ tx }: ITx) => {
+    const guid = tx.getGUID()
+    return connect(
+        (state: UIState) => ({ tx: state.txByGUID.get(guid) }),
+        (dispatch: any) =>
+            ({ requestProof: () => dispatch(proofRequested(tx)) })
+    )(DumbTx)
+}
 
 export const txHeader = ({ colOrder }: { colOrder?: headers }) =>
     <tr>{...Object.keys(defaultColumns).map(
