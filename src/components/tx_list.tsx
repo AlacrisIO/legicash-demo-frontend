@@ -6,7 +6,9 @@ export const TxList = ({ txs }: { txs: Transaction[] }) =>
     <table className="txList">
         <thead>{txHeader({})}</thead>
         <tbody>
-            {...txs.map((tx: Transaction, key: number) =>
-                <Tx key={key} tx={tx} />)}
+            {...txs.map((tx: Transaction, key: number): any => {
+                const TxComponent = Tx({ tx })
+                return <TxComponent key={key} />
+            })}
         </tbody>
     </table>

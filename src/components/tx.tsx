@@ -1,6 +1,12 @@
 import * as React from 'react';
+import { connect } from 'react-redux'
 
+import { proofRequested } from '../types/actions/proofs'
+import { UIState } from '../types/state';
 import { defaultValues, Transaction } from '../types/tx'
+
+import { ProofDisplay } from './merkle_proof'
+import { SecondsSince } from './seconds_since'
 
 // XXX: Needs some indication of the direction cross-chain txs go in.
 
@@ -21,29 +27,44 @@ const txClass = (tx: Transaction) => {
 
 type header = keyof (typeof defaultValues)
 type headers = header[]
-const defaultColumns: headers =
-    ['srcSideChainRevision', 'dstSideChainRevision', 'creationDate', 'from', 'to', 'amount', 'validated', 'rejected', 'failureMessage']
 
-// Verify that columns are all keys of transactions
-const t = new Transaction({})
-defaultColumns.map((k: string) => {
-    if (!t.has(k)) { throw Error(`Missing key! ${k}, ${t}`) }
-})
+/* tslint:disable:object-literal-sort-keys */  // Ordered this way in display
+const defaultColumns = {
+    'src num': (tx: Transaction) => tx.srcSideChainRevision,
+    'dst num': (tx: Transaction) => tx.dstSideChainRevision,
+    'seen for': (tx: Transaction) =>
+        tx.creationDate && <SecondsSince time={tx.creationDate} />,
+    'from': (tx: Transaction) => (tx.from && tx.from.toString().slice(0, 10)),
+    'to': (tx: Transaction) => (tx.to && tx.to.toString().slice(0, 10)),
+    'amount': (tx: Transaction) => tx.amount,
+    'validated': (tx: Transaction) =>
+        (tx.validated && 'valid') || (
+            tx.rejected && 'rejected: ' + tx.failureMessage) || 'pending',
+}
 
-const concreteColOrder = (colOrder: headers | undefined, f: (n: header) => JSX.Element
-): JSX.Element[] =>
-    (colOrder ? colOrder : defaultColumns).map((fieldName: header, key: number) =>
-        <td key={key}>{f(fieldName)}</td>)
-
-interface ITx { tx: Transaction; colOrder?: headers }
-
+interface ITx { tx: Transaction, requestProof: () => void }
 /** A row corresponding to a tx. */
-// XXX: Do something prettier with pending Txs. Maybe a spinner...
-export const Tx = ({ tx, colOrder }: ITx) =>
-    <tr className={txClass(tx)}>
-        {...concreteColOrder(colOrder, (k: header) =>
-            <p>{`${(tx.get(k) || '').toString().slice(0, 15)}`}</p>)}
+export const DumbTx = ({ tx, requestProof }: ITx): JSX.Element => {
+    const txVals = []
+    /* tslint:disable:forin */
+    for (const colName in defaultColumns) {
+        txVals.push(<td key={txVals.length}>{defaultColumns[colName](tx)}</td>)
+    }
+    txVals.push(
+        <td key={txVals.length}>
+            <ProofDisplay tx={tx} requestProof={requestProof} />
+        </td>
+    )
+    return <tr className={txClass(tx)}>
+        {...txVals}
     </tr>
+}
+
+export const Tx = ({ tx }: ITx) => connect(
+    (state: UIState) => ({ tx: state.txByGUID.get(tx.getGUID()) }),
+    (dispatch: any) => ({ requestProof: dispatch(proofRequested(tx)) }))(
+        DumbTx)
 
 export const txHeader = ({ colOrder }: { colOrder?: headers }) =>
-    <tr>{...concreteColOrder(colOrder, (n: header) => <b>{n}</b>)}</tr>
+    <tr>{...Object.keys(defaultColumns).map(
+        (h, i) => <td key={i}><b>{h}</b></td>)}</tr>
