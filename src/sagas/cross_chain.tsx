@@ -32,7 +32,8 @@ const serverWithErrorHandling = (address: Address, tx: Transaction) =>
         }
     }
 
-/* See https://gitlab.com/legicash/legicash-facts/blob/endpoints-demo/src/endpoints/endpoints.md#depositwithdrawal-threads */
+/* See
+ * https://gitlab.com/legicash/legicash-facts/blob/endpoints-demo/src/endpoints/endpoints.md#depositwithdrawal-threads */
 function* awaitThread(server: any, threadResponse: IThreadResponse) {
     const threadNumber = readThread(threadResponse as { result: string })
     let delayTimeMS = 1  // Initial delay time before checking
