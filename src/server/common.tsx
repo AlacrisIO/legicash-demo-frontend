@@ -36,5 +36,5 @@ export const readThread = (response: IThreadResponse): number => {
 
 export const pendingResult = { result: "The operation is pending" }
 export const resultPending = (r: IThreadResponse) =>
-    (typeof r.result === "string")
+    r && (typeof r.result === "string")
     && r.result.valueOf() === pendingResult.result.valueOf()
