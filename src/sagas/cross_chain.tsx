@@ -74,7 +74,6 @@ const crossChainTx = (
         const failMsg = (msg: string) =>
             failure(action.tx.from, action.tx, Error(msg))
         if (resultPending(result)) { return yield failMsg("Timed out!") }
-        log.push([result, action])
         if (result === undefined) { return yield failMsg("Server failure!") }
         // Update the transaction with the new information
         const hash = result.main_chain_confirmation.transaction_hash
