@@ -57,15 +57,6 @@ const updateHash = (rawHash: string) => {
     }
 }
 
-
-declare global {
-    /* tslint:disable:interface-name */
-    /* tslint:disable:class-name */
-    interface window { n: any; }
-}
-
-const log = (window as any).n = (window as any).n || []
-
 /** Return a generator for a cross-chain server interaction */
 const crossChainTx = (
     /** The endpoint to hit on the server */
