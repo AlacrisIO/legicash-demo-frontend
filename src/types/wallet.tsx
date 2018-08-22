@@ -13,11 +13,16 @@ export const keyFn = (tx: Transaction): sortKey =>
     [tx.srcSideChainRevision || tx.dstSideChainRevision || -1,
     (tx.creationDate as Date).getTime()]
 
+export const isKey = (o: any): boolean =>
+    // Check that o is an array with two numeric values
+    o && (o.constructor === Array) && (o.length === 2) && !(o.some(isNaN))
+
 /** Compare to `sortKey`s. -1 if k1 < k2, 1 if k1 > k2, 0 if equal */
-export const cmp = (k1: sortKey, k2: sortKey): (-1 | 0 | 1) => {
+export const cmp = (k1: sortKey, k2: sortKey): (-1 | 0 | 1 | undefined) => {
     // [2, 1534271552822] > [131, 1534271552850], so lexicographic cmp does
     // not work as you wound expect. (It converts the elements to strings,
     // THEN compares lexicographically!!)
+    if ((!isKey(k1)) || (!isKey(k2))) { return undefined }
     if (k1[0] < k2[0]) { return -1 }
     if (k1[0] > k2[0]) { return 1 }
     if (k1[1] < k2[1]) { return -1 }
@@ -73,9 +78,6 @@ export class Wallet extends Record(defaultValues) {
     }
     public rejectTx(tx: Transaction): this {
         if (!this.knownTx(tx)) {
-            // XXX: Deal with this more gracefully
-            // XXX: This is happening when the server interaction fails. Find
-            // out why. The GUID does seem to be in txs...
             throw Error(`Server rejected a tx we haven't seen! ${tx}
 known tx guids: ${this.txs.elements}`)
         }  // OK, undo the balances

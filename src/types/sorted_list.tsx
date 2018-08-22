@@ -1,7 +1,7 @@
 import * as Immutable from 'immutable'
 import { is, List, Map, Record } from './immutable'
 
-type comparisonResults = -1 | 0 | 1
+type comparisonResults = (-1 | 0 | 1 | undefined)
 
 export interface ISortedList<T, K> {
     elements: List<T>;
@@ -12,7 +12,7 @@ export interface ISortedList<T, K> {
 }
 
 const defaultValues = {
-    cmp: (x: any, y: any) => x < y ? -1 : (x > y ? 1 : 0),
+    cmp: (x: any, y: any): comparisonResults => x < y ? -1 : (x > y ? 1 : 0),
     elements: List(),
     keyFn: (x: any) => x,  // XXX: This will break things.
     keys: List(),
@@ -30,7 +30,8 @@ export class SortedList<T, K> extends Record(defaultValues) implements ISortedLi
         const keyMemo = Map<T, K>().fromPairs(
             unsortedElements.map((e: T): [T, K] => [e, props.keyFn(e)]).toArray())
         const elements = List(unsortedElements.sortBy(
-            (e: T) => keyMemo.get(e) as K, props.cmp))
+            (e: T) => keyMemo.get(e) as K,
+            (k1, k2) => (props.cmp || defaultValues.cmp)(k1, k2) || 0))
         const keys = List(elements.map((e: T) => keyMemo.get(e) as K))
         const nProps = {
             ...props as ISortedList<T, K>, elements, keys, lSize: keys.size
@@ -65,7 +66,7 @@ export class SortedList<T, K> extends Record(defaultValues) implements ISortedLi
     public hasElt(e: T, key?: K): boolean {
         key = (key === undefined) ? this.keyFn(e) : key
         const insertIdx = this.binarySearch(key)
-        return ((is(key, this.keys.get(insertIdx)))
+        return ((this.cmp(key, this.keys.get(insertIdx)) === 0)
             && (is(this.elements.get(insertIdx), e)))
     }
     public map<V>(f: (e: T) => V): Immutable.Iterable<number, V> {
@@ -87,8 +88,8 @@ export class SortedList<T, K> extends Record(defaultValues) implements ISortedLi
 searching for key ${key} in list of size ${this.keys.size} : ${this.keys}`)
             }
             const cmp = this.cmp(key, midpointKey)
-            if (cmp > 0) { m = midpoint + 1 }
-            else if (cmp < 0) { n = midpoint - 1 }
+            if ((cmp || 0) > 0) { m = midpoint + 1 }
+            else if ((cmp || 0) < 0) { n = midpoint - 1 }
             else { return midpoint }  // Break out of loop with found idx
         }
         return m  // Not found, so give index where should be inserted
