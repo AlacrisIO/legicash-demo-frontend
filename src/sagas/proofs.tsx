@@ -10,6 +10,10 @@ export function* proof(action: Actions.IProofRequested) {
     const id = sidechainIdx(action.tx)
     try {
         const r = yield call(get, 'proof', { 'tx-revision': id })
+        if (r === undefined) {
+            return yield put(
+                Actions.proofError(action.tx, Error("Server failure!")))
+        }
         if (r.steps && r.leaf) {
             // XXX: Constructing a "valid" proof without validation!!!
             const validationSteps = stepsIntermediateDigests(r.steps, r.leaf)

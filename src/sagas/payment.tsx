@@ -12,6 +12,10 @@ export function* payment(action: Actions.IPaymentInitiated) {
             recipient: `${tx.to}`, sender: `${tx.from}`,
         }
         const response = yield call(post, 'payment', body)
+        if (response === undefined) {
+            return yield put(Actions.paymentFailed(tx.set('rejected', true),
+            Error("Server failure!")))
+        }
         if (response.amount_transferred !== tx.amount) {
             throw Error(`Server sent  a different amount than we requested!
 It sent ${response.amount_transferred}, but we requested ${tx.amount} in ${tx}`)

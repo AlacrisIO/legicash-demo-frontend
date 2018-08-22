@@ -67,6 +67,10 @@ export function* recentTxs(action: Actions.IRecentTxsInitiated) {
     const address = action.address.toString()
     try {
         const response = yield call(post, 'recent_transactions', { address })
+        if (response === undefined) {
+            return yield put(Actions.recentTxsFailed(
+                action.address, Error("Server failure!")))
+        }
         return yield put(Actions.recentTxsReceived(
             action.address, response.map(txFromResponse).filter(
                 (t: Transaction): boolean => (t.amount as number) > 0)))
