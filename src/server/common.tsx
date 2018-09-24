@@ -22,16 +22,18 @@ export const get = (endpoint: string, params: object): Promise<Response> => {
         .then(r => r.json())
 }
 
-export interface IThreadResponse { result: string | object }
+export interface IThreadResponse { result: { thread: number } | string }
+
 /**
  * Return the thread number reported by this thread response.
  * https://gitlab.com/legicash/legicash-facts/blob/endpoints-demo/src/endpoints/endpoints.md#depositwithdrawal-threads
  */
 export const readThread = (response: IThreadResponse): number => {
-    // response.result should be of the form "api/thread?id=nn" 
-    const assignSplit = (response.result as string).split('=')
-    if (assignSplit.length !== 2) { throw Error(`Bad thread response! ${response}`) }
-    return parseInt(assignSplit[1], 10)
+    // response.result should be of the form {"thread":nn }
+    if (typeof response.result === "string" || !response.result || !response.result.thread) {
+        throw Error(`Bad thread response ${JSON.stringify(response)}`)
+    }
+    return response.result.thread
 }
 
 export const pendingResult = { result: "The operation is pending" }

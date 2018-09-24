@@ -3,9 +3,13 @@ import { addresses } from './ethereum_addresses'
 
 const serverRunning = true
 
-export const validateBalance = (resp: any) =>
-    /0x[0-9A-Fa-f]{40}/.exec(resp.address) && (resp.balance >= 0)
-    && (resp.user_name in addresses)
+export const validateBalance = (resp: any) => {
+    if (!(parseInt(resp.balance, 16) >= 0
+        && parseInt(resp.account_revision, 16) >= 0)) {
+        throw Error(`Bad balance response: ${resp}`)
+    }
+    return true
+}
 
 describe('server/common tests', () => {
     if (!serverRunning) {
