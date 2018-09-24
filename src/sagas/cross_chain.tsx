@@ -57,6 +57,18 @@ const updateHash = (rawHash: string) => {
     }
 }
 
+type hex_string = string /** 0x-prefix hex string */
+
+interface ICrossChainServerResponse {
+    side_chain_account_state: { balance: hex_string, account_revision: hex_string },
+    side_chain_tx_revision: hex_string,
+    main_chain_confirmation: hex_string /* XXX: FIX!!! */
+}
+
+/** Update logic for a transaction revision number. */
+type revisionNumber = ((r: ICrossChainServerResponse) =>
+    ((_: number | undefined) => number | undefined))
+
 /** Return a generator for a cross-chain server interaction */
 const crossChainTx = (
     /** The endpoint to hit on the server */
