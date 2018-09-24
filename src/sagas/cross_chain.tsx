@@ -25,10 +25,14 @@ import { Transaction } from '../types/tx'
 import { listener } from './common'
 
 /** Hit server with given args, and report deposit failure on exception */
-const serverWithErrorHandling = (address: Address, tx: Transaction) =>
+const serverWithErrorHandling = (address: Address, tx: Transaction,
+    failure: Actions.crossChainFailureMessage) =>
     function* (...args: any[]) {
-        try { return yield (call as any)(...args) } catch (e) {
-            yield put(Actions.depositFailed(address, tx, e))
+        try {
+            return yield (call as any)(...args)
+        } catch (e) {
+            yield put(failure(address, tx, e))
+            return e
         }
     }
 
@@ -80,7 +84,7 @@ const crossChainTx = (
     function* (action: Actions.ICrossChainInitiate) {
         const address = action.tx.from.toString()
         const amount = action.tx.amount
-        const server = serverWithErrorHandling(action.tx.from, action.tx)
+        const server = serverWithErrorHandling(action.tx.from, action.tx, failure)
         const threadResponse = yield* server(post, endpoint, { address, amount })
         const result: any = yield* awaitThread(server, threadResponse)
         const failMsg = (msg: string) =>
