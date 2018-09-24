@@ -80,35 +80,61 @@ const crossChainTx = (
     /** Constructor for  message to send on success */
     success: Actions.crossChainValidationMessage,
     /** Constructor for message to send on failure. */
-    failure: Actions.crossChainFailureMessage) =>
+    failure: Actions.crossChainFailureMessage,
+    /** Computes transaction source revision number given server response */
+    srcRev: revisionNumber,
+    /** Computes transaction destination revision number given server response */
+    dstRev: revisionNumber
+) =>
     function* (action: Actions.ICrossChainInitiate) {
         const address = action.tx.from.toString()
-        const amount = action.tx.amount
+        const amount = "0x" + (action.tx.amount as any).toString(16)
         const server = serverWithErrorHandling(action.tx.from, action.tx, failure)
         const threadResponse = yield* server(post, endpoint, { address, amount })
-        const result: any = yield* awaitThread(server, threadResponse)
+        if (!threadResponse) { throw Error("Server returned null/undefined value!") }
         const failMsg = (msg: string) =>
             failure(action.tx.from, action.tx, Error(msg))
-        if (resultPending(result)) { return yield failMsg("Timed out!") }
-        if (result === undefined) { return yield failMsg("Server failure!") }
+        if (threadResponse.error) { return yield failMsg(threadResponse.error) }
+        const result: ICrossChainServerResponse | IThreadResponse =
+            yield* awaitThread(server, threadResponse)
+        if (resultPending(result as IThreadResponse)) {
+            return yield failMsg("Timed out!")
+        }
+        if ((result as ICrossChainServerResponse).main_chain_confirmation
+            === undefined) {
+            return yield failMsg(`Server failure! Response: ${JSON.stringify(result)}`)
+        }
+        const response = result as ICrossChainServerResponse
         // Update the transaction with the new information
-        const hash = result.main_chain_confirmation.transaction_hash
+        const hash = (response.main_chain_confirmation as any).transaction_hash
         const newTx = action.tx.multiUpdateIn([
             [['validated'], () => true],
             [['hash'], updateHash(hash)],
+            [['srcSideChainRevision'], srcRev(response)],
+            [['dstSideChainRevision'], dstRev(response)],
         ])
-        yield put(success(
-            action.tx.from, result.user_account_state.balance, action.tx, newTx))
+        const side_chain_account_state = response.side_chain_account_state
+        const balance = side_chain_account_state.balance
+        yield put(success(action.tx.from, parseInt(balance, 16), action.tx, newTx))
     }
 
+const parseSideChain = (r: ICrossChainServerResponse) =>
+    (_: number | undefined) => parseInt(r.side_chain_tx_revision, 16)
+
+const dummyMainChain = (r: ICrossChainServerResponse) =>
+    (_: number | undefined) => undefined
+
 /** Generator for deposit server interaction */
-export const makeDeposit = crossChainTx('deposit', Actions.depositValidated,
-    Actions.depositFailed)
+export const makeDeposit = crossChainTx(
+    'deposit', Actions.depositValidated, Actions.depositFailed,
+    dummyMainChain, parseSideChain
+)
 
 export const depositListener = listener(Actions.Action.MAKE_DEPOSIT, makeDeposit)
 
 export const makeWithdrawal = crossChainTx(
-    'withdrawal', Actions.withdrawalValidated, Actions.withdrawalFailed)
+    'withdrawal', Actions.withdrawalValidated, Actions.withdrawalFailed,
+    parseSideChain, dummyMainChain)
 
 export const withdrawalListener = listener(
     Actions.Action.MAKE_WITHDRAWAL, makeWithdrawal)
