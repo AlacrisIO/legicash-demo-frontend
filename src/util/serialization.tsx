@@ -82,8 +82,6 @@ export const numberToHexString = (n: number): string => '0x' + n.toString(16)
 const logHashInput = (arrays: Uint8Array[]) => {
     const asHex = arrays.map(toHexString)
     asHex.splice(0, 0, '0x')
-    /* tslint:disable:no-console */
-    console.log('hashing', asHex.join(''))
 }
 
 export const keccackHashArrays = (arrays: Uint8Array[]): string => {
