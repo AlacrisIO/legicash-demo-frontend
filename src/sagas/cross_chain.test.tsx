@@ -79,6 +79,8 @@ result', () => {
 
 
     if (serverRunning) {
+        /* TODO: Hit the deposit endpoint multiple times. This would be a
+         * regression test */
         describe('Deposit saga test with server interaction', () => {
             it('Hits the deposit endpoint, and returns a DEPOSIT_VALIDATED action',
                 () => {
