@@ -99,10 +99,12 @@ result', () => {
                                 /* tslint:disable:no-console */
                             } else {
                                 console.log(`Deposit test failed! \
-${JSON.stringify(action)}`
+${JSON.stringify(action)}`)
                             }
                         })
                     // XXX: More validation, here?
                 })
         })
     }
+}
+)
