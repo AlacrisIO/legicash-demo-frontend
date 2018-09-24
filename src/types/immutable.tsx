@@ -95,6 +95,7 @@ function setProp(prototype: object, name: string) {
     try { _setProp(prototype, name) } catch (error) {
         /* tslint:disable:no-console */
         console.log(`Failed to set prop ${name}: ${error}`)
+        /* XXX: Surely there's something more robust to do, here! */
     }
 }
 
