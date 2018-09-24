@@ -23,23 +23,28 @@ const depositMocks = {
         switch (effect.fn) {
             case post:
                 if (!is(fromJS(effect.args), fromJS(
-                    ["deposit", { address: address.toString(), amount }]))) {
+                    ["deposit", {
+                        address: address.toString(),
+                        amount: '0x' + amount.toString(16)
+                    }]))) {
                     // Throwing has no effect, here!
                     /* tslint:disable:no-console */
                     console.log(`Bad post call! ${JSON.stringify(effect)}`)
                 }
-                return { result: "api/thread?id=5" }
+                return {
+                    result: { thread: 5 }
+                }
             case get:
                 return {
                     /* tslint:disable:object-literal-sort-keys */
-                    user_account_state: {
-                        address, user_name: "Alice", balance
+                    side_chain_account_state: {
+                        balance: "0x32", account_revision: "0x1"
                     },
-                    side_chain_tx_revision: 256,
+                    side_chain_tx_revision: "0x100",
                     main_chain_confirmation: {
                         transaction_hash: hash.toRawString(),
-                        transaction_index: 651,
-                        block_number: 50,
+                        transaction_index: "0x50",
+                        block_number: "0x50",
                         block_hash: hash.toRawString()
                     }
                 }
@@ -62,7 +67,11 @@ result', () => {
                     const action = put.action
                     expect(action.newBalance).toEqual(balance)
                     expect(action.serverResponse).toEqual(
-                        tx.set('validated', true).set('hash', hash))
+                        tx
+                            .set('validated', true)
+                            .set('hash', hash)
+                            .set('srcSideChainRevision', undefined)
+                            .set('dstSideChainRevision', 256))
                     expect(action.tx).toBe(tx)
                     expect(action.type).toEqual(Actions.Action.DEPOSIT_VALIDATED)
                 })
