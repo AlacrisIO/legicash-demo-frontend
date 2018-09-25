@@ -9,13 +9,13 @@ const ns = s.addTx(aliceToTrent)
 const emptyMap = Map<Guid, Transaction>({})
 const newLocalGUID = new Guid()
 const firstExpected = emptyMap.set(
-    aliceToTrent.localGUID as Guid, aliceToTrent)
+    aliceToTrent.getGUID(), aliceToTrent)
 const nt = aliceToTrent.set('validated', true).set('localGUID', newLocalGUID)
-const nns = ns.addTx(nt)
+const nns = ns.updateTx(aliceToTrent.getGUID() as Guid, nt)
 // Should correct to previous GUID, based on side-chain data, but with the new
 // Tx data.
-const secondExpected = emptyMap.set(aliceToTrent.localGUID as Guid,
-    nt.set('localGUID', aliceToTrent.localGUID))
+const secondExpected = emptyMap.set(aliceToTrent.getGUID() as Guid,
+    nt.set('localGUID', aliceToTrent.getGUID()))
 
 describe('UIState tests', () => {
     it('Adds an unknown tx', () => { expect(ns.txByGUID).toEqual(firstExpected) })

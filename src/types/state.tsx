@@ -64,9 +64,6 @@ export class UIState extends Record(defaultValues) {
     /** State with tx added */
     public addTx(tx: Transaction): this {
         if (tx === undefined) { throw Error("Attempt to add undefined tx") }
-        const localGUID = this.checkLocalGUID(tx)
-        if (localGUID) { tx = tx.set('localGUID', localGUID) }
-        // Add tx to GUID map, ensuring compatibility with any extant tx
         const updateTx = (otx: Transaction | undefined): Transaction => {
             // XXX: Fail more gracefully on contradiction? Some kind of warning?
             if (otx !== undefined) { tx.assertSameTransaction(otx) }
@@ -92,6 +89,15 @@ export class UIState extends Record(defaultValues) {
         updates.push(...this.sideChainRevisions(tx)) // Update sidechain indices
         return this.multiUpdateIn(updates)  // Actually do the updates
     }
+    /** State with the tx at `localGUID` updated with the info in `tx` */
+    public updateTx(localGUID: Guid, tx: Transaction): this {
+        if (tx === undefined) { throw Error("Attempt to update undefined tx") }
+        const oldTx = this.txByGUID.get(localGUID)
+        tx.assertNoErasure(oldTx)
+        tx = tx.set('localGUID', localGUID)  // Store this tx info under the old location
+        return this.setIn(['txByGUID', localGUID], tx)
+            .multiUpdateIn(this.sideChainRevisions(tx))
+    }
     /** State with tx marked as rejected */
     public rejectTx(tx: Transaction): this {
         return this
@@ -113,27 +119,6 @@ export class UIState extends Record(defaultValues) {
     public addProof(tx: Transaction, response: IResponse | Error): this {
         return this.updateIn(['proofByGUID', tx.getGUID()], () => response)
     }
-    /**
-     * Check whether there's already a localGUID for this based on sidechain 
-     * info, and use that if so. NB: assumes strict monotonicity of
-     * sidechain revision numbers, which is true as of this writing, per F.
-     */
-    private checkLocalGUID(tx: Transaction): Guid | undefined {
-        let localGUID
-        if (tx.srcSideChainRevision !== undefined) {
-            localGUID = this.txBySrcSideChainRevision.get(
-                tx.srcSideChainRevision)
-        }
-        if (tx.dstSideChainRevision !== undefined) {
-            const dstGUID = this.txByDstSideChainRevision.get(
-                tx.dstSideChainRevision)
-            if (localGUID && (!localGUID.equals(dstGUID))) {
-                throw Error('Incompatible src/dst GUIDs!')
-            }
-            localGUID = dstGUID
-        }
-        return localGUID
-    }
     /** Calculate updates for the sidechain revision-index indices */
     private sideChainRevisions(tx: Transaction): updatesType {
         const updateSCRevision = (g: Guid | undefined): Guid => {
@@ -145,7 +130,7 @@ searching for ${tx}!`)
                 }
                 // Here we are using the fact that the GUID is updated in `addTx`,'
                 // when the tx side-chain revisions have been found in the state.
-                if (g) { oldTx.assertSameTransaction(tx) }
+                if (g) { oldTx.assertNoErasure(tx) }
             }
             return tx.getGUID()
         }

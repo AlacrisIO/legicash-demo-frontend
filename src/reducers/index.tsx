@@ -15,7 +15,7 @@ export const rootReducer = (state: UIState, action: Actions.IActionType)
         case Actions.Action.MAKE_DEPOSIT:
             return state.addTx((action as Actions.IMakeDeposit).tx)
         case Actions.Action.DEPOSIT_VALIDATED:
-            return Crosschain.addTx(state, action as Actions.ICrossChainValidated)
+            return Crosschain.updateTx(state, action as Actions.ICrossChainValidated)
         case Actions.Action.DEPOSIT_FAILED:
             return Crosschain.rejectTx(state, action as Actions.ICrossChainFailed)
 
@@ -23,7 +23,7 @@ export const rootReducer = (state: UIState, action: Actions.IActionType)
         case Actions.Action.MAKE_WITHDRAWAL:
             return state.addTx((action as Actions.IMakeWithdrawal).tx)
         case Actions.Action.WITHDRAWAL_VALIDATED:
-            return Crosschain.addTx(state, action as Actions.ICrossChainValidated)
+            return Crosschain.updateTx(state, action as Actions.ICrossChainValidated)
         case Actions.Action.WITHDRAWAL_FAILED:
             return Crosschain.rejectTx(state, action as Actions.ICrossChainFailed)
 

@@ -155,4 +155,15 @@ ${this.toString()} vs ${o.toString()}:
         }
         return this.localGUID
     }
+
+    public assertNoErasure(oldTx: Transaction) {
+        if ((this.hash === undefined && oldTx.hash !== undefined)
+            || (this.rejected === undefined && oldTx.rejected !== undefined)
+            || (this.validated === undefined && oldTx.validated !== undefined)
+            || (this.srcSideChainRevision === undefined && oldTx.srcSideChainRevision !== undefined)
+            || (this.dstSideChainRevision === undefined && oldTx.dstSideChainRevision !== undefined)) {
+            throw Error(`Attempt to erase information in ${oldTx} with ${this}`)
+        }
+    }
+
 }
