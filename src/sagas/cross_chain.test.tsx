@@ -8,9 +8,8 @@ import * as Actions from '../types/actions'
 import { Address } from '../types/address'
 import { HashValue } from '../types/hash'
 
+import { serverRunning } from './common.test'
 import { makeDeposit } from './cross_chain'
-
-const serverRunning = true
 
 const address = new Address(addresses.Alice)
 const amount = 5
