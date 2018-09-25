@@ -1,14 +1,14 @@
 import { fromJS, is } from 'immutable'
 import { expectSaga } from 'redux-saga-test-plan'
 
-import { makeDeposit } from '../sagas/cross_chain'
 import { get, post } from '../server/common'
 import { addresses } from '../server/ethereum_addresses'
 
 import * as Actions from '../types/actions'
-// import { depositFailed } from '../types/actions';
 import { Address } from '../types/address'
 import { HashValue } from '../types/hash'
+
+import { makeDeposit } from './cross_chain'
 
 const serverRunning = true
 
