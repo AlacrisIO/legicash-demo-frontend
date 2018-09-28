@@ -9,7 +9,7 @@ export const addTxs = (state: UIState, txs: Transaction[]): UIState => {
         if (tx === undefined) {
             throw Error(`Undefined tx at ${numTxs}th position of ${txs}`)
         }
-        state = state.addTx(tx)
+        state = state.addTx(tx, false)  // Add to state without updating balances
         numTxs += 1
     }
     return state

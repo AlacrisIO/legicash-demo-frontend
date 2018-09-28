@@ -61,7 +61,8 @@ export class Wallet extends Record(defaultValues) {
         // XXX: Check that all transactions belong to `address`?
     }
     /** Wallet with this tx added */
-    public addTx(tx: Transaction, txs: Map<Guid, Transaction>): this {
+    public addTx(tx: Transaction, txs: Map<Guid, Transaction>,
+        updateBalance: boolean = true): this {
         if (tx === undefined) {
             throw Error(`Attempt to add undefined Tx to ${this}!`)
         }
@@ -69,7 +70,7 @@ export class Wallet extends Record(defaultValues) {
         const updates: Array<[any[], (a: any) => any]> = [
             [['txs'], this.updateTxs(tx.localGUID as Guid, tx)]
         ]
-        if (!this.knownTx(tx)) {
+        if ((!this.knownTx(tx)) && (updateBalance)) {
             updates.push(...this.balanceUpdates(tx, this.updateBalance.bind(this)))
         }
         const rv = this.multiUpdateIn(updates)

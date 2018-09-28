@@ -62,7 +62,7 @@ export class UIState extends Record(defaultValues) {
         ])
     }
     /** State with tx added */
-    public addTx(tx: Transaction): this {
+    public addTx(tx: Transaction, updateBalance: boolean = true): this {
         if (tx === undefined) { throw Error("Attempt to add undefined tx") }
         const updateTx = (otx: Transaction | undefined): Transaction => {
             // XXX: Fail more gracefully on contradiction? Some kind of warning?
@@ -72,7 +72,8 @@ export class UIState extends Record(defaultValues) {
         const updateGUID = (s: Set<Guid> | undefined): Set<Guid> =>
             (s || Set()).add(tx.getGUID())
         const updateWallet = (a: Address) => (w: Wallet | undefined) => {
-            const rv = (w || new Wallet({ address: a })).addTx(tx, this.txByGUID)
+            const rv = (w || new Wallet({ address: a })).addTx(
+                tx, this.txByGUID, updateBalance)
             return rv
         }
         const updates: updatesType = [
