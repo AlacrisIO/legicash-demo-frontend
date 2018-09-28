@@ -31,7 +31,11 @@ export const rootReducer = (state: UIState, action: Actions.IActionType)
         case Actions.Action.PAYMENT_INITIATED:
             return state.addTx((action as Actions.IPaymentAction).tx)
         case Actions.Action.PAYMENT_VALIDATED:
-            return state.addTx((action as Actions.IPaymentValidated).tx)
+            const { tx, fromBalance, toBalance } = action as Actions.IPaymentValidated
+            return state.updateTx(tx.getGUID(), tx)
+                // XXX: Validate client-reported balances here??
+                .setIn(['accounts', tx.from, 'offchainBalance'], fromBalance)
+                .setIn(['accounts', tx.to, 'offchainBalance'], toBalance)
         case Actions.Action.PAYMENT_FAILED:
             return state.rejectTx((action as Actions.IPaymentFailed).tx)
 
