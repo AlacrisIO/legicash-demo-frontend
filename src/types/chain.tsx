@@ -19,7 +19,7 @@ export enum Chain {
 /**
  * Return the adjustment to `chain`'s `address` balance by `tx`
  * (-1 for from `address`, 0 for unrelated, +1 for to `address`) * `tx.amount`
- * 
+ *
  */
 export const balanceUpdate = (
     tx: Transaction, address: Address, chain: Chain): number => {
