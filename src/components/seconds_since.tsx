@@ -4,22 +4,29 @@ import * as React from 'react'
 
 export interface ISecondsSince { time: Date }
 
+/** Renders the seconds since the date provided in the `time` prop. */
 export class SecondsSince extends React.Component<ISecondsSince, {}> {
     public interval: any
     public state: { seconds: number }
+
     constructor(props: ISecondsSince) {
         super(props)
-        this.state = { seconds: (new Date).getTime() - props.time.getTime() }
+        this.state = { seconds: this.secondsSinceTimeProp() }
     }
 
-    public tick() {
+    public secondsSinceTimeProp() {
+        const msSince = (new Date).getTime() - this.props.time.getTime()
+        return Math.round(msSince / 1000)
+    }
+
+    public recordSecondsSinceTimeProp() {
         this.setState((prevState: { seconds: number }) => ({
-            seconds: prevState.seconds + 1
+            seconds: this.secondsSinceTimeProp()
         }))
     }
 
     public componentDidMount() {
-        this.interval = setInterval(() => this.tick(), 1000);
+        this.interval = setInterval(() => this.recordSecondsSinceTimeProp(), 1000);
     }
 
     public componentWillUnmount() {
