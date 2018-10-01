@@ -46,6 +46,7 @@ const defaultValues = {
         elements: List(),
         keyFn: (x: any) => { throw Error('Set a real key function!') }
     }),
+    txSet: Set<Guid>(),
     /** Human-readable username for this account */
     username: ''
 }
@@ -66,9 +67,11 @@ export class Wallet extends Record(defaultValues) {
         if (tx === undefined) {
             throw Error(`Attempt to add undefined Tx to ${this}!`)
         }
-        // To be applied in a big batch at the end
+        if (this.knownTx(tx)) { return this }  // No need to update...
+        // to be applied in a big batch at the end
         const updates: Array<[any[], (a: any) => any]> = [
-            [['txs'], this.updateTxs(tx.localGUID as Guid, tx)]
+            [['txs'], this.updateTxs(tx.localGUID as Guid, tx)],
+            [['txSet'], (s: Set<Guid>) => s.add(tx.getGUID())]
         ]
         if ((!this.knownTx(tx)) && (updateBalance)) {
             updates.push(...this.balanceUpdates(tx, this.updateBalance.bind(this)))
@@ -83,13 +86,15 @@ export class Wallet extends Record(defaultValues) {
 known tx guids: ${this.txs.elements}`)
         }  // OK, undo the balances
         const updates = this.balanceUpdates(tx, this.undoBalance.bind(this))
+        updates.push([['txSet'], (s: Set<Guid>) => s.remove(tx.getGUID())])
         const rv = this.multiUpdateIn(updates)
         // XXX: Provide a means to remove rejected Txs from the display?
         rv.checkBalances()
         return rv
     }
     private knownTx(tx: Transaction): boolean {
-        return this.txs.hasElt(tx.localGUID as Guid, keyFn(tx))
+        return this.txs.hasElt(tx.localGUID as Guid, keyFn(tx)) ||
+            this.txSet.has(tx.getGUID())
     }
 
     /** Function for updating the tx list with the given txID. */
