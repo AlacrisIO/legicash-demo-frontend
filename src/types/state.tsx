@@ -65,6 +65,24 @@ export class UIState extends Record(defaultValues) {
     /** State with tx added */
     public addTx(tx: Transaction, updateBalance: boolean = true): this {
         if (tx === undefined) { throw Error("Attempt to add undefined tx") }
+        /* tslint:disable:no-console */
+        console.log(tx.getGUID())
+        if (tx.dstSideChainRevision !== undefined &&
+            this.txByDstSideChainRevision.has(tx.dstSideChainRevision)) {
+            const oldGUID = this.txByDstSideChainRevision.get(
+                tx.dstSideChainRevision)
+            tx = tx.set('localGUID', oldGUID)
+            tx.assertSameTransaction(this.txByGUID.get(oldGUID))
+        }
+        if (tx.srcSideChainRevision !== undefined &&
+            this.txBySrcSideChainRevision.has(tx.srcSideChainRevision)) {
+            const oldGUID = this.txBySrcSideChainRevision.get(
+                tx.srcSideChainRevision)
+            tx = tx.set('localGUID', oldGUID)
+            tx.assertSameTransaction(this.txByGUID.get(oldGUID))
+        }
+        /* tslint:disable:no-console */
+        console.log(tx.getGUID())
         const updateTx = (otx: Transaction | undefined): Transaction => {
             // XXX: Fail more gracefully on contradiction? Some kind of warning?
             if (otx !== undefined) { tx.assertSameTransaction(otx) }
