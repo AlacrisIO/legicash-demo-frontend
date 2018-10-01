@@ -1,3 +1,4 @@
+import * as Actions from './actions'
 import { Address } from './address'
 import { DefaultContractState } from './contract_state'
 import { Guid } from './guid'
@@ -98,6 +99,19 @@ export class UIState extends Record(defaultValues) {
         tx = tx.set('localGUID', localGUID)  // Store this tx info under the old location
         return this.setIn(['txByGUID', localGUID], tx)
             .multiUpdateIn(this.sideChainRevisions(tx))
+    }
+    /* State with new balances for displayed wallets */
+    public updateBalances(balances: Actions.IBalances) {
+        const updates: updatesType = []  // Update for each observed new balance
+        Object.keys(balances).forEach((address: string) => {
+            const asAddress = new Address(address)
+            if(this.displayedAccountsSet.has(asAddress)) {
+                /* This wallet is displayed, so update its balance */
+                updates.push([['accounts', asAddress, 'offchainBalance'],
+                              (_) => balances[address].balance])
+            }
+        })
+        return this.multiUpdateIn(updates)
     }
     /** State with tx marked as rejected */
     public rejectTx(tx: Transaction): this {

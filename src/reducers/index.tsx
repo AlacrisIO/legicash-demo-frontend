@@ -39,6 +39,11 @@ export const rootReducer = (state: UIState, action: Actions.IActionType)
         case Actions.Action.PAYMENT_FAILED:
             return state.rejectTx((action as Actions.IPaymentFailed).tx)
 
+        // Facilitator-state-related actions
+        case Actions.Action.BALANCES_OBSERVED:
+            return state.updateBalances(
+                (action as Actions.IBalancesObserved).balances)
+
         // Transaction query-related actions
         case Actions.Action.RECENT_TRANSACTIONS_INITIATED:
             return state  // XXX: Reflect this in the UI, somehow?

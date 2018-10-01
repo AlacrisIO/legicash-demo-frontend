@@ -18,6 +18,9 @@ export enum Action {
     PAYMENT_VALIDATED,
     PAYMENT_FAILED,
 
+    /* Actions related to querying the facalitator state */
+    BALANCES_OBSERVED,  // Response from `balances` API endpoint.
+
     RECENT_TRANSACTIONS_INITIATED,  // Request for recent txs
     RECENT_TRANSACTIONS_RECEIVED,  // Request for recent txs
     RECENT_TRANSACTIONS_FAILED,  // Request for recent txs
@@ -30,6 +33,7 @@ export enum Action {
     /* UI actions */
     ADD_WALLET, // Add this address to the list of displayed wallets
     REMOVE_WALLET,  // Remove this address from the list of displayed wallets.
+
 }
 
 /** Characteristics of all action types */
