@@ -19,13 +19,12 @@ export const makePayment =
         payment(makeSideChain(new Transaction({ to, from, amount })))
 
 export interface IPaymentValidated extends IPaymentAction {
-    fromBalance: number
-    toBalance: number
+
 }
 export const paymentValidated =
-    (tx: Transaction, fromBalance: number, toBalance: number) => {
+    (tx: Transaction) => {
         if ((!tx.validated) || tx.rejected) { throw Error(`Invalid payment! ${tx}`) }
-        return { fromBalance, toBalance, tx, type: Action.PAYMENT_VALIDATED }
+        return { tx, type: Action.PAYMENT_VALIDATED }
     }
 
 export interface IPaymentFailed extends IPaymentAction {
