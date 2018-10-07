@@ -119,10 +119,10 @@ export class UIState extends Record(defaultValues) {
         const updates: updatesType = []  // Update for each observed new balance
         Object.keys(balances).forEach((address: string) => {
             const asAddress = new Address(address)
-            if(this.displayedAccountsSet.has(asAddress)) {
+            if (this.displayedAccountsSet.has(asAddress)) {
                 /* This wallet is displayed, so update its balance */
                 updates.push([['accounts', asAddress, 'offchainBalance'],
-                              (_) => balances[address].balance])
+                (_) => balances[address].balance])
             }
         })
         return this.multiUpdateIn(updates)
