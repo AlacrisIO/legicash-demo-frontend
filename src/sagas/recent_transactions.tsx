@@ -51,9 +51,12 @@ ${payload.operation}`)
     const address = new Address(deposit.main_chain_deposit.tx_header.sender)
     const amount = parseHexAsNumber(deposit.deposit_amount)
     const dstSideChainRevision = parseHexAsNumber(
-        payload.rx_header.requester_revision)
+        d.tx_header.tx_revision)
     return new Transaction({
-        amount, dstSideChainRevision, from: address, to: address
+        // XXX: Move side-chain determination logic into chain.tsx
+        amount, dstChain: Chain.Chain.Side, dstSideChainRevision,
+        from: address, srcChain: Chain.Chain.Main, to: address,
+
     })
 }
 
