@@ -2,11 +2,14 @@ import * as React from 'react';
 import { Provider } from 'react-redux'
 import { applyMiddleware, createStore } from 'redux'
 import createSagaMiddleware from 'redux-saga'  // Does not work with braces!!
+import 'semantic-ui-css/semantic.min.css'
+import  './App.css'
 import { AddAccount } from './components/add_account'
 import { WalletList } from './components/wallet_list'
 import { rootReducer } from './reducers'
 import { rootSaga } from './sagas'
 import { UIState } from './types/state'
+
 
 const sagaMiddleware = createSagaMiddleware()
 

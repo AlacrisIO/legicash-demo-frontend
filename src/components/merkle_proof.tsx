@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { connect } from 'react-redux'
-
 // This is the magic typescript invocation for react-spinkit. See
 // https://github.com/DefinitelyTyped/DefinitelyTyped/issues/27455#issuecomment-406763025
 import * as Spinner from 'react-spinkit'
+import { Card, Table } from 'semantic-ui-react'
 import { HashValue } from '../types/hash'
 import { stepsIntermediateDigests } from '../types/proofs/proof_protocol'
 import {
@@ -24,18 +24,18 @@ const truncateHash = (h: HashValue) => h.toRawString().substring(0, 10)
 
 /* E.g., | Root |  <root hash> | */
 const singleHashEntry = (key: number, name: string, hash: HashValue) =>
-    <tr key={key}>
-        <td>{name}</td>
-        <td colSpan={2} style={targetCSS}>{truncateHash(hash)}</td>
-    </tr>
+    <Table.Row key={key}>
+        <Table.Cell>{name}</Table.Cell>
+        <Table.Cell colSpan={2} style={targetCSS}>{truncateHash(hash)}</Table.Cell>
+    </Table.Row>
 
 const doubleHashEntry =
     (key: number, left: HashValue, right: HashValue, target: boolean) =>
-        <tr key={key}>
-            <td />
-            <td style={hashColor(target)}>{truncateHash(left)}</td>
-            <td style={hashColor(!target)}>{truncateHash(right)}</td>
-        </tr>
+        <Table.Row key={key}>
+            <Table.Cell />
+            <Table.Cell style={hashColor(target)}>{truncateHash(left)}</Table.Cell>
+            <Table.Cell style={hashColor(!target)}>{truncateHash(right)}</Table.Cell>
+        </Table.Row>
 
 const renderLeaf = (key: number, hash: HashValue) =>
     singleHashEntry(key, "Leaf", hash)
@@ -74,12 +74,11 @@ export interface IMerkleProofDisplay { proof: IResponse }
 
 /** Renders a MerkleProof for display to the user */
 export const MerkleProofDisplay = ({ proof }: IMerkleProofDisplay) =>
-    <div>
-        <span>Proof at trie hash {proof.trie.slice(0, 10)}</span>
-        <table className="merkleTable" style={alignCSS} >
-            <tbody>{renderLayers(proof)}</tbody>
-        </table>
-    </div>
+    <Card.Description >
+        <Table className="merkleTable" style={alignCSS} celled={true} >
+            <Table.Body>{renderLayers(proof)}</Table.Body>
+        </Table>
+    </Card.Description>
 
 interface IMerkleProofWait {
     /** Description of the data for which a proof is being sought */
@@ -94,15 +93,22 @@ interface IMerkleProofWait {
  * Or reports an error, if that happens, and spins until one or the other.
  */
 export const DumbMerkleProofWait = ({ eventInfo, result }: IMerkleProofWait) =>
-    <div className="merkleProofWait">
-        <p>"Proof for " {eventInfo}</p>
+    <Card fluid={true}>
+    <Card.Content>
+        <Card.Header><h3>Proof for {eventInfo}</h3></Card.Header>
+        {(result as IResponse || {}).trie &&
+            <Card.Meta>{'Proof at trie hash '}<b>{(result as IResponse ).trie.slice(0, 10)}</b></Card.Meta>}
         {(result as IResponse || {}).trie &&
             <MerkleProofDisplay proof={result as IResponse} />}
         {(result instanceof Error) &&
-            <p className="load-merkle-error">"Error: " {result.message}</p>}
+            <Card.Description className="load-merkle-error">"Error: " {result.message}</Card.Description>}
         {(!result) &&
-            <Spinner name="circle" overrideSpinnerClassName="load-merkle" />}
-    </div>
+            <Card.Description>
+                <Spinner name="circle" overrideSpinnerClassName="load-merkle" />
+            </Card.Description>
+        }
+        </Card.Content>
+    </Card>
 
 export const MerkleProofWait = ({ tx }: { tx: Transaction }) => connect(
     (state: UIState) => ({
@@ -131,9 +137,14 @@ export class ProofDisplay extends React.Component<IProofDisplay, {}> {
             const WaitComponent = MerkleProofWait({ tx: this.props.tx })
             display = <div><WaitComponent /></div>
         }
-        return <div>
-            <button onClick={this.props.requestProof}>Get Merkle Proof</button>
-            <button onClick={this.onToggle}>Toggle Display</button>
+        return <div style={{marginTop: '10px'}}>
+            <div className={'lrsplit'}>
+                <span className={'black accent'}>Info</span>
+            </div>
+            <div className={'lrsplit'}>
+                <a className={'bluelink'} onClick={this.props.requestProof}>Get Merkle Proof</a>
+                <a className={'bluelink'} onClick={this.onToggle}>Explore block</a>
+            </div>
             {this.state.display && display}
         </div>
     }

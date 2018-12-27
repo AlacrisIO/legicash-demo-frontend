@@ -8,11 +8,9 @@ describe('AmountDialog tests', () => {
             let amount: number = -1
             const dialog = mount( /* Not shallow; need to access <input> */
                 /* tslint:disable:jsx-no-lambda */
-                <AmountDialog header={<span>"foo"</span>} amountDescription="bar"
+                <AmountDialog header={<span>"foo"</span>}
                     submitCallback={(v: number) => { amount = v }} />)
             expect(dialog.find('span').text()).toEqual('"foo"')
-            expect(dialog.find('label').text()).toMatch(
-                RegExp("bar *(<AmountField />)?"))
             const input = dialog.find('.amtField').find('.amountField')
             expect(input.props().type).toEqual("text")
             // Enter some text in the input field

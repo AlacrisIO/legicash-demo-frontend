@@ -1,6 +1,7 @@
 import { List } from 'immutable'
 import * as React from 'react'
 import { connect } from 'react-redux'
+import { Button, Container, Form, Header, Segment } from 'semantic-ui-react'
 import { addAddress, recentTxsInitiated } from '../types/actions'
 import { Address, emptyAddress } from '../types/address'
 import { UIState } from '../types/state'
@@ -27,37 +28,43 @@ export class DumbAddAccount extends BaseComponent {
     }
     public onSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
-        if (this.state.optIdx !== 0) {
-            if (this.state.address.equals(emptyAddress)) {
-                // XXX: This happened once, but I haven't been able to reproduce
-                throw Error(`OptIdx is ${this.state.optIdx}, which is outside \
-the range for the current options list, \
-${this.props.displayedAddresses.toArray()} of length \
-${this.props.displayedAddresses.size}.`)
-            } else {
-                this.props.add(this.state.address)
-            }
+        if (!this.state.address.equals(emptyAddress)) {
+            this.props.add(this.state.address)
+            this.setState(this.stateForNewDisplay(
+                    this.state, this.props.displayedAddresses
+                )
+            )
         }
-        this.setState(this.stateForNewDisplay(
-            this.state, this.props.displayedAddresses))
+        
+        
     }
     public render() {
         return (
-            <div className="addAccount">
-                <form className="addAccountMenu" onSubmit={this.onSubmit}>
-                    Add account:
-                    <SelectAccount
-                        displayedAddresses={this.props.displayedAddresses}
-                        initialMessage="Please pick a wallet to display"
-                        select={this.selectChange}
-                    />
-                    <input type="submit" value="Submit" />
-                </form>
-            </div >
+            <Container 
+                textAlign={"center"}
+                style={{marginTop: '20px', maxWidth: '500px',  width: '500px'}}
+            >
+                <Segment
+                raised={true} 
+                basic={true}
+                >
+                    <Form className="addAccountMenu" onSubmit={this.onSubmit}>
+                        <Segment basic={true}>
+                            <Header as="h2" content="Add Wallet" textAlign="left" />
+                            <SelectAccount
+                                    displayedAddresses={this.props.displayedAddresses}
+                                    initialMessage="Please pick a wallet to display"
+                                    select={this.selectChange}
+                            />
+                            <Button primary={true} size="large" type="submit" style={{marginTop: '10px'}}>Submit</Button>
+                        </Segment>
+                    </Form>
+                </Segment>
+            </Container >
         )
     }
-    private selectChange(optIdx: number, address: Address): void {
-        this.setState({ optIdx, address })
+    private selectChange(address: Address): void {
+        this.setState({ address })
     }
     /**
      * Compute what the new state should be, given that the current selection
