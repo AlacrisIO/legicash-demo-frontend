@@ -19,6 +19,7 @@ interface IOptionTypes {  // Declare types where they can't be inferred
     srcChain: Chain | undefined,
     srcSideChainRevision: number | undefined,
     dstSideChainRevision: number | undefined,
+    blockNumber: number | undefined
 }
 
 const optionValues: IOptionTypes = {
@@ -39,6 +40,7 @@ const optionValues: IOptionTypes = {
     /** Index of revision in which this tx was validated */
     srcSideChainRevision: undefined,
     dstSideChainRevision: undefined,
+    blockNumber: undefined
 }
 
 const inferrableValues = {  // Attributes where type can be inferred directly
@@ -169,6 +171,10 @@ ${this.toString()} vs ${o.toString()}:
 
     public getType(): string {
         return this.transactionType;
+    }
+
+    public getBlockNumber(): number {
+        return this.blockNumber as number
     }
 
 }

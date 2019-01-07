@@ -135,10 +135,8 @@ export class ProofDisplay extends React.Component<IProofDisplay, {}> {
         this.props.requestToggle();
     }
     public exploreBlock() {
-        /*tslint:disable */
         if (process.env.REACT_APP_BLOCK_EXPLORER_URL) {
-            console.log(process.env.REACT_APP_BLOCK_EXPLORER_URL + this.props.tx.hash.toRawString(), '_blank');
-            window.open(process.env.REACT_APP_BLOCK_EXPLORER_URL + this.props.tx.hash.toRawString(), '_blank');
+            window.open(process.env.REACT_APP_BLOCK_EXPLORER_URL + this.props.tx.getBlockNumber(), '_blank');
         }
     }
 
@@ -148,13 +146,19 @@ export class ProofDisplay extends React.Component<IProofDisplay, {}> {
             const WaitComponent = MerkleProofWait({ tx: this.props.tx })
             display = <div><WaitComponent /></div>
         }
+
+        let exploreBlockLink = <span />
+        if (this.props.tx.getBlockNumber()) {
+            exploreBlockLink = <a className={'bluelink'} onClick={this.exploreBlock}>Explore block</a>
+        }
+
         return <div style={{marginTop: '10px'}}>
             <div className={'lrsplit'}>
                 <span className={'black accent'}>Info</span>
             </div>
             <div className={'lrsplit'}>
                 <a className={'bluelink'} onClick={this.getProof}>Show Merkle Proof</a>
-                <a className={'bluelink'} onClick={this.exploreBlock}>Explore block</a>
+                {exploreBlockLink}
             </div>
             {display}
         </div>

@@ -14,12 +14,14 @@ const parseHexAsNumber = (h: hex_number) => parseInt(h, 16)
 interface IDeposit {
     deposit_amount: hex_number,
     deposit_fee: hex_number,
-    main_chain_deposit: { tx_header: { sender: hex_string } }
+    main_chain_deposit: { tx_header: { sender: hex_string } },
+    main_chain_deposit_confirmation: { block_number: hex_string}
 }
 
 /* tslint:disable:no-empty-interface */
 interface IPayment {
     payment_invoice: { recipient: Address, amount: hex_number, memo: string },
+    main_chain_deposit_confirmation?: { block_number: hex_string}
 }
 
 interface IWithdrawal { /* empty */ }
@@ -53,9 +55,10 @@ ${payload.operation}`)
     const dstSideChainRevision = parseHexAsNumber(
         d.tx_header.tx_revision)
     const transactionType = 'Deposit'
+    const blockNumber = parseHexAsNumber(deposit.main_chain_deposit_confirmation.block_number);
     return new Transaction({
         // XXX: Move side-chain determination logic into chain.tsx
-        amount, dstChain: Chain.Chain.Side, dstSideChainRevision,
+        amount, blockNumber, dstChain: Chain.Chain.Side, dstSideChainRevision,
         from: address, srcChain: Chain.Chain.Main, to: address, transactionType,
     })
 }
