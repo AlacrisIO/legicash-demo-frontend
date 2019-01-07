@@ -52,11 +52,11 @@ ${payload.operation}`)
     const amount = parseHexAsNumber(deposit.deposit_amount)
     const dstSideChainRevision = parseHexAsNumber(
         d.tx_header.tx_revision)
+    const transactionType = 'Deposit'
     return new Transaction({
         // XXX: Move side-chain determination logic into chain.tsx
         amount, dstChain: Chain.Chain.Side, dstSideChainRevision,
-        from: address, srcChain: Chain.Chain.Main, to: address,
-
+        from: address, srcChain: Chain.Chain.Main, to: address, transactionType,
     })
 }
 
@@ -68,6 +68,7 @@ ${payload.operation}`)
     }
     const withdrawal = payload.operation[1] as IWithdrawal
     JSON.stringify(withdrawal)  // Shut linter up
+    // const transactionType = 'Withdrawal'
     throw Error("Not implemented")
 }
 
@@ -84,8 +85,9 @@ ${payload.operation}`)
     const dstSideChainRevision = parseHexAsNumber(p.tx_header.tx_revision)
     const srcSideChainRevision = dstSideChainRevision
     const to = new Address(payment.payment_invoice.recipient)
+    const transactionType = 'Payment'
     return new Transaction({
-        amount, dstSideChainRevision, srcSideChainRevision, from, to,
+        amount, dstSideChainRevision, srcSideChainRevision, from, to, transactionType,
         srcChain: Chain.Chain.Side, dstChain: Chain.Chain.Side
     })
     throw Error("Not implemented")
@@ -107,6 +109,8 @@ export function* recentTxs(action: Actions.IRecentTxsInitiated) {
     const address = action.address.toString()
     try {
         const response = yield call(post, 'recent_transactions', { address })
+        /* tslint:disable */
+        console.log(response);
         if (response === undefined) {
             return yield put(Actions.recentTxsFailed(
                 action.address, Error("Server failure!")))

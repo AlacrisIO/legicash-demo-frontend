@@ -50,6 +50,7 @@ const inferrableValues = {  // Attributes where type can be inferred directly
     hash: emptyHash,
     /** Destination address for transaction */
     to: emptyAddress,
+    transactionType: 'Payment'
 }
 
 export const defaultValues = { ...optionValues, ...inferrableValues }
@@ -164,6 +165,10 @@ ${this.toString()} vs ${o.toString()}:
             || (this.dstSideChainRevision === undefined && oldTx.dstSideChainRevision !== undefined)) {
             throw Error(`Attempt to erase information in ${oldTx} with ${this}`)
         }
+    }
+
+    public getType(): string {
+        return this.transactionType;
     }
 
 }

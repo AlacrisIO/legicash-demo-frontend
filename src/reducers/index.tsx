@@ -69,6 +69,8 @@ export const rootReducer = (state: UIState, action: Actions.IActionType)
             return state.removeWallet((action as Actions.IRemoveWallet).address)
         case Actions.Action.PROOF_REQUESTED:
             return state.removeProof((action as Actions.IProofRequested).tx)
+        case Actions.Action.PROOF_TOGGLED:
+            return state.toggleProof((action as Actions.IProofToggle).tx, (action as Actions.IProofToggle).owner)
     }
     return state
 }

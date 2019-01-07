@@ -25,6 +25,7 @@ export enum Action {
     RECENT_TRANSACTIONS_RECEIVED,  // Request for recent txs
     RECENT_TRANSACTIONS_FAILED,  // Request for recent txs
 
+    PROOF_TOGGLED,  // Display a Merkle proof
     PROOF_REQUESTED,  // Request for a Merkle proof
     PROOF_RECEIVED_AND_VALID,  // Valid proof has been returned
     PROOF_RECEIVED_BUT_INVALID,  // Invalid proof has been returned!

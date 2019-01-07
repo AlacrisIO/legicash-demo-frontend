@@ -118,7 +118,7 @@ export const MerkleProofWait = ({ tx }: { tx: Transaction }) => connect(
     (dispatch: any) => ({})
 )(DumbMerkleProofWait)
 
-interface IProofDisplay { requestProof: () => void; tx: Transaction }
+interface IProofDisplay { requestProof: () => void; requestToggle: () => void; show: boolean; tx: Transaction }
 
 /** Button in tx table row which allows user to toggle/request proof display */
 export class ProofDisplay extends React.Component<IProofDisplay, {}> {
@@ -126,14 +126,25 @@ export class ProofDisplay extends React.Component<IProofDisplay, {}> {
 
     public constructor(props: IProofDisplay) {
         super(props)
-        this.onToggle = this.onToggle.bind(this)
+        this.getProof = this.getProof.bind(this)
+        this.exploreBlock = this.exploreBlock.bind(this)
     }
 
-    public onToggle() { this.setState({ display: !this.state.display }) }
+    public getProof() {
+        this.props.requestProof();
+        this.props.requestToggle();
+    }
+    public exploreBlock() {
+        /*tslint:disable */
+        if (process.env.REACT_APP_BLOCK_EXPLORER_URL) {
+            console.log(process.env.REACT_APP_BLOCK_EXPLORER_URL + this.props.tx.hash.toRawString(), '_blank');
+            window.open(process.env.REACT_APP_BLOCK_EXPLORER_URL + this.props.tx.hash.toRawString(), '_blank');
+        }
+    }
 
     public render() {
         let display = <span />
-        if (this.state.display) {
+        if (this.props.show) {
             const WaitComponent = MerkleProofWait({ tx: this.props.tx })
             display = <div><WaitComponent /></div>
         }
@@ -142,10 +153,10 @@ export class ProofDisplay extends React.Component<IProofDisplay, {}> {
                 <span className={'black accent'}>Info</span>
             </div>
             <div className={'lrsplit'}>
-                <a className={'bluelink'} onClick={this.props.requestProof}>Get Merkle Proof</a>
-                <a className={'bluelink'} onClick={this.onToggle}>Explore block</a>
+                <a className={'bluelink'} onClick={this.getProof}>Show Merkle Proof</a>
+                <a className={'bluelink'} onClick={this.exploreBlock}>Explore block</a>
             </div>
-            {this.state.display && display}
+            {display}
         </div>
     }
 }

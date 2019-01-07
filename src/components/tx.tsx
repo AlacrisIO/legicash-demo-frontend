@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { connect } from 'react-redux'
 import { Segment } from 'semantic-ui-react'
-import { proofRequested } from '../types/actions/proofs'
+import { proofRequested, proofToggled } from '../types/actions/proofs'
 import { Address } from '../types/address'
 import { UIState } from '../types/state';
 import { Transaction } from '../types/tx'
@@ -29,35 +29,21 @@ const txClass = (tx: Transaction) => {
     return <span className={"yellow status"} >Pending</span>
 }
 
-const txType = (tx: Transaction, owner: Address) => {
-    if (owner.equals(tx.from)) {
-        return 'Payment'
-    }
-
-    if (owner.equals(tx.to)) {
-        return 'Received'
-    }
-
-    if (owner.equals(tx.to) && owner.equals(tx.from)) {
-        return 'Payment to self'
-    }
-
-    return 'Unknown'
-}
-
 interface ITx { 
     tx: Transaction,
     requestProof: () => void,
+    requestToggle: () => void,
+    show: boolean,
     owner: Address
 }
 
 /** A row corresponding to a tx. */
-export const DumbTx = ({ tx, requestProof, owner }: ITx): JSX.Element => {
+export const DumbTx = ({ tx, requestProof, requestToggle, show, owner }: ITx): JSX.Element => {
     return (<Segment vertical={true} style={{ textAlign: 'left', padding: '5px'}}>
             <div className={'lrsplit txsSegment'}>
                 <span style={{flex: 1}}>
                     <span className={'gray'} >Transaction type: </span>
-                    <span className={'black'}>{txType(tx, owner)}</span>
+                    <span className={'black'}>{tx.getType()}</span>
                 </span>
             </div>
             <div className={'lrsplit txsSegment'}>
@@ -80,14 +66,21 @@ export const DumbTx = ({ tx, requestProof, owner }: ITx): JSX.Element => {
                     <span className={'black'}> {txClass(tx)}</span>
                 </span>
             </div>
-            <ProofDisplay tx={tx} requestProof={requestProof} />
+            <ProofDisplay tx={tx} requestProof={requestProof} requestToggle={requestToggle}  show={show} />
     </Segment>)
 }
 
 export const Tx = ({ tx, owner }: { tx: Transaction, owner: Address }) => {
     const guid = tx.getGUID()
     return connect(
-        (state: UIState) => ({ tx: state.txByGUID.get(guid) }),
-        (dispatch: any) => ({ requestProof: () => dispatch(proofRequested(tx)), owner })
+        (state: UIState) => ({
+            show: state.showProofByGUID.get(guid.guid + owner.toString()),
+            tx: state.txByGUID.get(guid),
+        }),
+        (dispatch: any) => ({
+            owner,
+            requestProof: () => dispatch(proofRequested(tx)),
+            requestToggle: () => dispatch(proofToggled(tx, owner.toString())),
+        })
     )(DumbTx)
 }
