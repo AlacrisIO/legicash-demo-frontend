@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { connect } from 'react-redux'
 import { Accordion, Header, Icon, Segment} from 'semantic-ui-react'
+import { addresses as allAddresses } from '../server/ethereum_addresses'
 import {
     makeDeposit, makePayment, makeWithdrawal, removeWallet
 } from '../types/actions'
@@ -15,6 +16,12 @@ import { DepositDialog } from './txs/deposit_dialog'
 import { PayDialog } from './txs/pay_dialog'
 import { WithdrawDialog } from './txs/withdraw_dialog'
 import {OffchainBalance, OnchainBalance, WalletAddress} from './wallet_elements'
+
+
+export const addressNames: { Address: string } = {} as any
+Object.keys(allAddresses).forEach(n => addressNames[allAddresses[n]] = n)
+
+export const name = (a: Address) => addressNames[a.toString()]
 
 interface IWallet {
     depositCallback: (amount: number) => void
@@ -61,7 +68,7 @@ export class DumbWallet extends React.Component<IWallet> {
             <div style={{textAlign: 'right'}}>
                 <Icon link={true} onClick={this.props.killCallback} name="close" />
             </div>
-            <Header as={'h2'} style={{marginTop: 0, padding: 0}} >Wallet Name: {this.props.wallet.username}</Header>
+            <Header as={'h2'} style={{marginTop: 0, padding: 0}} >Wallet Name: {name(this.props.wallet.address)}</Header>
             <Segment vertical={true} style={{margin: 0, padding: 0}}>
                 <WalletAddress address={this.props.wallet.address.toString()} />
                 <OffchainBalance balance={this.props.wallet.offchainBalance} />
