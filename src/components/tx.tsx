@@ -39,6 +39,22 @@ interface ITx {
 
 /** A row corresponding to a tx. */
 export const DumbTx = ({ tx, requestProof, requestToggle, show, owner }: ITx): JSX.Element => {
+
+    let toAndFrom = <span/>;
+
+    if (tx.getType() === 'Payment') {
+        toAndFrom = <div className={'lrsplit txsSegment'}>
+                <span style={{flex: 0.5}}>
+                    <span className={'gray'} >From: </span>
+                    <span className={'black'}>{name(tx.from)}</span>
+                </span>
+            <span style={{flex: 0.5}}>
+                    <span className={'gray'} >To: </span>
+                    <span className={'black'}>{name(tx.to)}</span>
+                </span>
+        </div>
+    }
+
     return (<Segment vertical={true} style={{ textAlign: 'left', padding: '5px'}}>
             <div className={'lrsplit txsSegment'}>
                 <span style={{flex: 1}}>
@@ -46,16 +62,7 @@ export const DumbTx = ({ tx, requestProof, requestToggle, show, owner }: ITx): J
                     <span className={'black'}>{tx.getType()}</span>
                 </span>
             </div>
-            <div className={'lrsplit txsSegment'}>
-                <span style={{flex: 0.5}}>
-                    <span className={'gray'} >From: </span>
-                    <span className={'black'}>{name(tx.from)}</span>
-                </span>
-                <span style={{flex: 0.5}}>
-                    <span className={'gray'} >To: </span>
-                    <span className={'black'}>{name(tx.to)}</span>
-                </span>
-            </div>
+        {toAndFrom}
             <div className={'lrsplit txsSegment'}>
                 <span style={{flex: 0.5}}>
                     <span className={'gray'} >Amount: </span>
