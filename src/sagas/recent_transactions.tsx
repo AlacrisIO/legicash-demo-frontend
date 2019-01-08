@@ -112,8 +112,7 @@ export function* recentTxs(action: Actions.IRecentTxsInitiated) {
     const address = action.address.toString()
     try {
         const response = yield call(post, 'recent_transactions', { address })
-        /* tslint:disable */
-        console.log(response);
+
         if (response === undefined) {
             return yield put(Actions.recentTxsFailed(
                 action.address, Error("Server failure!")))
