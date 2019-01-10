@@ -1,3 +1,4 @@
+import {delay} from "redux-saga";
 import { call, put } from 'redux-saga/effects'
 import { post } from '../server/common'
 import * as Actions from '../types/actions'
@@ -110,18 +111,22 @@ export const txFromResponse = (r: IResponse): Transaction => (
 
 export function* recentTxs(action: Actions.IRecentTxsInitiated) {
     const address = action.address.toString()
-    try {
-        const response = yield call(post, 'recent_transactions', { address })
+    while(true) {
+        try {
+            const response = yield call(post, 'recent_transactions', { address })
 
-        if (response === undefined) {
-            return yield put(Actions.recentTxsFailed(
-                action.address, Error("Server failure!")))
+            if (response === undefined) {
+                yield put(Actions.recentTxsFailed(
+                    action.address, Error("Server failure!")))
+            }
+            yield put(Actions.recentTxsReceived(
+                action.address, response.map(txFromResponse).filter(
+                    (t: Transaction): boolean => (t.amount as number) > 0)))
+        } catch (e) {
+            yield put(Actions.recentTxsFailed(action.address, e))
         }
-        return yield put(Actions.recentTxsReceived(
-            action.address, response.map(txFromResponse).filter(
-                (t: Transaction): boolean => (t.amount as number) > 0)))
-    } catch (e) {
-        return yield put(Actions.recentTxsFailed(action.address, e))
+
+        yield delay(1000)
     }
 }
 
