@@ -18,12 +18,11 @@ if ( process.env.REACT_APP_API_PORT ) {
     endpointPort = (process.env.REACT_APP_API_PORT as any as number);
 }
 
+ let apiUrl = `${window.location.protocol}//${hostname}`
 
 /** URL at which the legicash server is listening */
 if (endpointPort) {
-    export const serverURL =
-    `${window.location.protocol}//${hostname}:${endpointPort}`
-} else {
-    export const serverURL =
-    `${window.location.protocol}//${hostname}`
+     apiUrl = `${window.location.protocol}//${hostname}:${endpointPort}`
 }
+
+export const serverURL = apiUrl
