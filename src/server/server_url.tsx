@@ -1,7 +1,7 @@
 /** Blow this file away and put "serverURL = <my URL>" */
 
 /** The port on which the legicash server is listening */
-let endpointPort = 80
+let endpointPort:number = 0
 
 /** The hostname for the faciilitator service */
 // XXX: Note that this is not the mandated hostname. It is set to this to avoid
