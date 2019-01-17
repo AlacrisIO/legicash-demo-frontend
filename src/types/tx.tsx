@@ -177,4 +177,8 @@ ${this.toString()} vs ${o.toString()}:
         return this.blockNumber as number
     }
 
+    public getDstSideChainRevision(): number {
+        return this.dstSideChainRevision as number;
+    }
+
 }
