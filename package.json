@@ -29,7 +29,15 @@
   },
   "scripts": {
     "start": "react-scripts-ts start",
+    "start-env": "sh -ac '. configs/${REACT_APP_ENV}.env; react-scripts-ts start'",
     "build": "react-scripts-ts build",
+    "build-env": "sh -ac '. configs/${REACT_APP_ENV}.env; react-scripts-ts build'",
+    "start:dev": "REACT_APP_ENV=dev npm run start-env",
+    "start:staging": "REACT_APP_ENV=staging npm run start-env",
+    "start:production": "REACT_APP_ENV=production npm run start-env",
+    "build:dev": "REACT_APP_ENV=dev npm run build-env",
+    "build:staging": "REACT_APP_ENV=staging npm run build-env",
+    "build:production": "REACT_APP_ENV=production npm run build-env",
     "test": "tslint --project . ; react-scripts-ts test --env=jsdom",
     "eject": "react-scripts-ts eject"
   },
@@ -42,6 +50,7 @@
     "crypto": "^1.0.1",
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-16": "*",
+    "react-app-env": "^1.2.3",
     "react-test-renderer": "^16.4.2",
     "typescript": "^2.9.2"
   }
