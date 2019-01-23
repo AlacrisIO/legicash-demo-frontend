@@ -11,14 +11,14 @@ export const validateBalance = (resp: any) => {
     return true
 }
 
-const allWith = (elems, f) =>
+const allWith = (elems: any[], f: (x: any) => boolean) =>
     elems.reduce((acc, e) => acc && f(e), true)
 
 describe('server/common tests', () => {
     /* XXX: Flaky tests which depend on the server running. */
     let connected = false
 
-    const whenConnectedIt = (description, spec) =>
+    const whenConnectedIt = (description: string, spec: () => Promise<any>) =>
         it(description, () => connected
             ? spec()
             : expect(connected).toBe(true));
@@ -42,7 +42,7 @@ describe('server/common tests', () => {
         const notFoundMsg = `Could not find balance for address ${address}`
 
         const req = post('balance', { address })
-            .then(r => r.error
+            .then((r: any) => r.error
                 ? r.error   === notFoundMsg
                 : r.address === address && Number.isFinite(
                     parseInt(r.account_balance, 16)))
