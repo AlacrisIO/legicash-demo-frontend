@@ -1,28 +1,104 @@
-.App {
-  text-align: center;
+
+.status {
+  font-weight: 400;
 }
 
-.App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 80px;
+.green {
+  color: green;
+}
+.red {
+  color: red;
+}
+.yellow {
+  color: orange;
+}
+.gray {
+  color: gray;
 }
 
-.App-header {
-  background-color: #222;
-  height: 150px;
-  padding: 20px;
-  color: white;
+.black {
+  color: black;
 }
 
-.App-title {
-  font-size: 1.5em;
+.accent {
+  font-weight: 700;
 }
 
-.App-intro {
-  font-size: large;
+.lrsplit {
+  display: flex;
+  justify-content: space-between;
 }
 
-@keyframes App-logo-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+.txsSegment {
+  padding: 2px;
+  margin-bottom: 5px;
+}
+.infoSection {
+  font-size: 17px;
+  margin-bottom: 3px;
+  margin-top: 5px;
+  padding: 2px;
+}
+
+.infoLabel {
+  margin-bottom: 2px;
+}
+
+.addressLine {
+  font-size: 14px;
+}
+
+.bluelink {
+  font-size: 12px;
+  font-weight: 600;
+  color: #3CA4D8;
+  cursor: pointer;
+  transition: font-size 0.2s;
+}
+
+.bluelink:hover {
+  text-decoration: underline;
+}
+
+input::placeholder, .default.text {
+  color: #000 !important;
+  font-style: italic;
+  opacity: 0.5 !important;
+}
+
+.truncate {
+  min-width: 180px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+h3.exp {
+  margin: 0;
+}
+
+.slider {
+  max-width: 1024px;
+  box-sizing: border-box;
+  display:flex;
+  flex-direction: row;
+  overflow: hidden;
+  overflow-x: auto;
+  justify-items: baseline;
+}
+
+@media screen and (max-width: 768px) {
+  .slide {
+    margin-left: 1%;
+    max-width: 99%;
+    min-width: 99%;
+  }
+}
+
+@media screen and (min-width: 768px) {
+  .slide {
+    margin-left: 1%;
+    max-width: 48%;
+    min-width: 48%;
+  }
 }

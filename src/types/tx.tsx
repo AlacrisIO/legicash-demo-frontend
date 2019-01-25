@@ -19,6 +19,7 @@ interface IOptionTypes {  // Declare types where they can't be inferred
     srcChain: Chain | undefined,
     srcSideChainRevision: number | undefined,
     dstSideChainRevision: number | undefined,
+    blockNumber: number | undefined
 }
 
 const optionValues: IOptionTypes = {
@@ -39,6 +40,7 @@ const optionValues: IOptionTypes = {
     /** Index of revision in which this tx was validated */
     srcSideChainRevision: undefined,
     dstSideChainRevision: undefined,
+    blockNumber: undefined
 }
 
 const inferrableValues = {  // Attributes where type can be inferred directly
@@ -50,6 +52,7 @@ const inferrableValues = {  // Attributes where type can be inferred directly
     hash: emptyHash,
     /** Destination address for transaction */
     to: emptyAddress,
+    transactionType: 'Payment'
 }
 
 export const defaultValues = { ...optionValues, ...inferrableValues }
@@ -164,6 +167,18 @@ ${this.toString()} vs ${o.toString()}:
             || (this.dstSideChainRevision === undefined && oldTx.dstSideChainRevision !== undefined)) {
             throw Error(`Attempt to erase information in ${oldTx} with ${this}`)
         }
+    }
+
+    public getType(): string {
+        return this.transactionType;
+    }
+
+    public getBlockNumber(): number {
+        return this.blockNumber as number
+    }
+
+    public getDstSideChainRevision(): number {
+        return this.dstSideChainRevision as number;
     }
 
 }

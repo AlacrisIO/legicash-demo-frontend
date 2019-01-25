@@ -25,6 +25,7 @@ const defaultValues = {
     txByGUID: Map<Guid, Transaction>(),
     /** Record of latest proofs for each tx, if known */
     proofByGUID: Map<Guid, IResponse | Error>(),
+    showProofByGUID: Map<string, boolean>(),
 }
 
 /** Updates to portions of the state are stored as thunks of this form */
@@ -144,6 +145,10 @@ export class UIState extends Record(defaultValues) {
     /** Remove any proof for given tx, anticipating a new one */
     public removeProof(tx: Transaction): this {
         return this.removeIn(['proofByGUID', tx.getGUID()])
+    }
+    /** Remove any proof for given tx, anticipating a new one */
+    public toggleProof(tx: Transaction, owner: string): this {
+        return this.updateIn(['showProofByGUID', tx.getGUID().guid + owner], () => !!!this.showProofByGUID.get(tx.getGUID().guid + owner))
     }
     public addProof(tx: Transaction, response: IResponse | Error): this {
         return this.updateIn(['proofByGUID', tx.getGUID()], () => response)

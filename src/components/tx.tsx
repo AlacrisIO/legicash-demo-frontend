@@ -1,72 +1,93 @@
 import * as React from 'react';
 import { connect } from 'react-redux'
-
-import { proofRequested } from '../types/actions/proofs'
+import { Segment } from 'semantic-ui-react'
+import { proofRequested, proofToggled } from '../types/actions/proofs'
+import { Address } from '../types/address'
 import { UIState } from '../types/state';
-import { defaultValues, Transaction } from '../types/tx'
-
+import { Transaction } from '../types/tx'
 import { ProofDisplay } from './merkle_proof'
-import { SecondsSince } from './seconds_since'
+import { name } from './select_account'
 
 // XXX: Needs some indication of the direction cross-chain txs go in.
 
 /* Representation of the epistemic state of a Tx in the frontend */
 export type txCSSClass = 'pending' | 'valid' | 'invalid'
 
-/* Determine CSS class name for Tx representation, based on epistemic status */
+// /* Determine CSS class name for Tx representation, based on epistemic status */
 const txClass = (tx: Transaction) => {
     if (tx.validated) {
         if (tx.rejected) {
-            throw Error(`Tx with inconsistent validation/rejection status! ${tx}`)
+            // throw Error(`Tx with inconsistent validation/rejection status! ${tx}`)
+            return <span className={"gray status"} >Inconsistent</span>
         }
-        return 'valid'
+        return <span className={"green status"} >Valid</span>
     }
-    if (tx.rejected) { return 'invalid' }
-    return 'pending'
+    if (tx.rejected) { 
+        return <span className={"red status"} >Invalid</span>
+    }
+    
+    return <span className={"yellow status"} >Pending</span>
 }
 
-type header = keyof (typeof defaultValues)
-type headers = header[]
-
-/* tslint:disable:object-literal-sort-keys */  // Ordered this way in display
-const defaultColumns = {
-    'src num': (tx: Transaction) => tx.srcSideChainRevision,
-    'dst num': (tx: Transaction) => tx.dstSideChainRevision,
-    'seen for': (tx: Transaction) =>
-        tx.creationDate && <SecondsSince time={tx.creationDate} />,
-    'from': (tx: Transaction) => (tx.from && tx.from.toString().slice(0, 10)),
-    'to': (tx: Transaction) => (tx.to && tx.to.toString().slice(0, 10)),
-    'amount': (tx: Transaction) => tx.amount,
-    'validated': (tx: Transaction) =>
-        (tx.validated && 'valid') || (
-            tx.rejected && 'rejected: ' + tx.failureMessage) || 'pending',
+interface ITx { 
+    tx: Transaction,
+    requestProof: () => void,
+    requestToggle: () => void,
+    show: boolean,
+    owner: Address
 }
 
-interface ITx { tx: Transaction, requestProof: () => void }
 /** A row corresponding to a tx. */
-export const DumbTx = ({ tx, requestProof }: ITx): JSX.Element => {
-    const txVals = []
-    /* tslint:disable:forin */
-    for (const colName in defaultColumns) {
-        txVals.push(<td key={txVals.length}>{defaultColumns[colName](tx)}</td>)
+export const DumbTx = ({ tx, requestProof, requestToggle, show, owner }: ITx): JSX.Element => {
+
+    let toAndFrom = <span/>;
+
+    if (tx.getType() === 'Payment') {
+        toAndFrom = <div className={'lrsplit txsSegment'}>
+                <span style={{flex: 0.5}}>
+                    <span className={'gray'} >From: </span>
+                    <span className={'black'}>{name(tx.from)}</span>
+                </span>
+            <span style={{flex: 0.5}}>
+                    <span className={'gray'} >To: </span>
+                    <span className={'black'}>{name(tx.to)}</span>
+                </span>
+        </div>
     }
-    txVals.push(
-        <td key={txVals.length}>
-            <ProofDisplay tx={tx} requestProof={requestProof} />
-        </td>
-    )
-    return <tr className={txClass(tx)}>{...txVals}</tr>
+
+    return (<Segment vertical={true} style={{ textAlign: 'left', padding: '5px'}}>
+            <div className={'lrsplit txsSegment'}>
+                <span style={{flex: 1}}>
+                    <span className={'gray'} >Transaction type: </span>
+                    <span className={'black'}>{tx.getType()}</span>
+                </span>
+            </div>
+        {toAndFrom}
+            <div className={'lrsplit txsSegment'}>
+                <span style={{flex: 0.5}}>
+                    <span className={'gray'} >Amount: </span>
+                    <span className={'black'}> {tx.amount}</span>
+                </span>
+                <span style={{flex: 0.5}}>
+                    <span className={'gray'} >Status: </span>
+                    <span className={'black'}> {txClass(tx)}</span>
+                </span>
+            </div>
+            <ProofDisplay tx={tx} requestProof={requestProof} requestToggle={requestToggle}  show={show} />
+    </Segment>)
 }
 
-export const Tx = ({ tx }: { tx: Transaction }) => {
+export const Tx = ({ tx, owner }: { tx: Transaction, owner: Address }) => {
     const guid = tx.getGUID()
     return connect(
-        (state: UIState) => ({ tx: state.txByGUID.get(guid) }),
-        (dispatch: any) =>
-            ({ requestProof: () => dispatch(proofRequested(tx)) })
+        (state: UIState) => ({
+            show: state.showProofByGUID.get(guid.guid + owner.toString()),
+            tx: state.txByGUID.get(guid),
+        }),
+        (dispatch: any) => ({
+            owner,
+            requestProof: () => dispatch(proofRequested(tx)),
+            requestToggle: () => dispatch(proofToggled(tx, owner.toString())),
+        })
     )(DumbTx)
 }
-
-export const txHeader = ({ colOrder }: { colOrder?: headers }) =>
-    <tr>{...Object.keys(defaultColumns).map(
-        (h, i) => <td key={i}><b>{h}</b></td>)}</tr>

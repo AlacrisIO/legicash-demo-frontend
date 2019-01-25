@@ -9,8 +9,16 @@ export interface IProofAction extends IActionType {
 
 /* tslint:disable:no-empty-interface */
 export interface IProofRequested extends IProofAction { /* empty */ }
+
+export interface IProofToggle extends IProofAction {
+    owner: string
+}
+
 export const proofRequested = (tx: Transaction): IProofRequested => (
     { type: Action.PROOF_REQUESTED, tx })
+
+export const proofToggled = (tx: Transaction, owner: string): IProofToggle => (
+    { type: Action.PROOF_TOGGLED, tx, owner })
 
 export interface IProofReceivedAndValid extends IProofAction {
     proof: IValidatedResponse

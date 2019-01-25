@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { connect } from 'react-redux'
+import { Button } from 'semantic-ui-react'
 import * as Actions from '../../types/actions'
 import { Address, emptyAddress } from '../../types/address'
 import { knownAddresses, name, SelectAccount } from '../select_account'
@@ -30,27 +31,26 @@ export class DumbPayDialog extends React.Component<IPayDialog, {}> {
             this.props.submitCallback(to, this.state.amount)
         }
     }
-    public setTo(optIdx: number, to: Address) { this.setState({ to }) }
+    public setTo(to: Address) { this.setState({ to }) }
     public setAmount(amount: number) { this.setState({ amount }) }
     public render() {
         const recipients = knownAddresses.remove(this.props.from).toList()
             .sortBy(name).toList()
         return (
             <div>
-                <h3>Send payment</h3>
                 <form onSubmit={this.onSubmit}>
-                    <label>
-                        To: <SelectAccount
+                    <label className={'black accent infoLabel'}>To:</label>
+                    <SelectAccount
                             displayedAddresses={recipients}
                             initialMessage="Choose recipient"
                             select={this.setTo}
                         />
-                    </label>
-                    <label>
-                        "Amount:" <AmountField callback={this.setAmount} />
-                    </label>
-                    <input className="paySubmitButton" type="submit"
-                        value="Submit" />
+                    <br/>
+                    <label className={'black accent infoLabel'}>Amount:</label>
+                    <div style={{display: 'flex', justifyContent: 'space-between'}}>
+                        <AmountField callback={this.setAmount} />
+                        <Button basic={true} color={'blue'} className="paySubmitButton" type="submit">Submit</Button>
+                    </div>
                 </form>
             </div >
         )
