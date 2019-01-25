@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Icon } from 'semantic-ui-react'
 import { Address } from '../../types/address'
 import { AmountDialog } from './amount_dialog';
 
@@ -12,7 +13,7 @@ interface IDepositDialog {
 }
 
 const header = (a: Address) => (
-    <h4>{"Deposit to main chain"}</h4>
+    <h3><Icon name="money" size={"large"} /> {"Deposit to side chain"}</h3>
 )
 
 
@@ -20,6 +21,7 @@ const header = (a: Address) => (
 export const DepositDialog = ({ from, submitCallback }: IDepositDialog) => (
     <AmountDialog
         header={header(from)}
-        amountDescription="Amount to deposit: " submitCallback={submitCallback}
+        placeholder={'Amount to deposit'}
+        submitCallback={submitCallback}
     />
 )

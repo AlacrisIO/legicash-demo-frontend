@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Icon } from 'semantic-ui-react'
 import { Address } from '../../types/address'
 import { AmountDialog } from './amount_dialog';
 
@@ -12,13 +13,14 @@ interface IWithdrawDialog {
 }
 
 const header = (a: Address) => (
-    <h3>{"Withdraw to main chain"}</h3>
+    <h3><Icon name="money" size={"large"} /> {"Withdraw to main chain"}</h3>
 )
 
 /** Form for specifying how much to withdraw from main chain */
 export const WithdrawDialog = ({ from, submitCallback }: IWithdrawDialog) => (
     <AmountDialog
-        header={header(from)}
-        amountDescription="Amount to withdraw:" submitCallback={submitCallback}
+        header={header(from)} 
+        placeholder={'Amount to withdraw'}
+        submitCallback={submitCallback}
     />
 )

@@ -1,13 +1,14 @@
 import * as React from 'react';
+import { Button, Container } from 'semantic-ui-react'
 import { AmountField } from './amount_field';
 
 export interface IAmountDialog {
     /** Header describing the dialog */
     header: JSX.Element;
-    /** Human-readable description of the amount being entered */
-    amountDescription: string;
     /** What to do with the amount when "submit" is hit */
-    submitCallback: (v: number) => void
+    submitCallback: (v: number) => void;
+    
+    placeholder? : string;
 }
 
 /** Form for specifying an amount */
@@ -32,13 +33,11 @@ export class AmountDialog extends React.Component<IAmountDialog, {}> {
 
     public render() {
         return (<div>
-            {this.props.header}
             <form onSubmit={this.onSubmit}>
-                <label>{this.props.amountDescription}
-                    <AmountField
-                        callback={this.setAmount} className="amtField" />
-                </label>
-                <input type="submit" value="Submit" />
+                <Container style={{display: 'flex', justifyContent: 'space-between'}}>
+                    <AmountField callback={this.setAmount} className="amtField" placeholder={this.props.placeholder}/>
+                    <Button basic={true} color={'blue'} type="submit" >Submit</Button>
+                </Container>
             </form>
         </div>)
     }
