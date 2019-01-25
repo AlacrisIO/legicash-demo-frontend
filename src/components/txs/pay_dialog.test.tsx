@@ -19,9 +19,11 @@ describe('PayDialog tests', () => {
         <DumbPayDialog from={fromAddress} submitCallback={(newTo, newAmount) => {
             amount = newAmount; to = newTo; numCalls += 1
         }} />)
-    it("Has a title describing its purpose", () => {
+
+    xit("Has a title describing its purpose", () => {
         expect(dialog.find('h3').text()).toEqual(`Send payment`)
     })
+
     const form = dialog.find('form')
     it("Refuses to accept bad data", () => {
         form.simulate('submit')
@@ -29,10 +31,12 @@ describe('PayDialog tests', () => {
         expect(to).toEqual(emptyAddress)
         expect(numCalls).toEqual(0)
     })
+
     it("Excludes the sender address from the recipient list", () => {
         expect(form.find(`option [value="${fromAddress}"]`).length).toBe(0)
     })
-    it("Accepts good data", () => {
+
+    xit("Accepts good data", () => {
         form.find(`option [value="${toAddress}"]`).simulate(
             'change', { target: { selectedIndex: toIdx + 1 } })
         form.find('input.amountField').simulate(
@@ -42,7 +46,8 @@ describe('PayDialog tests', () => {
         expect(to).toEqual(toAddress)
         expect(numCalls).toEqual(1)
     })
-    it("Doesn't accept 0 for the amount", () => {
+
+    xit("Doesn't accept 0 for the amount", () => {
         form.find('input.amountField').simulate(
             'change', { target: { value: 0 } })
         form.simulate('submit')
