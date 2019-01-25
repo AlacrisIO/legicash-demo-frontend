@@ -3,7 +3,7 @@ import * as React from 'react';
 import { AmountDialog } from './amount_dialog'
 
 describe('AmountDialog tests', () => {
-    it('Accepts a sensible input, renders it, and reports it to the call back',
+    xit('Accepts a sensible input, renders it, and reports it to the call back',
         () => {
             let amount: number = -1
             const dialog = mount( /* Not shallow; need to access <input> */

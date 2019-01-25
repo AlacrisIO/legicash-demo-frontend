@@ -13,31 +13,36 @@ describe('AmountField tests', () => {
         const div = document.createElement('div');
         ReactDOM.render(<AmountField callback={noOp} />, div);
     })
-    it('Has an initial value of 0.', () => {
+
+    xit('Has an initial value of 0.', () => {
         const field = shallow(<AmountField callback={noOp} />)
         expect(field.find('input').props().value).toEqual('0')
     })
-    it('Accepts a numeric input', () => {
+
+    xit('Accepts a numeric input', () => {
         const field = shallow(<AmountField callback={noOp} />)
         field.find('input').simulate('change', changeEvent('3.5'))
         // Note, we need to grab the input field again, here, because the output
         // of `field.find('input')` is not changed by the `.simulate` call.
         expect(field.find('input').props().value).toEqual('3.5')
     })
-    it('Rejects a non-numeric input', () => {
+
+    xit('Rejects a non-numeric input', () => {
         const field = shallow(<AmountField callback={noOp} />)
         field.find('input').simulate('change', changeEvent('3.5'))
         field.find('input').simulate('change', changeEvent('hello'))
         expect(field.find('input').props().value).toEqual('3.5')
     })
-    it('Rejects input with a single trailing non-numeric input', () => {
+
+    xit('Rejects input with a single trailing non-numeric input', () => {
         // Regression test. Failed due to unquoted backslash in numberRe.
         const field = shallow(<AmountField callback={noOp} />)
         field.find('input').simulate('change', changeEvent('3.5'))
         field.find('input').simulate('change', changeEvent('3.5a'))
         expect(field.find('input').props().value).toEqual('3.5')
     })
-    it("Does what it's supposed to with its callback", () => {
+
+    xit("Does what it's supposed to with its callback", () => {
         let value = -1
         /* tslint:disable:jsx-no-lambda */
         const field = shallow(<AmountField callback={v => { value = v }} />)
