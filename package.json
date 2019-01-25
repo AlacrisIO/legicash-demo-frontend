@@ -36,6 +36,7 @@
     "start:staging": "REACT_APP_ENV=staging npm run start-env",
     "start:production": "REACT_APP_ENV=production npm run start-env",
     "build:dev": "REACT_APP_ENV=dev npm run build-env",
+    "build:demo": "REACT_APP_ENV=demo npm run build-env",
     "build:staging": "REACT_APP_ENV=staging npm run build-env",
     "build:production": "REACT_APP_ENV=production npm run build-env",
     "test": "tslint --project . ; react-scripts-ts test --env=jsdom",
