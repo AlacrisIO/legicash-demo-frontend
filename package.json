@@ -31,6 +31,8 @@
     "start": "react-scripts-ts start",
     "start-env": "sh -ac '. configs/${REACT_APP_ENV}.env; npm run start'",
     "start:dev": "REACT_APP_ENV=dev npm run start-env",
+    "start:demo": "REACT_APP_ENV=demo npm run start-env",
+    "start:local": "REACT_APP_ENV=local npm run start-env",
     "start:staging": "REACT_APP_ENV=staging npm run start-env",
     "start:production": "REACT_APP_ENV=production npm run start-env",
     "build": "react-scripts-ts build",

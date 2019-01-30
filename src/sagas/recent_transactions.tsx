@@ -1,11 +1,11 @@
 import {delay} from "redux-saga";
-import { call, put } from 'redux-saga/effects'
-import { post } from '../server/common'
-import * as Actions from '../types/actions'
-import { Address } from '../types/address'
+import {call, cancel, fork, put, takeEvery} from 'redux-saga/effects'
+import {post} from '../server/common'
+import * as Actions from "../types/actions";
+import {IRemoveWallet} from "../types/actions";
+import {Address} from '../types/address'
 import * as Chain from '../types/chain'
-import { Transaction } from '../types/tx'
-import { listener } from './common'
+import {Transaction} from '../types/tx'
 
 type hex_string = string
 type hex_number = hex_string
@@ -130,5 +130,24 @@ export function* recentTxs(action: Actions.IRecentTxsInitiated) {
     }
 }
 
-export const recentTxsListener = listener(
-    Actions.Action.RECENT_TRANSACTIONS_INITIATED, recentTxs)
+const recentTxTasks = {};
+
+const recentHandler = function* (action: Actions.IRecentTxsInitiated) {
+    if (!recentTxTasks.hasOwnProperty(action.address.toString())) {
+        recentTxTasks[action.address.toString()] = yield fork(recentTxs, action);
+    }
+};
+
+const removeHandler = function* (action: IRemoveWallet) {
+    if (recentTxTasks.hasOwnProperty(action.address.toString())) {
+        yield cancel(recentTxTasks[action.address.toString()]);
+        delete recentTxTasks[action.address.toString()];
+    }
+};
+
+export const recentTxsListener = function* () {
+    const removeMatcher =  (ac: Actions.IActionType) => ac.type === Actions.Action.REMOVE_WALLET;
+    const initMatcher =  (ac: Actions.IActionType) => ac.type === Actions.Action.RECENT_TRANSACTIONS_INITIATED;
+    yield takeEvery(initMatcher, recentHandler);
+    yield takeEvery(removeMatcher, removeHandler);
+};
