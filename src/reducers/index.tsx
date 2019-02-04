@@ -47,6 +47,9 @@ export const rootReducer = (state: UIState, action: Actions.IActionType)
         case Actions.Action.RECENT_TRANSACTIONS_RECEIVED:
             return RecentTxs.addTxs(
                 state, (action as Actions.IRecentTxsReceived).txs)
+        case Actions.Action.RECENT_TRANSACTIONS_NEW_PAYMENTS:
+            return RecentTxs.setNewPayments(
+                state, (action as Actions.IRecentTxsNewPayments).txIds)
         case Actions.Action.RECENT_TRANSACTIONS_FAILED:
             return RecentTxs.recentTxsFailed(state) // XXX: Reflect in UI??
 

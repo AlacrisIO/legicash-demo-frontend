@@ -26,6 +26,7 @@ const defaultValues = {
     /** Record of latest proofs for each tx, if known */
     proofByGUID: Map<Guid, IResponse | Error>(),
     showProofByGUID: Map<string, boolean>(),
+    paymentNotifications: []
 }
 
 /** Updates to portions of the state are stored as thunks of this form */
@@ -63,6 +64,11 @@ export class UIState extends Record(defaultValues) {
             [['displayedAccountsSet'], (s: Set<Address>) => s.remove(address)]
         ])
     }
+
+    public setPaymentNotifications(txs: string[] = []) {
+        this.set('paymentNotifications', txs);
+    }
+
     /** State with tx added */
     public addTx(tx: Transaction, updateBalance: boolean = true): this {
         if (tx === undefined) { throw Error("Attempt to add undefined tx") }

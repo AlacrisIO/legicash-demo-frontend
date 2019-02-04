@@ -6,8 +6,8 @@ import { List } from '../types/immutable'
 import { UIState } from '../types/state'
 import { Wallet } from './wallet'
 
-export const DumbWalletList = ({ wl }: { wl: List<Address> }) =>
-    <Container>
+export const DumbWalletList = ({ wl }: { wl: List<Address> }) => {
+    return <Container>
     <div className={'slider'} style={{marginTop: '10px', marginBottom: '50px' }} >
         {
         ...wl.map((address: Address, key: number) => {
@@ -17,8 +17,12 @@ export const DumbWalletList = ({ wl }: { wl: List<Address> }) =>
         }
     </div>
     </Container>
+}
 
 export const WalletList = connect(
-    (state: UIState) => ({ wl: state.displayedAccounts }),
+    (state: UIState) => ({
+        wl: state.displayedAccounts,
+        wpn: state.paymentNotifications
+    }),
     (dispatch: (a: any) => any) => ({ /* empty */ })
 )(DumbWalletList)

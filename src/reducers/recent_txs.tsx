@@ -16,6 +16,12 @@ export const addTxs = (state: UIState, txs: Transaction[]): UIState => {
     return state
 }
 
+export const setNewPayments = (state: UIState, txIds: string[] = []): UIState => {
+    state.setPaymentNotifications(txIds);
+    return state
+};
+
+
 export const recentTxsFailed = (state: UIState): UIState => {
     // XXX: What to do here???
     return state

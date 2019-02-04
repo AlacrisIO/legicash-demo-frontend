@@ -34,9 +34,7 @@ export function* payment(action: Actions.IPaymentInitiated) {
             }
             if (!resultPending(threadCheck)) { break }
         }
-        const response = threadCheck
-        /* tslint:disable:no-console */
-        console.log(response)
+        const response = threadCheck;
         if (response === undefined) {
             return yield failMsg("Server failure!")
         }

@@ -24,6 +24,7 @@ export enum Action {
     RECENT_TRANSACTIONS_INITIATED,  // Request for recent txs
     RECENT_TRANSACTIONS_RECEIVED,  // Request for recent txs
     RECENT_TRANSACTIONS_FAILED,  // Request for recent txs
+    RECENT_TRANSACTIONS_NEW_PAYMENTS,  // New payments to wallet, launch snackbar
 
     PROOF_TOGGLED,  // Display a Merkle proof
     PROOF_REQUESTED,  // Request for a Merkle proof

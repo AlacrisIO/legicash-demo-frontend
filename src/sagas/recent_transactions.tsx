@@ -1,15 +1,18 @@
 import {delay} from "redux-saga";
-import {call, cancel, fork, put, takeEvery} from 'redux-saga/effects'
+import {call, cancel, fork, put, select, takeEvery} from 'redux-saga/effects'
+import {UIState} from "src/types/state";
 import {post} from '../server/common'
 import * as Actions from "../types/actions";
 import {IRemoveWallet} from "../types/actions";
 import {Address} from '../types/address'
 import * as Chain from '../types/chain'
+import {Guid} from "../types/guid";
 import {Transaction} from '../types/tx'
 
 type hex_string = string
 type hex_number = hex_string
 
+const POLLING_DELAY = 2000;
 const parseHexAsNumber = (h: hex_number) => parseInt(h, 16)
 
 interface IDeposit {
@@ -65,13 +68,14 @@ ${payload.operation}`)
 }
 
 export const txFromWithdrawal = (d: IResponse): Transaction => {
+    console.log("WITHDRAWAL RESPONSE!", d);
     const payload = d.tx_request[1].payload
     if (payload.operation[0] !== "Withdrawal") {
         throw Error(`txFromWithdrawal called with operation which is not a withdrawal!
-${payload.operation}`)
+        ${payload.operation}`)
     }
     const withdrawal = payload.operation[1] as IWithdrawal
-    JSON.stringify(withdrawal)  // Shut linter up
+    console.log(JSON.stringify(withdrawal));  // Shut linter up
     // const transactionType = 'Withdrawal'
     throw Error("Not implemented")
 }
@@ -105,32 +109,52 @@ const responseMap = {
 
 /** Parse a tx from the server response for this transaction. */
 export const txFromResponse = (r: IResponse): Transaction => (
-    responseMap[r.tx_request[1].payload.operation[0]](r)
-        .set('validated', true)
+    responseMap[r.tx_request[1].payload.operation[0]](r).set('validated', true)
 )
 
 export function* recentTxs(action: Actions.IRecentTxsInitiated) {
-    const address = action.address.toString()
+    const address = action.address.toString();
+
     while(true) {
         try {
             const response = yield call(post, 'recent_transactions', { address })
 
             if (response === undefined) {
-                yield put(Actions.recentTxsFailed(
-                    action.address, Error("Server failure!")))
+                yield put(Actions.recentTxsFailed( action.address, Error("Server failure!")))
             }
+
             yield put(Actions.recentTxsReceived(
                 action.address, response.map(txFromResponse).filter(
                     (t: Transaction): boolean => (t.amount as number) > 0)))
+
+            // new payments @todo: luka  move this
+            const recentPaymentTx = yield select(recentPaymentsSelector(address));
+            const newPayments: any[] = [];
+
+            if (!recentPayments.hasOwnProperty(address)) {
+                recentPayments[address] = recentPaymentTx;
+            } else {
+                recentPaymentTx.forEach(
+                    (tx: string) => {
+                        if (recentPayments[address].indexOf(tx) === -1) {
+                            newPayments.push(tx);
+                            recentPayments[address].push(tx);
+                        }
+                    });
+            }
+
+            yield put(Actions.newPaymentsReceived(action.address, newPayments));
+
         } catch (e) {
             yield put(Actions.recentTxsFailed(action.address, e))
         }
 
-        yield delay(1000)
+        yield delay(POLLING_DELAY)
     }
 }
 
 const recentTxTasks = {};
+const recentPayments = {};
 
 const recentHandler = function* (action: Actions.IRecentTxsInitiated) {
     if (!recentTxTasks.hasOwnProperty(action.address.toString())) {
@@ -142,6 +166,7 @@ const removeHandler = function* (action: IRemoveWallet) {
     if (recentTxTasks.hasOwnProperty(action.address.toString())) {
         yield cancel(recentTxTasks[action.address.toString()]);
         delete recentTxTasks[action.address.toString()];
+        delete recentPayments[action.address.toString()];
     }
 };
 
@@ -150,4 +175,16 @@ export const recentTxsListener = function* () {
     const initMatcher =  (ac: Actions.IActionType) => ac.type === Actions.Action.RECENT_TRANSACTIONS_INITIATED;
     yield takeEvery(initMatcher, recentHandler);
     yield takeEvery(removeMatcher, removeHandler);
+};
+
+const recentPaymentsSelector = (address: string) => {
+    return (state: UIState)  => {
+        return state.txByGUID.filter(
+            (i:any) => i.to.address === address && i.transactionType === 'Payment'
+        ).filter(
+            (i:any) => i.creationDate > new Date(Date.now() - POLLING_DELAY)
+        ).map(
+            (i: any, k: Guid) =>  k.toString()
+        ).toArray()
+    }
 };

@@ -70,6 +70,7 @@ export const makeSideChain = (tx: Transaction) =>
     tx.set('dstChain', Chain.Side).set('srcChain', Chain.Side)
 
 export const sidechainIdx = (tx: Transaction): number => {
+    console.log('Requested Proof for: ', tx);
     if (tx.dstChain === Chain.Side) { return tx.dstSideChainRevision as number }
     if (tx.srcChain === Chain.Side) { return tx.dstSideChainRevision as number }
     throw Error(`No sidechain found in tx ${tx}!`)
