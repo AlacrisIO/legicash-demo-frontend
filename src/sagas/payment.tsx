@@ -17,8 +17,7 @@ export function* payment(action: Actions.IPaymentInitiated) {
         // XXX: Copy-pasta from cross_chain.crossChainTx. Factor out
         if (!threadResponse) { throw Error("Server returned null/undefined value!") }
         const failMsg = (msg: string) =>
-            put(Actions.paymentFailed(tx.set('rejected', true),
-                Error("Server failure!")))
+            put(Actions.paymentFailed(tx.set('rejected', true), Error("Server failure!"), action.address));
         if (threadResponse.error) { return yield failMsg(threadResponse.error) }
         const threadNumber = readThread(threadResponse as { result: string })
         let delayTimeMS = 1  // Initial delay time before checking
@@ -43,11 +42,11 @@ export function* payment(action: Actions.IPaymentInitiated) {
         const finalTx = tx.set('validated', true)
             .set('srcSideChainRevision', srcSideChainRevision)
             .set('dstSideChainRevision', dstSideChainRevision)
-        yield put(Actions.paymentValidated(finalTx))
+        yield put(Actions.paymentValidated(finalTx, action.address))
     }
     catch (e) {
         throw e
-        return yield put(Actions.paymentFailed(tx.set('rejected', true), e))
+        return yield put(Actions.paymentFailed(tx.set('rejected', true), e, action.address))
     }
 }
 

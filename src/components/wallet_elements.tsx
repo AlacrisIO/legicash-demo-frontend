@@ -1,4 +1,5 @@
 import * as React from 'react'
+import {Loader} from 'semantic-ui-react';
 
 export const WalletAddress = ({address} : {address: string}) => {
         const linkref = React.createRef() ;
@@ -31,11 +32,13 @@ export const WalletAddress = ({address} : {address: string}) => {
     )
 }
 
-export const OffchainBalance = ({balance} : {balance: number}) => {
+export const OffchainBalance = ({balance, pending = false} : {balance: number, pending: boolean}) => {
+    const loader = pending ? <Loader active={true} inline={true} size={'tiny'} /> : '';
+    const balanceClasses =   pending ? 'infoLabel gray accent' : 'infoLabel black accent';
     return (
         <div className={'infoSection'}>
             <p className={'infoLabel gray '}>Offchain balance:</p>
-            <p className={'infoLabel black accent'} >{balance}</p>
+            <div className={balanceClasses} >{balance}  {loader}</div>
         </div>
     )
 }

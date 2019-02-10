@@ -22,20 +22,22 @@ export interface ICrossChainInitiate extends ICrossChain { /* empty */ }
 /** Represents a request to make a deposit */
 export interface IMakeDeposit extends ICrossChainInitiate {
     readonly type: Action.MAKE_DEPOSIT;
+    readonly address: Address;
 }
 export const makeDeposit = (address: Address, amount: number): IMakeDeposit => {
     const tx = depositTransaction(address, amount)
-    return { type: Action.MAKE_DEPOSIT, tx }
+    return { type: Action.MAKE_DEPOSIT, tx, address }
 }
 
 /** Represents a request to make a deposit */
 export interface IMakeWithdrawal extends ICrossChainInitiate {
     readonly type: Action.MAKE_WITHDRAWAL;
+    readonly address: Address;
 }
 export const makeWithdrawal = (address: Address, amount: number
 ): IMakeWithdrawal => {
     const tx = withdrawTransaction(address, amount)
-    return { type: Action.MAKE_WITHDRAWAL, tx }
+    return { type: Action.MAKE_WITHDRAWAL, tx, address}
 }
 
 /** Represents a crosschain transaction validated by the server */
@@ -43,6 +45,7 @@ export interface ICrossChainValidated extends ICrossChain, IServerResponse {
     // New balance for the depositing user, per the server.
     readonly newBalance: number;
     readonly serverResponse: Transaction;
+    readonly address: Address;
 }
 
 const validatedMessage = (action: Action) =>
@@ -52,7 +55,7 @@ const validatedMessage = (action: Action) =>
             throw Error('Received unvalidated tx!')
         }
         tx.assertSameTransaction(serverResponse)  // Same tx, w/ more info?
-        return { newBalance, serverResponse, tx, type: action }
+        return { newBalance, serverResponse, tx, type: action, address }
     }
 
 /** Represents that deposit has been validated by server. */
@@ -82,13 +85,15 @@ const failedMessage = (action: Action) =>
 
 /** Represents rejection of deposit by server. */
 export interface IDepositFailed extends ICrossChainFailed {
-    type: Action.DEPOSIT_FAILED
+    type: Action.DEPOSIT_FAILED;
+    readonly address: Address;
 }
 export const depositFailed = failedMessage(Action.DEPOSIT_FAILED)
 
 /** Represents rejection of withdrawal by server. */
 export interface IWithdrawalFailed extends ICrossChainFailed {
-    type: Action.WITHDRAWAL_FAILED
+    type: Action.WITHDRAWAL_FAILED;
+    readonly address: Address;
 }
 export const withdrawalFailed = failedMessage(Action.WITHDRAWAL_FAILED)
 

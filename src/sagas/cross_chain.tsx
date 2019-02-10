@@ -128,7 +128,7 @@ const dummyMainChain = (r: ICrossChainServerResponse) =>
 export const makeDeposit = crossChainTx(
     'deposit', Actions.depositValidated, Actions.depositFailed,
     dummyMainChain, parseSideChain
-)
+);
 
 export const depositListener = listener(Actions.Action.MAKE_DEPOSIT, makeDeposit)
 

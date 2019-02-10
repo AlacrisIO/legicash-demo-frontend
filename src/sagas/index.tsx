@@ -4,13 +4,14 @@ import * as Payment from './payment'
 import * as Proofs from './proofs'
 import * as RecentTxs from './recent_transactions'
 
+(window as any).pause = false;
 export function* rootSaga() {
     yield [
-        Balances.balances(),
-        Crosschain.depositListener(),
-        Crosschain.withdrawalListener(),
-        Payment.paymentListener(),
-        RecentTxs.recentTxsListener(),
-        Proofs.proofRequestListener(),
-    ]
+            Balances.balances(),
+            Crosschain.depositListener(),
+            Crosschain.withdrawalListener(),
+            Payment.paymentListener(),
+            RecentTxs.recentTxsListener(),
+            Proofs.proofRequestListener(),
+    ];
 }

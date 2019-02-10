@@ -26,8 +26,19 @@ const defaultValues = {
     /** Record of latest proofs for each tx, if known */
     proofByGUID: Map<Guid, IResponse | Error>(),
     showProofByGUID: Map<string, boolean>(),
-    paymentNotifications: []
+    paymentNotifications: [],
+    pendingStates: Map<Address, IPendingState>(),
 }
+
+export interface IPendingState {
+    deposit: boolean;
+    withdrawal: boolean;
+    payment: boolean;
+}
+
+export const DefaultPendingStates: IPendingState = {deposit: false, withdrawal: false, payment: false};
+
+type PendingStateAction = 'deposit' | 'withdrawal' | 'payment';
 
 /** Updates to portions of the state are stored as thunks of this form */
 type updatesType = Array<[any[], (a: any) => any]>
@@ -67,6 +78,25 @@ export class UIState extends Record(defaultValues) {
 
     public setPaymentNotifications(txs: string[] = []) {
         this.set('paymentNotifications', txs);
+    }
+
+    public getPendingStates(address: Address): IPendingState {
+        if (!this.pendingStates.has(address)) {
+            this.pendingStates.set(address, {deposit: false, withdrawal: false, payment: false});
+        }
+
+        return {
+            deposit: this.getIn(['pendingStates', address, 'deposit']) || false,
+            withdrawal: this.getIn(['pendingStates', address, 'withdrawal']) || false,
+            payment: this.getIn(['pendingStates', address, 'payment']) || false,
+        };
+    }
+
+    public setPendingState(action: PendingStateAction, address: Address, isPending: boolean = true): this {
+        if (!this.pendingStates.has(address)) {
+            this.pendingStates.set(address, DefaultPendingStates);
+        }
+        return this.setIn(['pendingStates', address, action], isPending);
     }
 
     /** State with tx added */

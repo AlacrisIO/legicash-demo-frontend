@@ -9,10 +9,11 @@ import * as Chain from '../types/chain'
 import {Guid} from "../types/guid";
 import {Transaction} from '../types/tx'
 
+
+const POLLING_DELAY = 1000 * 10;
 type hex_string = string
 type hex_number = hex_string
 
-const POLLING_DELAY = 2000;
 const parseHexAsNumber = (h: hex_number) => parseInt(h, 16)
 
 interface IDeposit {
@@ -50,16 +51,14 @@ interface IResponse {
 export const txFromDeposit = (d: IResponse): Transaction => {
     const payload = d.tx_request[1].payload
     if (payload.operation[0] !== "Deposit") {
-        throw Error(`txFromDeposit called with operation which is not a deposit!
-${payload.operation}`)
-    }
+        throw Error(`txFromDeposit called with operation which is not a deposit! ${payload.operation}`) }
     const deposit = payload.operation[1] as IDeposit
     const address = new Address(deposit.main_chain_deposit.tx_header.sender)
     const amount = parseHexAsNumber(deposit.deposit_amount)
-    const dstSideChainRevision = parseHexAsNumber(
-        d.tx_header.tx_revision)
+    const dstSideChainRevision = parseHexAsNumber(d.tx_header.tx_revision)
     const transactionType = 'Deposit'
     const blockNumber = parseHexAsNumber(deposit.main_chain_deposit_confirmation.block_number);
+
     return new Transaction({
         // XXX: Move side-chain determination logic into chain.tsx
         amount, blockNumber, dstChain: Chain.Chain.Side, dstSideChainRevision,
@@ -84,8 +83,7 @@ export const txFromWithdrawal = (d: IResponse): Transaction => {
 export const txFromPayment = (p: IResponse): Transaction => {
     const payload = p.tx_request[1].payload
     if (payload.operation[0] !== "Payment") {
-        throw Error(`txFromPayment called with operation which is not a payment!
-${payload.operation}`)
+        throw Error(`txFromPayment called with operation which is not a payment!${payload.operation}`)
     }
     const payment = payload.operation[1] as IPayment
     const amount = parseHexAsNumber(payment.payment_invoice.amount)
