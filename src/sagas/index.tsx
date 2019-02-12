@@ -1,3 +1,4 @@
+import { all } from "redux-saga/effects";
 import * as Balances from './balances'
 import * as Crosschain from './cross_chain'
 import * as Payment from './payment'
@@ -6,12 +7,12 @@ import * as RecentTxs from './recent_transactions'
 
 (window as any).pause = false;
 export function* rootSaga() {
-    yield [
+    yield all([
             Balances.balances(),
             Crosschain.depositListener(),
             Crosschain.withdrawalListener(),
             Payment.paymentListener(),
             RecentTxs.recentTxsListener(),
             Proofs.proofRequestListener(),
-    ];
+    ]);
 }
