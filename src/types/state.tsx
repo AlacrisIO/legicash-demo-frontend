@@ -102,6 +102,7 @@ export class UIState extends Record(defaultValues) {
     /** State with tx added */
     public addTx(tx: Transaction, updateBalance: boolean = true): this {
         if (tx === undefined) { throw Error("Attempt to add undefined tx") }
+        
         if (tx.dstSideChainRevision !== undefined &&
             this.txByDstSideChainRevision.has(tx.dstSideChainRevision)) {
             const oldGUID = this.txByDstSideChainRevision.get(

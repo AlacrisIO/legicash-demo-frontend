@@ -47,7 +47,7 @@ export const isDeposit = (tx: Transaction) =>
 export const depositTransaction =
     (address: Address, amount: number, revision?: number): Transaction => {
         const details = {
-            amount, from: address, to: address, dstSideChainRevision: revision
+            amount, from: address, to: address, dstSideChainRevision: revision, transactionType: 'Deposit'
         }
         const direction = { dstChain: Chain.Side, srcChain: Chain.Main }
         return new Transaction({ ...details, ...direction })
@@ -57,7 +57,7 @@ export const depositTransaction =
 export const withdrawTransaction =
     (address: Address, amount: number, revision?: number): Transaction => {
         const details = {
-            amount, from: address, to: address, srcSideChainRevision: revision
+            amount, from: address, to: address, srcSideChainRevision: revision, transactionType: 'Withdrawal'
         }
         const direction = { dstChain: Chain.Main, srcChain: Chain.Side }
         return new Transaction({ ...details, ...direction })

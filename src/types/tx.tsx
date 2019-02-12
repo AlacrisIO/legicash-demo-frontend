@@ -10,7 +10,8 @@ import { Record } from './immutable'
 
 /* tslint:disable:object-literal-sort-keys */
 interface IOptionTypes {  // Declare types where they can't be inferred
-    amount: number | undefined
+    amount: number | undefined,
+    fee: number | undefined,
     creationDate: Date | undefined,
     localGUID: Guid | undefined
     rejected: boolean | undefined
@@ -25,6 +26,8 @@ interface IOptionTypes {  // Declare types where they can't be inferred
 const optionValues: IOptionTypes = {
     /** Amount transferred. Cannot be negative. */
     amount: undefined,
+    /** Transaction fee if applicable */
+    fee: undefined,
     /** LOCAL time that this tx was created. */
     creationDate: undefined,
     /** Privately assigned ID for tracking within the front end */
@@ -143,13 +146,13 @@ export class Transaction extends Record(defaultValues) {
     /** Throw if o contains contradictory information to this tx. */
     public assertSameTransaction(o: Transaction): boolean {
         const areDifferent = this.txsDiffer(o)
+
         if (areDifferent) {
             const [description, accessor] = areDifferent
-            throw Error(`${description} differ in transactions
-${this.toString()} vs ${o.toString()}:
-(${accessor(this)} != ${accessor(o)})`)
+            throw Error(`${description} differ in transactions ${this.toString()} vs ${o.toString()}: (${accessor(this)} != ${accessor(o)})`)
         }
-        return true
+
+        return true;
     }
 
     public getGUID(): Guid {
@@ -175,6 +178,10 @@ ${this.toString()} vs ${o.toString()}:
 
     public getBlockNumber(): number {
         return this.blockNumber as number
+    }
+
+    public getFee(): number | undefined {
+        return this.fee;
     }
 
     public getDstSideChainRevision(): number {
