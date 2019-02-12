@@ -152,7 +152,7 @@ export function* recentTxs(action: Actions.IRecentTxsInitiated) {
                 action.address, response.map(txFromResponse).filter(
                     (t: Transaction): boolean => (t.amount as number) > 0)))
 
-            // new payments @todo: luka  move this
+            // new payments @todo: luka  Getting the actual new payments would at least require a solid creation date
             // const recentPaymentTx = yield select(recentPaymentsSelector(address));
             // const newPayments: any[] = [];
             //

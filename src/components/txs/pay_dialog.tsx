@@ -47,7 +47,7 @@ export class PayDialog extends React.Component<IPayDialog, {}> {
                     <br/>
                     <label className={'black accent infoLabel'}>Amount: {this.props.loading} </label>
                     <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                        <AmountField callback={this.setAmount} />
+                        <AmountField callback={this.setAmount} placeholder={'Amount for payment'} />
                         <Button basic={true} color={'blue'} loading={this.props.loading} className="paySubmitButton" type="submit">Submit</Button>
                     </div>
                 </form>
