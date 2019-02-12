@@ -3,7 +3,7 @@ import { call, put } from 'redux-saga/effects'
 import { get } from '../server/common'
 import * as Actions from '../types/actions'
 
-const BALANCES_POLLING_DELAY = 1000 * 10;
+const BALANCES_POLLING_DELAY = 1000;
 type hexString = string
 type hexNumber = hexString
 

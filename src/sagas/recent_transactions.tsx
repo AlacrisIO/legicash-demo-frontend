@@ -10,7 +10,7 @@ import * as Chain from '../types/chain'
 import {Transaction} from '../types/tx'
 
 
-const POLLING_DELAY = 1000 * 10;
+const POLLING_DELAY = 1000;
 type hex_string = string
 type hex_number = hex_string
 
@@ -80,8 +80,7 @@ export const txFromWithdrawal = (d: IResponse): Transaction => {
     const payload = d.tx_request[1].payload;
 
     if (payload.operation[0] !== "Withdrawal") {
-        throw Error(`txFromWithdrawal called with operation which is not a withdrawal!
-        ${payload.operation}`)
+        throw Error(`txFromWithdrawal called with operation which is not a withdrawal! ${payload.operation}`)
     }
 
     const transactionType = 'Withdrawal'
@@ -90,7 +89,6 @@ export const txFromWithdrawal = (d: IResponse): Transaction => {
     const amount = parseHexAsNumber(withdrawal.withdrawal_amount);
     const fee = parseHexAsNumber(withdrawal.withdrawal_fee);
     const address = new Address(payload.rx_header.requester);
-    console.log(JSON.stringify(withdrawal));  // Shut linter up
 
     return new Transaction({
         // XXX: Move side-chain determination logic into chain.tsx
@@ -104,7 +102,7 @@ export const txFromWithdrawal = (d: IResponse): Transaction => {
         to: address,
         transactionType,
     });
-}
+};
 
 /* tslint:disable:object-literal-sort-keys */
 export const txFromPayment = (p: IResponse): Transaction => {
