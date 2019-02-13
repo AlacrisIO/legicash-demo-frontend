@@ -135,21 +135,21 @@ export class DumbWallet extends React.Component<IWallet> {
 
     public hasActionsPending = () => this.props.pendingStates.deposit || this.props.pendingStates.withdrawal || this.props.pendingStates.payment;
 
-    public makeDeposit = (amount: number) => {
+    public makeDeposit = (amount: number): void => {
         if (!this.props.pendingStates.deposit) {
-            return this.props.depositCallback(amount);
+            this.props.depositCallback(amount);
         }
     };
 
-    public makeWithdrawal = (amount: number) => {
+    public makeWithdrawal = (amount: number): void => {
         if (!this.props.pendingStates.withdrawal) {
-            return this.props.withdrawCallback(amount);
+            this.props.withdrawCallback(amount);
         }
     };
 
-    public makePayment = (to: Address, amount: number) => {
+    public makePayment = (to: Address, amount: number): void => {
         if (!this.props.pendingStates.payment) {
-            return this.props.payCallback(to, amount);
+            this.props.payCallback(to, amount);
         }
     };
 }
@@ -165,14 +165,14 @@ const stateToProps = (address: Address) => (state: UIState) => {
     const pendingStates = state.getPendingStates(address) || DefaultPendingStates;
 
     return { txs, wallet, pendingStates}
-}
+};
 
 const dispatchToProps = (address: Address) => (dispatch: (a: any) => any) => ({
     depositCallback: (a: number) => dispatch(makeDeposit(address, a)),
     killCallback: () => dispatch(removeWallet(address)),
     payCallback: (to: Address, a: number) => dispatch(makePayment(to, address, a)),
     withdrawCallback: (a: number) => dispatch(makeWithdrawal(address, a)),
-})
+});
 
 export const Wallet = ({ address }: { address: Address }) =>
     connect(stateToProps(address), dispatchToProps(address))(DumbWallet) 
