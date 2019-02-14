@@ -28,7 +28,7 @@ const defaultValues = {
     showProofByGUID: Map<string, boolean>(),
     paymentNotifications: [],
     pendingStates: Map<Address, IPendingState>(),
-}
+};
 
 export interface IPendingState {
     deposit: boolean;
@@ -50,6 +50,7 @@ export class UIState extends Record(defaultValues) {
     }
     /** State with wallet added, if necessary. */
     public addWallet(username: string, address: Address): this {
+
         const updates: updatesType = [
             [['accounts', address],  // Add the wallet to the accounts list
             (w: Wallet) => {
@@ -60,19 +61,24 @@ export class UIState extends Record(defaultValues) {
                 return makeWalletWithTxList(
                     address, allTxs, this.txByGUID, username)
             }]
-        ]
+        ];
+
         if (!this.displayedAccountsSet.has(address)) {
             updates.push(
                 [['displayedAccounts'], (l: List<Address>) => l.push(address)],
                 [['displayedAccountsSet'], (s: Set<Address>) => s.add(address)])
         }
+
         return this.multiUpdateIn(updates)
+            .setIn(['pendingStates', address], {...DefaultPendingStates});
     }
+
     public removeWallet(address: Address): this {
         return this.multiUpdateIn([
             [['displayedAccounts'], (l: List<Address>) =>
                 l.remove(l.findIndex((a: Address) => a === address))],
-            [['displayedAccountsSet'], (s: Set<Address>) => s.remove(address)]
+            [['displayedAccountsSet'], (s: Set<Address>) => s.remove(address)],
+            [['pendingStates'], (m: Map<Address, IPendingState>) => m.remove(address)]
         ])
     }
 
@@ -82,25 +88,25 @@ export class UIState extends Record(defaultValues) {
 
     public getPendingStates(address: Address): IPendingState {
         if (!this.pendingStates.has(address)) {
-            this.pendingStates.set(address, {deposit: false, withdrawal: false, payment: false});
+            this.pendingStates.set(address, {...DefaultPendingStates});
         }
 
-        return {
-            deposit: this.getIn(['pendingStates', address, 'deposit']) || false,
-            withdrawal: this.getIn(['pendingStates', address, 'withdrawal']) || false,
-            payment: this.getIn(['pendingStates', address, 'payment']) || false,
-        };
+        return this.pendingStates.get(address);
     }
 
-    public setPendingState(action: PendingStateAction, address: Address, isPending: boolean = true): this {
-        if (!this.pendingStates.has(address)) {
-            this.pendingStates.set(address, DefaultPendingStates);
+    public setPendingState(action: PendingStateAction, address: Address | undefined, isPending: boolean = true): this {
+        if (address && this.pendingStates.has(address)) {
+            return this.setIn(
+                ['pendingStates', address],
+                {...this.getPendingStates(address), ...{[action]: isPending}}
+            );
         }
-        return this.setIn(['pendingStates', address, action], isPending);
+
+        return this;
     }
 
     /** State with tx added */
-    public addTx(tx: Transaction, updateBalance: boolean = true): this {
+    public addTx(tx: Transaction, updateBalance: boolean = false): this {
         if (tx === undefined) { throw Error("Attempt to add undefined tx") }
         
         if (tx.dstSideChainRevision !== undefined &&

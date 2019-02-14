@@ -48,15 +48,19 @@ export const rootReducer = (state: UIState, action: Actions.IActionType)
 
         // Side-chain payment-related actions
         case Actions.Action.PAYMENT_INITIATED:
-            return state.setPendingState('payment', (action as Actions.IPaymentInitiated).address, true).addTx((action as Actions.IPaymentAction).tx)
+            return state.setPendingState('payment', (action as Actions.IPaymentInitiated).address, true)
+                   .setPendingState('payment', (action as Actions.IPaymentInitiated).toAddress, true)
+                   .addTx((action as Actions.IPaymentAction).tx, false);
 
         case Actions.Action.PAYMENT_VALIDATED:
-            const { tx: PayValidTx, address: PayValidFrom } = action as Actions.IPaymentValidated;
-            return  state.setPendingState('payment', PayValidFrom, false)
-                .updateTx(PayValidTx.getGUID(), PayValidTx);
+            const { tx: PayValidTx} = action as Actions.IPaymentValidated;
+            return  state.setPendingState('payment', (action as Actions.IPaymentInitiated).address, false)
+                    .setPendingState('payment', (action as Actions.IPaymentInitiated).toAddress, false)
+                    .updateTx(PayValidTx.getGUID(), PayValidTx);
 
         case Actions.Action.PAYMENT_FAILED:
             return state.setPendingState('payment', (action as Actions.IPaymentFailed).address, false)
+                .setPendingState('payment', (action as Actions.IPaymentFailed).toAddress, false)
                 .rejectTx((action as Actions.IPaymentFailed).tx);
 
         // Facilitator-state-related actions

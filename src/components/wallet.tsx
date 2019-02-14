@@ -1,20 +1,18 @@
 import * as React from 'react'
-import { connect } from 'react-redux'
-import { Accordion, Header, Icon, Segment} from 'semantic-ui-react'
-import { addresses as allAddresses } from '../server/ethereum_addresses'
-import {
-    makeDeposit, makePayment, makeWithdrawal, removeWallet
-} from '../types/actions'
-import { Address } from '../types/address'
-import { Guid } from '../types/guid'
-import { DefaultPendingStates, IPendingState, UIState } from '../types/state'
-import { Transaction } from '../types/tx'
-import { Wallet as WalletType } from '../types/wallet'
+import {connect} from 'react-redux'
+import {Accordion, Header, Icon, Segment} from 'semantic-ui-react'
+import {addresses as allAddresses} from '../server/ethereum_addresses'
+import {makeDeposit, makePayment, makeWithdrawal, removeWallet} from '../types/actions'
+import {Address} from '../types/address'
+import {Guid} from '../types/guid'
+import {IPendingState, UIState} from '../types/state'
+import {Transaction} from '../types/tx'
+import {Wallet as WalletType} from '../types/wallet'
 import {SectionTitle} from './section_title'
-import { TxList } from './tx_list'  // Will need this later...
-import { DepositDialog } from './txs/deposit_dialog'
-import { PayDialog } from './txs/pay_dialog'
-import { WithdrawDialog } from './txs/withdraw_dialog'
+import {TxList} from './tx_list' // Will need this later...
+import {DepositDialog} from './txs/deposit_dialog'
+import {PayDialog} from './txs/pay_dialog'
+import {WithdrawDialog} from './txs/withdraw_dialog'
 import {OffchainBalance, OnchainBalance, WalletAddress} from './wallet_elements'
 
 export const addressNames: { Address: string } = {} as any
@@ -54,7 +52,7 @@ export class DumbWallet extends React.Component<IWallet> {
             openSwitches[k] = !openSwitches[k];
             this.setState({ open: openSwitches})
         }
-    }
+    };
 
     public isOpen(k: string): boolean {
         return this.state.open.hasOwnProperty(k) && this.state.open[k];
@@ -155,14 +153,16 @@ export class DumbWallet extends React.Component<IWallet> {
 }
 
 const stateToProps = (address: Address) => (state: UIState) => {
-    const wallet = state.accounts.get(address)
+    const wallet = state.accounts.get(address);
+    const pendingStates = state.getPendingStates(address);
+
     if (wallet === undefined) {
         throw Error(`Wallet for unknown address! ${address}`)
     }
-    const txs: Transaction[] = wallet.txs.map(
-        (g: Guid): Transaction => state.txByGUID.get(g)).toArray()
 
-    const pendingStates = state.getPendingStates(address) || DefaultPendingStates;
+    const txs: Transaction[] = wallet.txs.map(
+        (g: Guid): Transaction => state.txByGUID.get(g)
+    ).toArray();
 
     return { txs, wallet, pendingStates}
 };
