@@ -42,6 +42,11 @@ export const DumbTx = ({ tx, requestProof, requestToggle, show, owner }: ITx): J
 
     let toAndFrom = <span/>;
 
+    const feeInfo = tx.fee ?  <div className={'lrsplit txsSegment'}><span style={{flex: 0.5}}>
+                    <span className={'gray'} >Fee: </span>
+                    <span className={'black'}> {tx.fee}</span>
+    </span></div> : '';
+
     if (tx.getType() === 'Payment') {
         toAndFrom = <div className={'lrsplit txsSegment'}>
                 <span style={{flex: 0.5}}>
@@ -62,7 +67,7 @@ export const DumbTx = ({ tx, requestProof, requestToggle, show, owner }: ITx): J
                     <span className={'black'}>{tx.getType()}</span>
                 </span>
             </div>
-        {toAndFrom}
+            {toAndFrom}
             <div className={'lrsplit txsSegment'}>
                 <span style={{flex: 0.5}}>
                     <span className={'gray'} >Amount: </span>
@@ -73,6 +78,7 @@ export const DumbTx = ({ tx, requestProof, requestToggle, show, owner }: ITx): J
                     <span className={'black'}> {txClass(tx)}</span>
                 </span>
             </div>
+            {feeInfo}
             <ProofDisplay tx={tx} requestProof={requestProof} requestToggle={requestToggle}  show={show} />
     </Segment>)
 }

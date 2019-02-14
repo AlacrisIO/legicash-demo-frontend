@@ -13,12 +13,13 @@ import { UIState } from './types/state'
 
 const sagaMiddleware = createSagaMiddleware()
 
-const initialState = new UIState({})
-export const store = createStore(rootReducer, initialState, 
-    compose(
-        applyMiddleware(sagaMiddleware)
-    )
-);
+const initialState = new UIState({});
+
+const enchancers = (window as any).__REDUX_DEVTOOLS_EXTENSION__ ? 
+    compose( applyMiddleware(sagaMiddleware), (window as any).__REDUX_DEVTOOLS_EXTENSION__()) : 
+    compose(applyMiddleware(sagaMiddleware));
+
+export const store = createStore(rootReducer, initialState, enchancers);
 
 
 /* This MUST be run after the app has been rendered. Hence the thunk */

@@ -2,7 +2,7 @@ import { mount } from 'enzyme'
 import * as React from 'react'
 import { Address, emptyAddress } from '../../types/address'
 import { knownAddresses, name } from '../select_account'
-import { DumbPayDialog } from './pay_dialog'
+import { PayDialog } from './pay_dialog'
 
 const addresses = knownAddresses.toList().sortBy(name)
 const fromIdx = 9
@@ -16,7 +16,7 @@ describe('PayDialog tests', () => {
     let numCalls: number = 0
     const dialog = mount(
         /* tslint:disable:jsx-no-lambda */
-        <DumbPayDialog from={fromAddress} submitCallback={(newTo, newAmount) => {
+        <PayDialog from={fromAddress} loading={false} submitCallback={(newTo, newAmount) => {
             amount = newAmount; to = newTo; numCalls += 1
         }} />)
 

@@ -16,12 +16,19 @@ export const recentTxsInitiated = (address: Address): IRecentTxsInitiated => {
 export interface IRecentTxsReceived extends IRecentTxs {
     txs: Transaction[]
 }
+export interface IRecentTxsNewPayments extends IRecentTxs {
+    txIds: string[]
+}
+
 export const recentTxsReceived = (address: Address, txs: Transaction[]) => (
     { address, txs, type: Action.RECENT_TRANSACTIONS_RECEIVED }
-)
+);
 
 export interface IRecentTxsFailed extends IRecentTxs { error: Error }
 export const recentTxsFailed = (address: Address, error: Error) => ({
     address, error, type: Action.RECENT_TRANSACTIONS_FAILED
-})
+});
 
+export const newPaymentsReceived = (address: Address, txIds: string[]) => ({
+        address, txIds, type: Action.RECENT_TRANSACTIONS_NEW_PAYMENTS
+});

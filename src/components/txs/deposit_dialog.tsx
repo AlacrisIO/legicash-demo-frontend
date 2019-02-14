@@ -9,7 +9,8 @@ interface IDepositDialog {
      * (and to which it should be credited on the side chain)
      */
     from: Address;
-    submitCallback: (v: number) => void
+    submitCallback: (v: number) => void;
+    loading: boolean;
 }
 
 const header = (a: Address) => (
@@ -18,10 +19,11 @@ const header = (a: Address) => (
 
 
 /** Form for specifying how much to deposit from main chain */
-export const DepositDialog = ({ from, submitCallback }: IDepositDialog) => (
+export const DepositDialog = ({ from, submitCallback, loading = false }: IDepositDialog) => (
     <AmountDialog
         header={header(from)}
         placeholder={'Amount to deposit'}
         submitCallback={submitCallback}
+        loading={loading}
     />
 )

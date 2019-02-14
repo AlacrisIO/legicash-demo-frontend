@@ -9,7 +9,8 @@ interface IWithdrawDialog {
      * (and to which it should be credited on the main chain)
      */
     from: Address;
-    submitCallback: (v: number) => void
+    submitCallback: (v: number) => void;
+    loading: boolean;
 }
 
 const header = (a: Address) => (
@@ -17,10 +18,11 @@ const header = (a: Address) => (
 )
 
 /** Form for specifying how much to withdraw from main chain */
-export const WithdrawDialog = ({ from, submitCallback }: IWithdrawDialog) => (
+export const WithdrawDialog = ({ from, submitCallback, loading = false }: IWithdrawDialog) => (
     <AmountDialog
         header={header(from)} 
         placeholder={'Amount to withdraw'}
         submitCallback={submitCallback}
+        loading={loading}
     />
 )

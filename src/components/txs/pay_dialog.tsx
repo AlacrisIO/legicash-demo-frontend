@@ -1,7 +1,5 @@
 import * as React from 'react';
-import { connect } from 'react-redux'
 import { Button } from 'semantic-ui-react'
-import * as Actions from '../../types/actions'
 import { Address, emptyAddress } from '../../types/address'
 import { knownAddresses, name, SelectAccount } from '../select_account'
 import { AmountField } from './amount_field'
@@ -10,12 +8,13 @@ export interface IPayDialog {
     /** The address the payment will be sent from */
     from: Address;
     /** Submit receiver. `amount`: how much to send, `to`: who to send to */
-    submitCallback: (to: Address, amount: number) => void
+    submitCallback: (to: Address, amount: number) => void;
+    loading: boolean;
 }
 
-export class DumbPayDialog extends React.Component<IPayDialog, {}> {
-    public state: { amount: number; to: Address } = {
-        amount: 0, to: emptyAddress
+export class PayDialog extends React.Component<IPayDialog, {}> {
+    public state: { amount: number; to: Address, loading: boolean } = {
+        amount: 0,  loading: false, to: emptyAddress
     }
     public constructor(props: IPayDialog) {
         super(props)
@@ -46,21 +45,13 @@ export class DumbPayDialog extends React.Component<IPayDialog, {}> {
                             select={this.setTo}
                         />
                     <br/>
-                    <label className={'black accent infoLabel'}>Amount:</label>
+                    <label className={'black accent infoLabel'}>Amount: {this.props.loading} </label>
                     <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                        <AmountField callback={this.setAmount} />
-                        <Button basic={true} color={'blue'} className="paySubmitButton" type="submit">Submit</Button>
+                        <AmountField callback={this.setAmount} placeholder={'Amount for payment'} />
+                        <Button basic={true} color={'blue'} loading={this.props.loading} className="paySubmitButton" type="submit">Submit</Button>
                     </div>
                 </form>
             </div >
         )
     }
 }
-
-export const PayDialog = connect(
-    null, /* No need to map state to component properties */
-    (dispatch: (a: any) => any, props: IPayDialog) => ({
-        submitCallback: (to: Address, amount: number) =>
-            dispatch(Actions.makePayment(to, props.from, amount))
-    }))(DumbPayDialog)
-

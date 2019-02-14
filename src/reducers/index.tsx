@@ -11,30 +11,57 @@ export const rootReducer = (state: UIState, action: Actions.IActionType)
         // XXX: Since the reductions are identical for deposit/withdraw, could
         // fold those events into each other?
 
+        // -- DEPOSIT --
         // Deposit-related actions; see ../types/actions/cross_chain_txs.tsx
         case Actions.Action.MAKE_DEPOSIT:
-            return state.addTx((action as Actions.IMakeDeposit).tx)
+            const {tx: MakeDepositTx, address: MakeDepositFrom} = action as Actions.IMakeDeposit;
+            return state.setPendingState('deposit', MakeDepositFrom, true).addTx(MakeDepositTx, false);
+
         case Actions.Action.DEPOSIT_VALIDATED:
-            return Crosschain.updateTx(state, action as Actions.ICrossChainValidated)
+            return Crosschain.updateTx(
+                state.setPendingState('deposit', (action as Actions.IDepositValidated).address, false),
+                action as Actions.ICrossChainValidated
+            );
+
         case Actions.Action.DEPOSIT_FAILED:
-            return Crosschain.rejectTx(state, action as Actions.ICrossChainFailed)
+            return Crosschain.rejectTx(
+                state.setPendingState('deposit', (action as Actions.IDepositFailed).address, false),
+                action as Actions.ICrossChainFailed
+            );
 
         // Withdrawal-related actions; see ../types/actions/cross_chain_txs.tsx
         case Actions.Action.MAKE_WITHDRAWAL:
-            return state.addTx((action as Actions.IMakeWithdrawal).tx)
+            return state.setPendingState('withdrawal', (action as Actions.IMakeWithdrawal).address, true)
+            .addTx((action as Actions.IMakeWithdrawal).tx, false)
+
         case Actions.Action.WITHDRAWAL_VALIDATED:
-            return Crosschain.updateTx(state, action as Actions.ICrossChainValidated)
+            return Crosschain.updateTx(
+                state.setPendingState('withdrawal', (action as Actions.IWithdrawalValidated).address, false),
+                action as Actions.ICrossChainValidated
+            );
+
         case Actions.Action.WITHDRAWAL_FAILED:
-            return Crosschain.rejectTx(state, action as Actions.ICrossChainFailed)
+            return Crosschain.rejectTx(
+                state.setPendingState('withdrawal', (action as Actions.IWithdrawalFailed).address, false),
+                action as Actions.ICrossChainFailed
+            );
 
         // Side-chain payment-related actions
         case Actions.Action.PAYMENT_INITIATED:
-            return state.addTx((action as Actions.IPaymentAction).tx)
+            return state.setPendingState('payment', (action as Actions.IPaymentInitiated).address, true)
+                   .setPendingState('payment', (action as Actions.IPaymentInitiated).toAddress, true)
+                   .addTx((action as Actions.IPaymentAction).tx, false);
+
         case Actions.Action.PAYMENT_VALIDATED:
-            const { tx } = action as Actions.IPaymentValidated
-            return state.updateTx(tx.getGUID(), tx)
+            const { tx: PayValidTx} = action as Actions.IPaymentValidated;
+            return  state.setPendingState('payment', (action as Actions.IPaymentInitiated).address, false)
+                    .setPendingState('payment', (action as Actions.IPaymentInitiated).toAddress, false)
+                    .updateTx(PayValidTx.getGUID(), PayValidTx);
+
         case Actions.Action.PAYMENT_FAILED:
-            return state.rejectTx((action as Actions.IPaymentFailed).tx)
+            return state.setPendingState('payment', (action as Actions.IPaymentFailed).address, false)
+                .setPendingState('payment', (action as Actions.IPaymentFailed).toAddress, false)
+                .rejectTx((action as Actions.IPaymentFailed).tx);
 
         // Facilitator-state-related actions
         case Actions.Action.BALANCES_OBSERVED:
@@ -47,6 +74,9 @@ export const rootReducer = (state: UIState, action: Actions.IActionType)
         case Actions.Action.RECENT_TRANSACTIONS_RECEIVED:
             return RecentTxs.addTxs(
                 state, (action as Actions.IRecentTxsReceived).txs)
+        case Actions.Action.RECENT_TRANSACTIONS_NEW_PAYMENTS:
+            return RecentTxs.setNewPayments(
+                state, (action as Actions.IRecentTxsNewPayments).txIds)
         case Actions.Action.RECENT_TRANSACTIONS_FAILED:
             return RecentTxs.recentTxsFailed(state) // XXX: Reflect in UI??
 

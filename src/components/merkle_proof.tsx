@@ -122,7 +122,10 @@ interface IProofDisplay { requestProof: () => void; requestToggle: () => void; s
 
 /** Button in tx table row which allows user to toggle/request proof display */
 export class ProofDisplay extends React.Component<IProofDisplay, {}> {
-    public state = { display: false }
+    public state = { 
+        display: false,
+        proofOpen: false
+    }
 
     public constructor(props: IProofDisplay) {
         super(props)
@@ -152,12 +155,14 @@ export class ProofDisplay extends React.Component<IProofDisplay, {}> {
             exploreBlockLink = <a className={'bluelink'} onClick={this.exploreBlock}>Explore block</a>
         }
 
+        const merkleProofLinkText = this.props.show ? 'Hide Merkle Proof' : 'Show Merkle Proof';
+
         return <div style={{marginTop: '10px'}}>
             <div className={'lrsplit'}>
                 <span className={'black accent'}>Info</span>
             </div>
             <div className={'lrsplit'}>
-                <a className={'bluelink'} onClick={this.getProof}>Show Merkle Proof</a>
+            <a className={'bluelink'} onClick={this.getProof}>{merkleProofLinkText}</a>
                 {exploreBlockLink}
             </div>
             {display}

@@ -25,3 +25,9 @@ yarn-error.log*
 
 .env
 .idea
+
+configs/*.env
+!configs/demo.env
+!configs/dev.env
+!configs/production.env
+!configs/staging.env

@@ -29,6 +29,7 @@ const recentTxMocks = {
 }
 
 describe('Recent Txs tests', () => {
+
     it('Sends the address as part of the request', () => {
         return expectSaga(recentTxs, recentTxsInitiated(address))
             .provide(recentTxMocks).run()
