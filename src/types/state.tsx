@@ -44,22 +44,26 @@ type PendingStateAction = 'deposit' | 'withdrawal' | 'payment';
 type updatesType = Array<[any[], (a: any) => any]>
 
 export class UIState extends Record(defaultValues) {
+
     constructor(props: Partial<typeof defaultValues>) {
         // XXX: Check consistency between tx* members, addresses, etc.
         super(props)
     }
+
     /** State with wallet added, if necessary. */
     public addWallet(username: string, address: Address): this {
 
         const updates: updatesType = [
             [['accounts', address],  // Add the wallet to the accounts list
             (w: Wallet) => {
-                if (w) { return w }
-                const fromTxs = this.txByFromAddress.get(address) || Set()
-                const allTxs = fromTxs.union(this.txByToAddress.get(address)
-                    || Set())
-                return makeWalletWithTxList(
-                    address, allTxs, this.txByGUID, username)
+
+                if (w) {
+                    return w;
+                }
+
+                const fromTxs = this.txByFromAddress.get(address) || Set();
+                const allTxs = fromTxs.union(this.txByToAddress.get(address) || Set());
+                return makeWalletWithTxList(address, allTxs, this.txByGUID, username)
             }]
         ];
 

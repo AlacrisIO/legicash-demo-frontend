@@ -84,7 +84,7 @@ type revisionNumber = ((r: ICrossChainServerResponse) =>
 const crossChainTx = (
     /** The endpoint to hit on the server */
     endpoint: string,
-    /** Constructor for message to send on success */
+    /** Constructor for  message to send on success */
     success: Actions.crossChainValidationMessage,
     /** Constructor for message to send on failure. */
     failure: Actions.crossChainFailureMessage,
@@ -94,6 +94,8 @@ const crossChainTx = (
     dstRev: revisionNumber
 ) =>
     function* (action: Actions.ICrossChainInitiate) {
+
+        const failMsg = (msg: string) => failure(action.tx.from, action.tx, Error(msg));
         const address = action.tx.from.toString()
         const amount  = "0x" + (action.tx.amount as any).toString(16)
         const server  = serverWithErrorHandling(action.tx.from, action.tx, failure)
@@ -109,25 +111,23 @@ const crossChainTx = (
         const threadResponse = yield* server(post, endpoint, { address, amount, request_guid })
 
         if (!threadResponse) {
-            throw Error("Server returned null/undefined value!")
+            // throw Error("Server returned null/undefined value!");
+            return yield put(failMsg("Server returned null/undefined value!"));
         }
-
-        const failMsg = (msg: string) =>
-            failure(action.tx.from, action.tx, Error(msg))
 
         if (threadResponse.error) {
-            return yield failMsg(threadResponse.error)
+            return yield put(failMsg(threadResponse.error));
         }
 
-        const result: ICrossChainServerResponse | IThreadResponse =
-            yield* awaitThread(server, threadResponse)
+        try {
+            const result: ICrossChainServerResponse | IThreadResponse = yield* awaitThread(server, threadResponse);
 
         if (resultPending(result as IThreadResponse)) {
-            return yield failMsg("Timed out!")
+            return yield put(failMsg("Timed out!"));
         }
 
         if ((result as ICrossChainServerResponse).main_chain_confirmation === undefined) {
-            return yield failMsg(`Server failure! Response: ${JSON.stringify(result)}`)
+            return yield put(failMsg(`Server failure! Response: ${JSON.stringify(result)}`))
         }
 
         const response = result as ICrossChainServerResponse
@@ -145,7 +145,10 @@ const crossChainTx = (
         const balance                  = side_chain_account_state.balance
 
         yield put(success(action.tx.from, parseInt(balance, 16), action.tx, newTx))
-    }
+        } catch(e) {
+            return put(failMsg('Thread Failed'));
+        }
+};
 
 const parseSideChain = (r: ICrossChainServerResponse) =>
     (_: number | undefined) => parseInt(r.side_chain_tx_revision, 16)

@@ -23,11 +23,12 @@ export interface ICrossChainInitiate extends ICrossChain { /* empty */ }
 export interface IMakeDeposit extends ICrossChainInitiate {
     readonly type: Action.MAKE_DEPOSIT;
     readonly address: Address;
-}
+};
+
 export const makeDeposit = (address: Address, amount: number): IMakeDeposit => {
     const tx = depositTransaction(address, amount)
     return { type: Action.MAKE_DEPOSIT, tx, address }
-}
+};
 
 /** Represents a request to make a deposit */
 export interface IMakeWithdrawal extends ICrossChainInitiate {
@@ -79,34 +80,34 @@ export const depositValidated = validatedMessage(Action.DEPOSIT_VALIDATED)
 export interface IWithdrawalValidated extends ICrossChainValidated {
     readonly type: Action.WITHDRAWAL_VALIDATED;
 }
-export const withdrawalValidated = validatedMessage(Action.WITHDRAWAL_VALIDATED)
+export const withdrawalValidated = validatedMessage(Action.WITHDRAWAL_VALIDATED);
 
-export type crossChainValidationMessage =
-    typeof depositValidated | typeof withdrawalValidated
+export type crossChainValidationMessage = typeof depositValidated | typeof withdrawalValidated;
 
 /** Represents rejection of transaction by server. */
 export interface ICrossChainFailed extends ICrossChain, IServerResponse {
-    readonly serverResponse: Error
+    readonly serverResponse: Error;
+    readonly address: Address;
 }
 
 const failedMessage = (action: Action) =>
     (address: Address, tx: Transaction, serverResponse: Error
     ): ICrossChainFailed =>
-        ({ type: action, tx, serverResponse })
+        ({ type: action, tx, serverResponse, address })
 
 /** Represents rejection of deposit by server. */
 export interface IDepositFailed extends ICrossChainFailed {
     type: Action.DEPOSIT_FAILED;
     readonly address: Address;
 }
-export const depositFailed = failedMessage(Action.DEPOSIT_FAILED)
 
 /** Represents rejection of withdrawal by server. */
 export interface IWithdrawalFailed extends ICrossChainFailed {
     type: Action.WITHDRAWAL_FAILED;
     readonly address: Address;
 }
-export const withdrawalFailed = failedMessage(Action.WITHDRAWAL_FAILED)
 
-export type crossChainFailureMessage =
-    typeof depositFailed | typeof withdrawalFailed
+export const depositFailed = failedMessage(Action.DEPOSIT_FAILED);
+export const withdrawalFailed = failedMessage(Action.WITHDRAWAL_FAILED);
+
+export type crossChainFailureMessage = typeof depositFailed | typeof withdrawalFailed;
