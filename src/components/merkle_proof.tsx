@@ -159,9 +159,6 @@ export class ProofDisplay extends React.Component<IProofDisplay, {}> {
 
         return <div style={{marginTop: '10px'}}>
             <div className={'lrsplit'}>
-                <span className={'black accent'}>Info</span>
-            </div>
-            <div className={'lrsplit'}>
             <a className={'bluelink'} onClick={this.getProof}>{merkleProofLinkText}</a>
                 {exploreBlockLink}
             </div>
