@@ -4,14 +4,12 @@ import { serverURL } from './server_url'
 export const endpointURL = (endpoint: string) => `${serverURL}/api/${endpoint}`
 
 /** Post body to legicash endpoint  */
-export const post = (endpoint: string, body: object): Promise<Response | void> => {
-    return fetch(endpointURL(endpoint), {
-        body: JSON.stringify(body),
-        headers: { "Content-Type": "application/json; charset=utf-8" },
-        method: "POST",
-    })
-        .then(rv => rv.json())
-}
+export const post = (endpoint: string, body: object): Promise<Response | void> =>
+    fetch(endpointURL(endpoint), {
+            body:    JSON.stringify(body),
+            headers: { "Content-Type": "application/json; charset=utf-8" },
+            method:  "POST",
+        }).then(rv => rv.json())
 
 /** Post get query to legicash endpoint */
 export const get = (endpoint: string, params: object): Promise<Response> => {
@@ -22,7 +20,12 @@ export const get = (endpoint: string, params: object): Promise<Response> => {
         .then(r => r.json())
 }
 
-export interface IThreadResponse { result: { thread: number } | string }
+export interface IThreadResponse
+    { result: { thread:       number
+              , request_guid: string
+              , requested_at: string
+              }
+    | string }
 
 /**
  * Return the thread number reported by this thread response.

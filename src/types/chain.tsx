@@ -46,20 +46,28 @@ export const isDeposit = (tx: Transaction) =>
 /** Constructs a deposit from side chain to main chain, as Transaction */
 export const depositTransaction =
     (address: Address, amount: number, revision?: number): Transaction => {
-        const details = {
-            amount, from: address, to: address, dstSideChainRevision: revision, transactionType: 'Deposit'
-        }
+        const details = { amount
+                        , from:                 address
+                        , to:                   address
+                        , dstSideChainRevision: revision
+                        , transactionType:      'Deposit' }
+
         const direction = { dstChain: Chain.Side, srcChain: Chain.Main }
+
         return new Transaction({ ...details, ...direction })
     }
 
 /** Constructs a withdrawl from side chain to main chain, as Transaction */
 export const withdrawTransaction =
     (address: Address, amount: number, revision?: number): Transaction => {
-        const details = {
-            amount, from: address, to: address, srcSideChainRevision: revision, transactionType: 'Withdrawal'
-        }
+        const details = { amount
+                        , from:                 address
+                        , to:                   address
+                        , srcSideChainRevision: revision
+                        , transactionType:      'Withdrawal' }
+
         const direction = { dstChain: Chain.Main, srcChain: Chain.Side }
+
         return new Transaction({ ...details, ...direction })
     }
 

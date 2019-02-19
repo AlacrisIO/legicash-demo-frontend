@@ -2,27 +2,29 @@
  * Logic for transactions with the main chain (deposits / withdrawals)
  *
  * Basic pattern is that `crossChainTx` generator initiates the transaction,
- * then hands off to `awaitThread`, which polls the server with exponential 
+ * then hands off to `awaitThread`, which polls the server with exponential
  * backoff until the server returns the actual result.
  *
  * To wire this into the redux machinery, `crossChainListener` creates another
  * generator which checks every message for a relevant event, and hands off to
- * a crossChainTx generator when it finds one. Then that generator is 
+ * a crossChainTx generator when it finds one. Then that generator is
  * referenced in `rootSaga`, which  is started in ../App.tsx with
  * `sagaMiddleware.run`.
  */
 
-import { delay } from 'redux-saga'
+import { delay }     from 'redux-saga'
 import { call, put } from 'redux-saga/effects'
 
 import {
     get, IThreadResponse, post, readThread, resultPending
 } from '../server/common'
-import * as Actions from '../types/actions'
-import { Address } from '../types/address'
+
+import * as Actions             from '../types/actions'
+import { Address }              from '../types/address'
+import { Guid }                 from '../types/guid'
 import { emptyHash, HashValue } from '../types/hash'
-import { Transaction } from '../types/tx'
-import { listener } from './common'
+import { Transaction }          from '../types/tx'
+import { listener }             from './common'
 
 /** Hit server with given args, and report deposit failure on exception */
 const serverWithErrorHandling = (address: Address, tx: Transaction,
@@ -88,33 +90,55 @@ const crossChainTx = (
 ) =>
     function* (action: Actions.ICrossChainInitiate) {
         const address = action.tx.from.toString()
-        const amount = "0x" + (action.tx.amount as any).toString(16)
-        const server = serverWithErrorHandling(action.tx.from, action.tx, failure)
-        const threadResponse = yield* server(post, endpoint, { address, amount })
-        if (!threadResponse) { throw Error("Server returned null/undefined value!") }
+        const amount  = "0x" + (action.tx.amount as any).toString(16)
+        const server  = serverWithErrorHandling(action.tx.from, action.tx, failure)
+
+        // TODO: this smells wrong but right now `localGUID` is allowed to be
+        // `undefined` based on its signature, so even if it shouldn't be
+        // possible to reach this phase without a GUID, we have to satisfy the
+        // type system by transparently generating a new one if it's not
+        // provided - verify and/or fix
+        // tslint:disable:variable-name
+        const request_guid = (action.tx.localGUID || new Guid()).toString()
+
+        const threadResponse = yield* server(post, endpoint, { address, amount, request_guid })
+
+        if (!threadResponse) {
+            throw Error("Server returned null/undefined value!")
+        }
+
         const failMsg = (msg: string) =>
             failure(action.tx.from, action.tx, Error(msg))
-        if (threadResponse.error) { return yield failMsg(threadResponse.error) }
+
+        if (threadResponse.error) {
+            return yield failMsg(threadResponse.error)
+        }
+
         const result: ICrossChainServerResponse | IThreadResponse =
             yield* awaitThread(server, threadResponse)
+
         if (resultPending(result as IThreadResponse)) {
             return yield failMsg("Timed out!")
         }
-        if ((result as ICrossChainServerResponse).main_chain_confirmation
-            === undefined) {
+
+        if ((result as ICrossChainServerResponse).main_chain_confirmation === undefined) {
             return yield failMsg(`Server failure! Response: ${JSON.stringify(result)}`)
         }
+
         const response = result as ICrossChainServerResponse
         // Update the transaction with the new information
         const hash = (response.main_chain_confirmation as any).transaction_hash
+
         const newTx = action.tx.multiUpdateIn([
             [['validated'], () => true],
             [['hash'], updateHash(hash)],
             [['srcSideChainRevision'], srcRev(response)],
             [['dstSideChainRevision'], dstRev(response)],
         ])
+
         const side_chain_account_state = response.side_chain_account_state
-        const balance = side_chain_account_state.balance
+        const balance                  = side_chain_account_state.balance
+
         yield put(success(action.tx.from, parseInt(balance, 16), action.tx, newTx))
     }
 
