@@ -1,6 +1,7 @@
 /** Redux reducer logic */
 
 import * as Actions from '../types/actions'
+import {INotifAdd, INotifRemove} from "../types/actions/notifications";
 import { UIState } from '../types/state'
 import * as Crosschain from './crosschain'
 import * as RecentTxs from './recent_txs'
@@ -109,7 +110,19 @@ export const rootReducer = (state: UIState, action: Actions.IActionType)
             return state.removeProof((action as Actions.IProofRequested).tx)
 
         case Actions.Action.PROOF_TOGGLED:
-            return state.toggleProof((action as Actions.IProofToggle).tx, (action as Actions.IProofToggle).owner)
+            return state.toggleProof((action as Actions.IProofToggle).tx, (action as Actions.IProofToggle).owner);
+
+
+        case Actions.Action.ADD_NOTIFICATION:
+            const notificationAction = action as INotifAdd;
+            return state.addNotification(
+                notificationAction.guid,
+                notificationAction.text,
+                notificationAction.level,
+                (notificationAction.timeout)
+            );
+        case Actions.Action.REMOVE_NOTIFICATION:
+            return state.removeNotification((action as INotifRemove).guid);
     }
     return state
 }

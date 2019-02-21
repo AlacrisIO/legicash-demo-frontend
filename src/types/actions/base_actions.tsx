@@ -36,6 +36,8 @@ export enum Action {
     ADD_WALLET = 'ADD_WALLET', // Add this address to the list of displayed wallets
     REMOVE_WALLET = 'REMOVE_WALLET',  // Remove this address from the list of displayed wallets.
 
+    ADD_NOTIFICATION = 'ADD_NOTIFICATION',
+    REMOVE_NOTIFICATION = 'REMOVE_NOTIFICATION'
 }
 
 /** Characteristics of all action types */

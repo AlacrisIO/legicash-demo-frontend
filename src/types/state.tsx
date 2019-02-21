@@ -1,11 +1,12 @@
 import * as Actions from './actions'
-import { Address } from './address'
-import { DefaultContractState } from './contract_state'
-import { Guid } from './guid'
-import { List, Map, Record, Set } from './immutable'
-import { IResponse } from './proofs/proof_types'
-import { Transaction } from './tx'
-import { makeWalletWithTxList, Wallet } from './wallet'
+import {Address} from './address'
+import {DefaultContractState} from './contract_state'
+import {Guid} from './guid'
+import {List, Map, Record, Set} from './immutable'
+import INotification, {NotificationLevel} from './notification';
+import {IResponse} from './proofs/proof_types'
+import {Transaction} from './tx'
+import {makeWalletWithTxList, Wallet} from './wallet'
 /* tslint:disable:object-literal-sort-keys */
 const defaultValues = {
     /** Wallets known to the front end */
@@ -28,6 +29,7 @@ const defaultValues = {
     showProofByGUID: Map<string, boolean>(),
     paymentNotifications: [],
     pendingStates: Map<Address, IPendingState>(),
+    notifications: Map<Guid, INotification>()
 };
 
 export interface IPendingState {
@@ -210,6 +212,31 @@ export class UIState extends Record(defaultValues) {
     public addProof(tx: Transaction, response: IResponse | Error): this {
         return this.updateIn(['proofByGUID', tx.getGUID()], () => response)
     }
+
+    public addNotification(
+        guid: Guid,
+        text: string,
+        level: NotificationLevel = 'info',
+        timeout: number = 0
+    ) : this {
+        const notification = {
+            guid,
+            text,
+            level,
+            timeout
+        } as INotification;
+
+        return this.setIn(['notifications', notification.guid], notification);
+    }
+
+    public removeNotification(guid: Guid): this {
+        if (this.notifications.has(guid)) {
+            return this.removeIn(['notifications', guid]);
+        }
+
+        return this;
+    }
+
     /** Calculate updates for the sidechain revision-index indices */
     private sideChainRevisions(tx: Transaction): updatesType {
         const updateSCRevision = (g: Guid | undefined): Guid => {

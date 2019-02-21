@@ -152,24 +152,6 @@ export function* recentTxs(action: Actions.IRecentTxsInitiated) {
                 action.address, response.map(txFromResponse).filter(
                     (t: Transaction): boolean => (t.amount as number) > 0)))
 
-            // new payments @todo: luka  Getting the actual new payments would at least require a solid creation date
-            // const recentPaymentTx = yield select(recentPaymentsSelector(address));
-            // const newPayments: any[] = [];
-            //
-            // // if (!recentPayments.hasOwnProperty(address)) {
-            // //     recentPayments[address] = recentPaymentTx;
-            // // } else {
-            // //     recentPaymentTx.forEach(
-            // //         (tx: string) => {
-            // //             if (recentPayments[address].indexOf(tx) === -1) {
-            // //                 newPayments.push(tx);
-            // //                 recentPayments[address].push(tx);
-            // //             }
-            // //         });
-            // // }
-            // //
-            // // yield put(Actions.newPaymentsReceived(action.address, newPayments));
-
         } catch (e) {
             yield put(Actions.recentTxsFailed(action.address, e))
         }
@@ -201,15 +183,3 @@ export const recentTxsListener = function* () {
     yield takeEvery(initMatcher, recentHandler);
     yield takeEvery(removeMatcher, removeHandler);
 };
-
-// const recentPaymentsSelector = (address: string) => {
-//     return (state: UIState)  => {
-//         return state.txByGUID.filter(
-//             (i:any) => i.to.address === address && i.transactionType === 'Payment'
-//         ).filter(
-//             (i:any) => i.creationDate > new Date(Date.now() - POLLING_DELAY)
-//         ).map(
-//             (i: any, k: Guid) =>  k.toString()
-//         ).toArray()
-//     }
-// };

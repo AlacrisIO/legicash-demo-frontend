@@ -116,39 +116,66 @@ const crossChainTx = (
         }
 
         if (threadResponse.error) {
+            yield put(Actions.createAddNotificationAction(
+                'threadResponse.error',
+                'error',
+                5000
+            ));
             return yield put(failMsg(threadResponse.error));
         }
 
         try {
             const result: ICrossChainServerResponse | IThreadResponse = yield* awaitThread(server, threadResponse);
 
-        if (resultPending(result as IThreadResponse)) {
-            return yield put(failMsg("Timed out!"));
-        }
+            if ((result as IThreadResponse).error) {
+                yield put(Actions.createAddNotificationAction(
+                    (result as IThreadResponse).error,
+                    'error',
+                    5000
+                ));
+                return yield put(failMsg((result as IThreadResponse).error));
+            }
 
-        if ((result as ICrossChainServerResponse).main_chain_confirmation === undefined) {
-            return yield put(failMsg(`Server failure! Response: ${JSON.stringify(result)}`))
-        }
+            if (resultPending(result as IThreadResponse)) {
+                yield put(Actions.createAddNotificationAction(
+                    "Thread Timed out!",
+                    'error',
+                    5000
+                ));
+                return yield put(failMsg("Timed out!"));
+            }
 
-        const response = result as ICrossChainServerResponse
-        // Update the transaction with the new information
-        const hash = (response.main_chain_confirmation as any).transaction_hash
+            if ((result as ICrossChainServerResponse).main_chain_confirmation === undefined) {
+                yield put(Actions.createAddNotificationAction(
+                    "Server Failure",
+                    'error',
+                    5000
+                ));
+                return put(failMsg(`Server failure! Response: ${JSON.stringify(result)}`));
+            }
 
-        const newTx = action.tx.multiUpdateIn([
-            [['validated'], () => true],
-            [['hash'], updateHash(hash)],
-            [['srcSideChainRevision'], srcRev(response)],
-            [['dstSideChainRevision'], dstRev(response)],
-        ])
+            const response = result as ICrossChainServerResponse;
+            // Update the transaction with the new information
 
-        const side_chain_account_state = response.side_chain_account_state
-        const balance                  = side_chain_account_state.balance
+            const hash = (response.main_chain_confirmation as any).transaction_hash;
+            const newTx = action.tx.multiUpdateIn([
+                [['validated'], () => true],
+                [['hash'], updateHash(hash)],
+                [['srcSideChainRevision'], srcRev(response)],
+                [['dstSideChainRevision'], dstRev(response)],
+            ]);
 
-        yield put(success(action.tx.from, parseInt(balance, 16), action.tx, newTx))
+            const side_chain_account_state = response.side_chain_account_state;
+            const balance = side_chain_account_state.balance;
+            yield put(success(action.tx.from, parseInt(balance, 16), action.tx, newTx));
         } catch(e) {
-            return put(failMsg('Thread Failed'));
+            yield put(Actions.createAddNotificationAction(
+                'Thread Failed',
+                'error',
+                5000
+            ));
         }
-};
+    };
 
 const parseSideChain = (r: ICrossChainServerResponse) =>
     (_: number | undefined) => parseInt(r.side_chain_tx_revision, 16)
