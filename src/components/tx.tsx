@@ -62,7 +62,17 @@ export const DumbTx = ({ tx, requestProof, requestToggle, show, owner }: ITx): J
 
     const proofDisplay = tx.validated ? <ProofDisplay tx={tx} requestProof={requestProof} requestToggle={requestToggle}  show={show} /> : '';
 
-    return (<Segment vertical={true} style={{ textAlign: 'left', padding: '5px'}}>
+    return (<Segment vertical={true} color={'blue'} style={{ textAlign: 'left', padding: '5px'}}>
+            <div className={'lrsplit txsSegment'}>
+                    <span style={{flex: 1}}>
+                        <span className={'black'} >{
+                            tx.creationDate &&
+                            tx.creationDate.toLocaleDateString(
+                                "en-US",
+                                {  year: 'numeric', month: 'short', day: 'numeric' })
+                        } </span>
+                    </span>
+            </div>
             <div className={'lrsplit txsSegment'}>
                 <span style={{flex: 1}}>
                     <span className={'gray'} >Transaction type: </span>

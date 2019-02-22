@@ -20,8 +20,8 @@ const defaultValues = {
     /** Transactions, indexed by various characteristics */
     txByFromAddress: Map<Address, Set<Guid>>(),
     txByToAddress: Map<Address, Set<Guid>>(),
-    txBySrcSideChainRevision: Map<number, Guid>(),  // Revisions strictly monotonic
-    txByDstSideChainRevision: Map<number, Guid>(),
+    txBySrcSideChainRevision: Map<number, ITxPatch>(),  // Revisions strictly monotonic
+    txByDstSideChainRevision: Map<number, ITxPatch>(),
     /** Actual store for transactions */
     txByGUID: Map<Guid, Transaction>(),
     /** Record of latest proofs for each tx, if known */
@@ -36,6 +36,11 @@ export interface IPendingState {
     deposit: boolean;
     withdrawal: boolean;
     payment: boolean;
+}
+
+export interface ITxPatch {
+    guid: Guid,
+    date: Date | undefined
 }
 
 export const DefaultPendingStates: IPendingState = {deposit: false, withdrawal: false, payment: false};
@@ -117,25 +122,29 @@ export class UIState extends Record(defaultValues) {
         
         if (tx.dstSideChainRevision !== undefined &&
             this.txByDstSideChainRevision.has(tx.dstSideChainRevision)) {
-            const oldGUID = this.txByDstSideChainRevision.get(
-                tx.dstSideChainRevision)
-            tx = tx.set('localGUID', oldGUID)
-            tx.assertSameTransaction(this.txByGUID.get(oldGUID))
+            const txPatch = this.txByDstSideChainRevision.get(tx.dstSideChainRevision);
+            tx = tx.set('localGUID', txPatch.guid);
+            tx = tx.set('creationDate', txPatch.date);
+            tx.assertSameTransaction(this.txByGUID.get(txPatch.guid))
         }
+
         if (tx.srcSideChainRevision !== undefined &&
             this.txBySrcSideChainRevision.has(tx.srcSideChainRevision)) {
-            const oldGUID = this.txBySrcSideChainRevision.get(
-                tx.srcSideChainRevision)
-            tx = tx.set('localGUID', oldGUID)
-            tx.assertSameTransaction(this.txByGUID.get(oldGUID))
+            const txPatch = this.txBySrcSideChainRevision.get(tx.srcSideChainRevision)
+            tx = tx.set('localGUID', txPatch.guid);
+            tx = tx.set('creationDate', txPatch.date);
+            tx.assertSameTransaction(this.txByGUID.get(txPatch.guid));
         }
+
         const updateTx = (otx: Transaction | undefined): Transaction => {
             // XXX: Fail more gracefully on contradiction? Some kind of warning?
             if (otx !== undefined) { tx.assertSameTransaction(otx) }
             return tx
-        }
-        const updateGUID = (s: Set<Guid> | undefined): Set<Guid> =>
-            (s || Set()).add(tx.getGUID())
+        };
+
+
+        const updateGUID = (s: Set<Guid> | undefined): Set<Guid> => (s || Set()).add(tx.getGUID());
+
         const updateWallet = (a: Address) => (w: Wallet | undefined) => {
             const rv = (w || new Wallet({ address: a })).addTx(
                 tx, this.txByGUID, updateBalance)
@@ -239,19 +248,21 @@ export class UIState extends Record(defaultValues) {
 
     /** Calculate updates for the sidechain revision-index indices */
     private sideChainRevisions(tx: Transaction): updatesType {
-        const updateSCRevision = (g: Guid | undefined): Guid => {
-            if (g !== undefined) {
-                const oldTx = this.txByGUID.get(g)
+        const updateSCRevision = (p: ITxPatch | undefined): ITxPatch => {
+            if (p !== undefined) {
+                const oldTx = this.txByGUID.get(p.guid);
+
                 if (oldTx === undefined) {
-                    throw Error(`No tx found for ${g} in ${this.txByGUID} while \
-searching for ${tx}!`)
+                    throw Error(`No tx found for ${p.guid} in ${this.txByGUID} while  searching for ${tx}!`)
                 }
+
                 // Here we are using the fact that the GUID is updated in `addTx`,'
                 // when the tx side-chain revisions have been found in the state.
-                if (g) { oldTx.assertNoErasure(tx) }
+                if (p) { oldTx.assertNoErasure(tx) }
             }
-            return tx.getGUID()
-        }
+            return {guid: tx.getGUID(), date: tx.creationDate};
+        };
+
         const updates: updatesType = []
         if (tx.srcSideChainRevision !== undefined) {
             updates.push([['txBySrcSideChainRevision', tx.srcSideChainRevision],
