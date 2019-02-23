@@ -101,7 +101,7 @@ export const DumbMerkleProofWait = ({ eventInfo, result }: IMerkleProofWait) =>
         {(result as IResponse || {}).trie &&
             <MerkleProofDisplay proof={result as IResponse} />}
         {(result instanceof Error) &&
-            <Card.Description className="load-merkle-error">"Error: " {result.message}</Card.Description>}
+            <Card.Description as={'div'} className="load-merkle-error">"Error: " {result.message}</Card.Description>}
         {(!result) &&
             <Card.Description>
                 <Spinner name="circle" overrideSpinnerClassName="load-merkle" />

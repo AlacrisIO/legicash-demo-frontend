@@ -23,16 +23,15 @@ describe('MerkleProofWait tests', () => {
         const proofObject =
             <DumbMerkleProofWait result={exampleProof} eventInfo="foo" />
         expect(mount(proofObject).find('table.merkleTable').length).toEqual(1)
-    })
+    });
 
-    xit('Renders an error, when provided', () => {
-        const proofObject =
-            <DumbMerkleProofWait result={Error("fail!")} eventInfo="f" />
-        expect(mount(proofObject).find('.load-merkle-error').length).toEqual(1)
-    })
+    it('Renders an error, when provided', () => {
+        const proofObject = <DumbMerkleProofWait result={Error("fail!")} eventInfo="f" />;
+        expect(mount(proofObject).find('div.load-merkle-error').length).toEqual(1);
+    });
 
     it('Renders a spinner, when neither is available', () => {
         const proofObject = <DumbMerkleProofWait result={null} eventInfo="f" />
         expect(mount(proofObject).find('.load-merkle').length).toEqual(1)
-    })
-})
+    });
+});
