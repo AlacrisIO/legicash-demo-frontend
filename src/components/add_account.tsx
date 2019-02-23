@@ -26,13 +26,13 @@ export class DumbAddAccount extends BaseComponent {
         this.onSubmit = this.onSubmit.bind(this)
         this.selectChange = this.selectChange.bind(this)
     }
+
     public onSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
         if (!this.state.address.equals(emptyAddress)) {
             this.props.add(this.state.address)
-            this.setState(this.stateForNewDisplay(
-                    this.state, this.props.displayedAddresses
-                )
+            this.setState(
+                this.stateForNewDisplay(this.state, this.props.displayedAddresses)
             )
         }
         

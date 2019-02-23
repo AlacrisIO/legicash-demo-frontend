@@ -1,50 +1,45 @@
-import { mount } from 'enzyme'
-import { List } from 'immutable'
+import {mount, ReactWrapper} from 'enzyme'
+import {List} from 'immutable'
 import * as React from 'react';
 
-import { addresses } from '../server/ethereum_addresses'
-import { Address } from '../types/address'
-import { DumbAddAccount, IAddAccountState } from './add_account'
-import { knownAddresses, name } from './select_account'
+import {addresses} from '../server/ethereum_addresses'
+import {Address} from '../types/address'
+import {DumbAddAccount} from './add_account'
+import {knownAddresses, name} from './select_account'
+
+const findUser = (m: ReactWrapper, n: string) => m.find('div.item').filterWhere((c: any): boolean => {
+    return c.find('span.text') && c.find('span.text').html() === `<span class="text">${n}</span>`;
+});
+
+const findAddressByName = (n: string) => addresses[n];
+
 
 describe('Tests for add account dialog', () => {
     let v: Address | undefined
     const add = (e: Address) => { v = e }
     const sortedAddresses = List(knownAddresses.sortBy(name))
-    const m = mount(
-        <DumbAddAccount displayedAddresses={sortedAddresses} add={add} />)
+    const m = mount(<DumbAddAccount displayedAddresses={sortedAddresses} add={add} />)
 
-    xit('Renders without crashing', () => {
-        const defaultOption = m.find('.accountDefaultOption')
-        expect(defaultOption.length).toBe(1)
-        expect(m.find('.addOpt').length).toBe(Object.keys(addresses).length + 1)
-    })
+    it('Renders without crashing', () => {
+        expect(m.find('div.item').length).toBe(Object.keys(addresses).length)
+    });
 
-    const form = m.find('form')
+    const form = m.find('form');
     it('Refuses to submit, when nothing is chosen' /* Ooh la la. */, () => {
-        form.simulate('submit')
-        expect(v).toBe(undefined)
-    })
+        form.simulate('submit');
+        expect(v).toBe(undefined);
+    });
 
-    function getAddress(idx: number): Address {
-        return new Address(sortedAddresses.get(idx))
-    }
+    it('Submits when something is chosen', (done) => {
+        const userName = 'Bob';
+        const userAddress = findAddressByName(userName);
+        const onAdd = (a: Address) => {
+            expect(a).toEqual(userAddress);
+            done();
+        };
 
-    function hitSelection(idx: number): number {
-        const option = m.find(`option [value="${getAddress(idx)}"]`)
-        option.simulate('change', { target: { selectedIndex: idx + 1 } })
-        form.simulate('submit')
-        return (m.state() as IAddAccountState).optIdx
-    }
-
-    xit('Submits when something is chosen', () => {
-        const address = getAddress(8)
-        expect(getAddress(hitSelection(8) - 1)).toEqual(address)
-        expect(address.equals(v as Address)).toBe(true)
-    })
-
-    xit('Moves to the next entry up, when there is one, if at bottom', () => {
-        const finalIndex = sortedAddresses.size - 1
-        expect(hitSelection(finalIndex)).toBe(finalIndex)
-    })
-})
+        const vm = mount(<DumbAddAccount displayedAddresses={sortedAddresses} add={onAdd} />);
+        findUser(vm, userName).simulate('click');
+        vm.find('form').simulate('submit');
+    });
+});
