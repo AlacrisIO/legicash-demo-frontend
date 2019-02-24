@@ -1,17 +1,12 @@
-import {mount, ReactWrapper} from 'enzyme'
+import {mount} from 'enzyme'
 import {List} from 'immutable'
 import * as React from 'react';
 
 import {addresses} from '../server/ethereum_addresses'
 import {Address} from '../types/address'
+import {findAddressByName, findUserSelectItem} from "../util/test_util";
 import {DumbAddAccount} from './add_account'
 import {knownAddresses, name} from './select_account'
-
-const findUser = (m: ReactWrapper, n: string) => m.find('div.item').filterWhere((c: any): boolean => {
-    return c.find('span.text') && c.find('span.text').html() === `<span class="text">${n}</span>`;
-});
-
-const findAddressByName = (n: string) => addresses[n];
 
 
 describe('Tests for add account dialog', () => {
@@ -39,7 +34,7 @@ describe('Tests for add account dialog', () => {
         };
 
         const vm = mount(<DumbAddAccount displayedAddresses={sortedAddresses} add={onAdd} />);
-        findUser(vm, userName).simulate('click');
+        findUserSelectItem(vm, userName).simulate('click');
         vm.find('form').simulate('submit');
     });
 });
