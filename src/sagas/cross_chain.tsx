@@ -25,8 +25,10 @@ import { Transaction } from '../types/tx'
 import { listener } from './common'
 
 /** Hit server with given args, and report deposit failure on exception */
-const serverWithErrorHandling = (address: Address, tx: Transaction,
-    failure: Actions.crossChainFailureMessage) =>
+const serverWithErrorHandling = ( address: Address
+                                , tx:      Transaction
+                                , failure: Actions.crossChainFailureMessage
+                                ) =>
     function* (...args: any[]) {
         try {
             return yield (call as any)(...args)
@@ -39,15 +41,18 @@ const serverWithErrorHandling = (address: Address, tx: Transaction,
 /* See
  * https://gitlab.com/legicash/legicash-facts/blob/endpoints-demo/src/endpoints/endpoints.md#depositwithdrawal-threads */
 function* awaitThread(server: any, threadResponse: IThreadResponse) {
-    const threadNumber = readThread(threadResponse as { result: string })
+    const threadNumber = readThread(threadResponse)
     let delayTimeMS = 1  // Initial delay time before checking
     let threadCheck
-    for (let checkIdx: number = 0; checkIdx < 12; checkIdx++) {  // Wait ~8s
+
+    while (true) {
         yield call(delay, delayTimeMS)
         delayTimeMS *= 2  // Exponential backoff after each failed try
         threadCheck = yield* server(get, 'thread', { id: threadNumber })
+
         if (!resultPending(threadCheck)) { break }
     }
+
     return threadCheck
 }
 
@@ -77,7 +82,7 @@ type revisionNumber = ((r: ICrossChainServerResponse) =>
 const crossChainTx = (
     /** The endpoint to hit on the server */
     endpoint: string,
-    /** Constructor for  message to send on success */
+    /** Constructor for message to send on success */
     success: Actions.crossChainValidationMessage,
     /** Constructor for message to send on failure. */
     failure: Actions.crossChainFailureMessage,
@@ -126,15 +131,19 @@ const dummyMainChain = (r: ICrossChainServerResponse) =>
 
 /** Generator for deposit server interaction */
 export const makeDeposit = crossChainTx(
-    'deposit', Actions.depositValidated, Actions.depositFailed,
-    dummyMainChain, parseSideChain
-);
+      'deposit'
+    , Actions.depositValidated
+    , Actions.depositFailed
+    , dummyMainChain
+    , parseSideChain);
 
 export const depositListener = listener(Actions.Action.MAKE_DEPOSIT, makeDeposit)
 
 export const makeWithdrawal = crossChainTx(
-    'withdrawal', Actions.withdrawalValidated, Actions.withdrawalFailed,
-    parseSideChain, dummyMainChain)
+      'withdrawal'
+    , Actions.withdrawalValidated
+    , Actions.withdrawalFailed
+    , parseSideChain
+    , dummyMainChain)
 
-export const withdrawalListener = listener(
-    Actions.Action.MAKE_WITHDRAWAL, makeWithdrawal)
+export const withdrawalListener = listener(Actions.Action.MAKE_WITHDRAWAL, makeWithdrawal)
