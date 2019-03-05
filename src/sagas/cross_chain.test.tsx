@@ -21,18 +21,20 @@ const depositMocks = {
     call(effect: any, next: any): any {
         switch (effect.fn) {
             case post:
-                if (!is(fromJS(effect.args), fromJS(
-                    ["deposit", {
-                        address: address.toString(),
-                        amount: '0x' + amount.toString(16)
-                    }]))) {
+                const expected = fromJS(["deposit", {
+                        address:      address.toString(),
+                        amount:       '0x' + amount.toString(16)
+                        request_guid: effect.args[1].request_guid
+                    }])
+
+                if (!is(fromJS(effect.args), expected)) {
                     // Throwing has no effect, here!
                     /* tslint:disable:no-console */
                     console.log(`Bad post call! ${JSON.stringify(effect)}`)
                 }
-                return {
-                    result: { thread: 5 }
-                }
+
+                return { result: { thread: 5 }}
+
             case get:
                 return {
                     /* tslint:disable:object-literal-sort-keys */
@@ -47,6 +49,7 @@ const depositMocks = {
                         block_hash: hash.toRawString()
                     }
                 }
+
             default:
                 return next()
         }
