@@ -118,7 +118,7 @@ export const MerkleProofWait = ({ tx }: { tx: Transaction }) => connect(
     (dispatch: any) => ({})
 )(DumbMerkleProofWait)
 
-interface IProofDisplay { requestProof: () => void; requestToggle: () => void; show: boolean; tx: Transaction }
+interface IProofDisplay { requestProof: () => void; requestToggle: () => void; show: boolean; showBlockLink : boolean; tx: Transaction }
 
 /** Button in tx table row which allows user to toggle/request proof display */
 export class ProofDisplay extends React.Component<IProofDisplay, {}> {
@@ -150,9 +150,10 @@ export class ProofDisplay extends React.Component<IProofDisplay, {}> {
             display = <div><WaitComponent /></div>
         }
 
-        let exploreBlockLink = <span />
+        const expBlockStyle = {display: this.props.showBlockLink ? 'block' : 'none'};
+        let exploreBlockLink = <span />;
         if (this.props.tx.getBlockNumber()) {
-            exploreBlockLink = <a className={'bluelink'} onClick={this.exploreBlock}>Explore block</a>
+            exploreBlockLink = <a className={'bluelink'} style={expBlockStyle} onClick={this.exploreBlock}>Explore block</a>
         }
 
         const merkleProofLinkText = this.props.show ? 'Hide Merkle Proof' : 'Show Merkle Proof';

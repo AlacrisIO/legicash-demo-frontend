@@ -60,7 +60,13 @@ export const DumbTx = ({ tx, requestProof, requestToggle, show, owner }: ITx): J
         </div>
     }
 
-    const proofDisplay = tx.validated ? <ProofDisplay tx={tx} requestProof={requestProof} requestToggle={requestToggle}  show={show} /> : '';
+    const proofDisplay = tx.validated ? <ProofDisplay
+        tx={tx}
+        requestProof={requestProof}
+        requestToggle={requestToggle}
+        show={show}
+        showBlockLink={false}
+    /> : '';
 
     return (<Segment vertical={true} color={'blue'} style={{ textAlign: 'left', padding: '5px'}}>
             <div className={'lrsplit txsSegment'}>
