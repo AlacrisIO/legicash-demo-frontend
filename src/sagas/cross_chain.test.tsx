@@ -23,7 +23,7 @@ const depositMocks = {
             case post:
                 const expected = fromJS(["deposit", {
                         address:      address.toString(),
-                        amount:       '0x' + amount.toString(16)
+                        amount:       '0x' + amount.toString(16),
                         request_guid: effect.args[1].request_guid
                     }])
 

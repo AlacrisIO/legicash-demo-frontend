@@ -119,22 +119,22 @@ export class UIState extends Record(defaultValues) {
     /** State with tx added */
     public addTx(tx: Transaction, updateBalance: boolean = false): this {
         if (tx === undefined) { throw Error("Attempt to add undefined tx") }
-        
-        if (tx.dstSideChainRevision !== undefined &&
-            this.txByDstSideChainRevision.has(tx.dstSideChainRevision)) {
-            const txPatch = this.txByDstSideChainRevision.get(tx.dstSideChainRevision);
-            tx = tx.set('localGUID', txPatch.guid);
-            tx = tx.set('creationDate', txPatch.date);
-            tx.assertSameTransaction(this.txByGUID.get(txPatch.guid))
-        }
 
-        if (tx.srcSideChainRevision !== undefined &&
-            this.txBySrcSideChainRevision.has(tx.srcSideChainRevision)) {
-            const txPatch = this.txBySrcSideChainRevision.get(tx.srcSideChainRevision)
-            tx = tx.set('localGUID', txPatch.guid);
-            tx = tx.set('creationDate', txPatch.date);
-            tx.assertSameTransaction(this.txByGUID.get(txPatch.guid));
-        }
+        // if (tx.dstSideChainRevision !== undefined &&
+        //     this.txByDstSideChainRevision.has(tx.dstSideChainRevision)) {
+        //     const txPatch = this.txByDstSideChainRevision.get(tx.dstSideChainRevision);
+        //     tx = tx.set('localGUID', txPatch.guid);
+        //     tx = tx.set('creationDate', txPatch.date);
+        //     tx.assertSameTransaction(this.txByGUID.get(txPatch.guid))
+        // }
+        //
+        // if (tx.srcSideChainRevision !== undefined &&
+        //     this.txBySrcSideChainRevision.has(tx.srcSideChainRevision)) {
+        //     const txPatch = this.txBySrcSideChainRevision.get(tx.srcSideChainRevision)
+        //     tx = tx.set('localGUID', txPatch.guid);
+        //     tx = tx.set('creationDate', txPatch.date);
+        //     tx.assertSameTransaction(this.txByGUID.get(txPatch.guid));
+        // }
 
         const updateTx = (otx: Transaction | undefined): Transaction => {
             // XXX: Fail more gracefully on contradiction? Some kind of warning?

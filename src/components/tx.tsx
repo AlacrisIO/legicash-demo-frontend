@@ -70,7 +70,10 @@ export const DumbTx = ({ tx, requestProof, requestToggle, show, owner }: ITx): J
                             tx.creationDate.toLocaleDateString(
                                 "en-US",
                                 {  year: 'numeric', month: 'short', day: 'numeric' })
-                        } </span>
+                        } {
+                            tx.creationDate &&
+                            tx.creationDate.toLocaleTimeString("en-US", {hour: '2-digit', minute:'2-digit'})
+                        }</span>
                     </span>
             </div>
             <div className={'lrsplit txsSegment'}>
