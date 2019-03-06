@@ -20,8 +20,6 @@ const defaultValues = {
     /** Transactions, indexed by various characteristics */
     txByFromAddress: Map<Address, Set<Guid>>(),
     txByToAddress: Map<Address, Set<Guid>>(),
-    txBySrcSideChainRevision: Map<number, ITxPatch>(),  // Revisions strictly monotonic
-    txByDstSideChainRevision: Map<number, ITxPatch>(),
     /** Actual store for transactions */
     txByGUID: Map<Guid, Transaction>(),
     /** Record of latest proofs for each tx, if known */
@@ -36,11 +34,6 @@ export interface IPendingState {
     deposit: boolean;
     withdrawal: boolean;
     payment: boolean;
-}
-
-export interface ITxPatch {
-    guid: Guid,
-    date: Date | undefined
 }
 
 export const DefaultPendingStates: IPendingState = {deposit: false, withdrawal: false, payment: false};
@@ -120,22 +113,6 @@ export class UIState extends Record(defaultValues) {
     public addTx(tx: Transaction, updateBalance: boolean = false): this {
         if (tx === undefined) { throw Error("Attempt to add undefined tx") }
 
-        // if (tx.dstSideChainRevision !== undefined &&
-        //     this.txByDstSideChainRevision.has(tx.dstSideChainRevision)) {
-        //     const txPatch = this.txByDstSideChainRevision.get(tx.dstSideChainRevision);
-        //     tx = tx.set('localGUID', txPatch.guid);
-        //     tx = tx.set('creationDate', txPatch.date);
-        //     tx.assertSameTransaction(this.txByGUID.get(txPatch.guid))
-        // }
-        //
-        // if (tx.srcSideChainRevision !== undefined &&
-        //     this.txBySrcSideChainRevision.has(tx.srcSideChainRevision)) {
-        //     const txPatch = this.txBySrcSideChainRevision.get(tx.srcSideChainRevision)
-        //     tx = tx.set('localGUID', txPatch.guid);
-        //     tx = tx.set('creationDate', txPatch.date);
-        //     tx.assertSameTransaction(this.txByGUID.get(txPatch.guid));
-        // }
-
         const updateTx = (otx: Transaction | undefined): Transaction => {
             // XXX: Fail more gracefully on contradiction? Some kind of warning?
             if (otx !== undefined) { tx.assertSameTransaction(otx) }
@@ -161,7 +138,7 @@ export class UIState extends Record(defaultValues) {
                 ])
             ]
         ]
-        updates.push(...this.sideChainRevisions(tx)) // Update sidechain indices
+
         return this.multiUpdateIn(updates)  // Actually do the updates
     }
     /** State with the tx at `localGUID` updated with the info in `tx` */
@@ -170,8 +147,7 @@ export class UIState extends Record(defaultValues) {
         const oldTx = this.txByGUID.get(localGUID)
         tx.assertNoErasure(oldTx)
         tx = tx.set('localGUID', localGUID)  // Store this tx info under the old location
-        return this.setIn(['txByGUID', localGUID], tx)
-            .multiUpdateIn(this.sideChainRevisions(tx))
+        return this.setIn(['txByGUID', localGUID], tx);
     }
     /* State with new balances for displayed wallets */
     public updateBalances(balances: Actions.IBalances) {
@@ -246,32 +222,4 @@ export class UIState extends Record(defaultValues) {
         return this;
     }
 
-    /** Calculate updates for the sidechain revision-index indices */
-    private sideChainRevisions(tx: Transaction): updatesType {
-        const updateSCRevision = (p: ITxPatch | undefined): ITxPatch => {
-            if (p !== undefined) {
-                const oldTx = this.txByGUID.get(p.guid);
-
-                if (oldTx === undefined) {
-                    throw Error(`No tx found for ${p.guid} in ${this.txByGUID} while  searching for ${tx}!`)
-                }
-
-                // Here we are using the fact that the GUID is updated in `addTx`,'
-                // when the tx side-chain revisions have been found in the state.
-                if (p) { oldTx.assertNoErasure(tx) }
-            }
-            return {guid: tx.getGUID(), date: tx.creationDate};
-        };
-
-        const updates: updatesType = []
-        if (tx.srcSideChainRevision !== undefined) {
-            updates.push([['txBySrcSideChainRevision', tx.srcSideChainRevision],
-                updateSCRevision])
-        }
-        if (tx.dstSideChainRevision !== undefined) {
-            updates.push([['txByDstSideChainRevision', tx.dstSideChainRevision],
-                updateSCRevision])
-        }
-        return updates
-    }
 }

@@ -1,7 +1,7 @@
 import { aliceToTrent } from './chain.test'
 import { Guid } from './guid'
 import { Map } from './immutable'
-import {ITxPatch, UIState} from './state'
+import { UIState} from './state'
 import { Transaction } from './tx'
 
 const s = new UIState({});
@@ -34,16 +34,4 @@ describe('UIState tests', () => {
     it('Adds a tx which has been seen before', () => {
         expect(nns.txByGUID).toEqual(secondExpected)
     });
-
-    it('Updates the side-chain indices, when provided', () => {
-
-        const emptyRevMap = Map<number, ITxPatch>();
-        const txPatch = {guid: aliceToTrent.getGUID(), date: aliceToTrent.creationDate};
-        const srcRevMap = emptyRevMap.set(nt.srcSideChainRevision as number, txPatch);
-
-
-        expect(nns.txBySrcSideChainRevision).toEqual(srcRevMap);
-        const dstRevMap = emptyRevMap.set(nt.dstSideChainRevision as number, txPatch);
-        expect(nns.txByDstSideChainRevision).toEqual(dstRevMap);
-    })
 })
