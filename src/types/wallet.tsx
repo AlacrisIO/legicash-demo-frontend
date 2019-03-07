@@ -37,8 +37,7 @@ const defaultValues = {
     /** Balance in this address in the side chain. Cannot be negative. */
     offchainBalance: 0,
     /** Balance in this address on-chain. Cannot be negative. */
-    // XXX: We are effectively agnostic about onchainBalance, at this point.
-    onchainBalance: Infinity,
+    onchainBalance: 100000000000000000000,
     /** Known transactions for this account */
     // XXX: Key function is broken, because we don't have access to the Txs here
     txs: new SortedList<Guid, sortKey>({
