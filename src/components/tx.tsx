@@ -92,6 +92,12 @@ export const DumbTx = ({ tx, requestProof, requestToggle, show, owner }: ITx): J
                     <span className={'black'}>{tx.getType()}</span>
                 </span>
             </div>
+            <div className={'lrsplit txsSegment'}>
+                    <span style={{flex: 1}}>
+                        <span className={'gray'} >ID: </span>
+                        <span className={'black'}>{tx.getGUID().toString()}</span>
+                    </span>
+            </div>
             {toAndFrom}
             <div className={'lrsplit txsSegment'}>
                 <span style={{flex: 0.5}}>
