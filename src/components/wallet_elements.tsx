@@ -37,8 +37,8 @@ export const OffchainBalance = ({balance, pending = false} : {balance: number, p
     const balanceClasses =   pending ? 'infoLabel gray accent' : 'infoLabel black accent';
     return (
         <div className={'infoSection'}>
-            <p className={'infoLabel gray '}>Sidechain balance:</p>
-            <div className={balanceClasses} >{balance}  {loader}</div>
+            <p className={'infoLabel gray'}>Side chain balance:</p>
+            <div className={balanceClasses}>{balance}  {loader}</div>
         </div>
     )
 }
@@ -46,8 +46,8 @@ export const OffchainBalance = ({balance, pending = false} : {balance: number, p
 export const OnchainBalance = ({balance} : {balance: number}) => {
     return (
         <div className={'infoSection'}>
-            <p className={'infoLabel gray'} >Mainchain balance:</p>
-            <p className={'infoLabel black accent'}  >{balance}</p>
+            <p className={'infoLabel gray'}>Main chain balance:</p>
+            <p className={'infoLabel black accent'}>{balance}</p>
         </div>
     )
 }
