@@ -49,19 +49,25 @@ export interface ICrossChainValidated extends ICrossChain, IServerResponse {
 }
 
 const validatedMessage = (action: Action) =>
-            ( address:        Address
-            , newBalance:     number
-            , tx:             Transaction
-            , serverResponse: Transaction
-            ): ICrossChainValidated => {
+        ( address:        Address
+        , newBalance:     number
+        , tx:             Transaction
+        , serverResponse: Transaction
+        ): ICrossChainValidated => {
 
-        if (!serverResponse.validated) {
-            throw Error('Received unvalidated tx!')
-        }
-
-        tx.assertSameTransaction(serverResponse)  // Same tx, w/ more info?
-        return { newBalance, serverResponse, tx, type: action, address }
+    if (!serverResponse.validated) {
+        throw Error('Received unvalidated tx!')
     }
+
+    tx.assertSameTransaction(serverResponse)  // Same tx, w/ more info?
+
+    return { address
+           , newBalance
+           , serverResponse
+           , tx
+           , type: action
+           }
+}
 
 /** Represents that deposit has been validated by server. */
 export interface IDepositValidated extends ICrossChainValidated {
