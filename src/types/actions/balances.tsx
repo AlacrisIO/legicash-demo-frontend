@@ -4,8 +4,18 @@ import { Action, IActionType } from './base_actions'
 
 export interface IBalances {
     [a: string]: {
-        readonly balance: number
-        readonly revision: number
+        readonly side_chain_account: {
+            address: string,
+            account_state: {
+                balance:  number
+                revision: number
+            }
+        },
+        readonly main_chain_account: {
+            address:  string,
+            balance:  number,
+            revision: number
+        }
     }
 }
 

@@ -1,9 +1,9 @@
-import { Address, emptyAddress } from './address'
-import { balanceUpdate, Chain } from './chain'
-import { Guid } from './guid'
+import { Address, emptyAddress }  from './address'
+import { balanceUpdate, Chain }   from './chain'
+import { Guid }                   from './guid'
 import { List, Map, Record, Set } from './immutable'
-import { SortedList } from './sorted_list'
-import { Transaction } from './tx'
+import { SortedList }             from './sorted_list'
+import { Transaction }            from './tx'
 
 export type sortKey = [number, number]  // Revision #, date in ms.
 
@@ -35,10 +35,13 @@ const defaultValues = {
     /** Cryptographic address for this account */
     address: emptyAddress,
     /** Balance in this address in the side chain. Cannot be negative. */
-    offchainBalance: 0,
-    /** Balance in this address on-chain. Cannot be negative. */
-    // XXX: We are effectively agnostic about onchainBalance, at this point.
-    onchainBalance: Infinity,
+    sidechainBalance: 0,
+    /** Balance in this address main-chain. Cannot be negative. */
+    /** TODO `mainchainBalance` should be `0` but right now our synchronization
+     * is incomplete so we fudge the initial value to match what happens during
+     * prefunding
+     */
+    mainchainBalance: 100000000000000000000,
     /** Known transactions for this account */
     // XXX: Key function is broken, because we don't have access to the Txs here
     txs: new SortedList<Guid, sortKey>({
@@ -61,25 +64,34 @@ export class Wallet extends Record(defaultValues) {
         this.checkBalances()
         // XXX: Check that all transactions belong to `address`?
     }
+
     /** Wallet with this tx added */
-    public addTx(tx: Transaction, txs: Map<Guid, Transaction>,
-        updateBalance: boolean = true): this {
+    public addTx(tx:            Transaction
+               , txs:           Map<Guid, Transaction>
+               , updateBalance: boolean = true
+               ): this {
+
         if (tx === undefined) {
             throw Error(`Attempt to add undefined Tx to ${this}!`)
         }
+
         if (this.knownTx(tx)) { return this }  // No need to update...
+
         // to be applied in a big batch at the end
         const updates: Array<[any[], (a: any) => any]> = [
             [['txs'], this.updateTxs(tx.localGUID as Guid, tx)],
             [['txSet'], (s: Set<Guid>) => s.add(tx.getGUID())]
         ]
+
         if ((!this.knownTx(tx)) && (updateBalance)) {
             updates.push(...this.balanceUpdates(tx, this.updateBalance.bind(this)))
         }
+
         const rv = this.multiUpdateIn(updates)
         rv.checkBalances()
         return rv
     }
+
     public rejectTx(tx: Transaction): this {
         if (!this.knownTx(tx)) {
             throw Error(`Server rejected a tx we haven't seen! ${tx}
@@ -92,6 +104,7 @@ known tx guids: ${this.txs.elements}`)
         rv.checkBalances()
         return rv
     }
+
     private knownTx(tx: Transaction): boolean {
         return this.txs.hasElt(tx.localGUID as Guid, keyFn(tx)) ||
             this.txSet.has(tx.getGUID())
@@ -103,27 +116,31 @@ known tx guids: ${this.txs.elements}`)
             return l.add(txID, keyFn(tx))
         }
     }
+
     /** Function for updating balance, given tx direction. */
     private updateBalance(tx: Transaction, c: Chain): balanceUpdateFn {
         const address = this.address
         return (balance: number) => balance + balanceUpdate(tx, address, c)
     }
+
     private undoBalance(tx: Transaction, c: Chain): balanceUpdateFn {
         const address = this.address
         return (balance: number) => balance - balanceUpdate(tx, address, c)
     }
+
     private balanceUpdates(
-        tx: Transaction,
-        update: (tx: Transaction, chain: Chain) => balanceUpdateFn
-    ): Array<[string[], balanceUpdateFn]> {
-        return [
-            [['offchainBalance'], update(tx, Chain.Side)],
-            [['onchainBalance'], update(tx, Chain.Main)]
-        ]
+            tx:     Transaction,
+            update: (tx: Transaction, chain: Chain) => balanceUpdateFn
+            ): Array<[string[], balanceUpdateFn]> {
+
+        return [ [['sidechainBalance'], update(tx, Chain.Side)]
+               , [['mainchainBalance'], update(tx, Chain.Main)]
+               ]
     }
+
     private checkBalances(): void {
-        if (this.onchainBalance < 0) { throw Error("Onchain balance negative!") }
-        if (this.offchainBalance < 0) { throw Error("Offchain balance negative!") }
+        if (this.mainchainBalance < 0) { throw Error("Main chain balance negative!") }
+        if (this.sidechainBalance < 0) { throw Error("Side chain balance negative!") }
     }
 }
 

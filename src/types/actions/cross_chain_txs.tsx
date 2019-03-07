@@ -1,9 +1,9 @@
 /** Actions related to cross-chain txs */
 
-import { Address } from '../address'
+import { Address }                                 from '../address'
 import { depositTransaction, withdrawTransaction } from '../chain'
-import { Transaction } from '../tx'
-import { Action, IActionType, IServerResponse } from './base_actions'
+import { Transaction }                             from '../tx'
+import { Action, IActionType, IServerResponse }    from './base_actions'
 
 /**
  * Base class for cross-chain-interaction actions
