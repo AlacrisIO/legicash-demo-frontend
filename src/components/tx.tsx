@@ -40,6 +40,10 @@ interface ITx {
 /** A row corresponding to a tx. */
 export const DumbTx = ({ tx, requestProof, requestToggle, show, owner }: ITx): JSX.Element => {
 
+    if (!tx) {
+        return <span />;
+    }
+
     let toAndFrom = <span/>;
 
     const feeInfo = tx.fee ?  <div className={'lrsplit txsSegment'}><span style={{flex: 0.5}}>
@@ -78,7 +82,7 @@ export const DumbTx = ({ tx, requestProof, requestToggle, show, owner }: ITx): J
                                 {  year: 'numeric', month: 'short', day: 'numeric' })
                         } {
                             tx.creationDate &&
-                            tx.creationDate.toLocaleTimeString("en-US", {hour: '2-digit', minute:'2-digit'})
+                            tx.creationDate.toLocaleTimeString("en-US")
                         }</span>
                     </span>
             </div>

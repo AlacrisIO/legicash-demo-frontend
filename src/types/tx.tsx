@@ -12,8 +12,8 @@ import { Record } from './immutable'
 interface IOptionTypes {  // Declare types where they can't be inferred
     amount: number | undefined,
     fee: number | undefined,
-    creationDate: Date | undefined,
-    localGUID: Guid | undefined
+    creationDate: Date,
+    localGUID: Guid,
     rejected: boolean | undefined
     validated: boolean | undefined
     dstChain: Chain | undefined,
@@ -29,9 +29,9 @@ const optionValues: IOptionTypes = {
     /** Transaction fee if applicable */
     fee: undefined,
     /** LOCAL time that this tx was created. */
-    creationDate: undefined,
+    creationDate: new Date(0),
     /** Privately assigned ID for tracking within the front end */
-    localGUID: undefined,
+    localGUID: new Guid('no-guid'),
     /** Whether the transaction has been rejected by the facilitator */
     rejected: undefined,
     /** Whether the transaction has been validated by the main chain. */
