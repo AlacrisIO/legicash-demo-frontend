@@ -1,10 +1,11 @@
 import * as React from 'react';
 import { Button, Container } from 'semantic-ui-react'
+import {Money} from "../../types/units";
 import { AmountField } from './amount_field';
 
 export interface IAmountDialog {
     /** What to do with the amount when "submit" is hit */
-    submitCallback: (v: number) => void;
+    submitCallback: (v: Money) => void;
     placeholder? : string;
     loading ?: boolean
 }
@@ -12,7 +13,7 @@ export interface IAmountDialog {
 /** Form for specifying an amount */
 export class  AmountDialog extends React.Component<IAmountDialog, {}> {
 
-    public state: { amount: number } = { amount: 0 };
+    public state: { amount: Money|null } = { amount: null };
 
     public constructor(props: IAmountDialog) {
         super(props)
@@ -20,11 +21,11 @@ export class  AmountDialog extends React.Component<IAmountDialog, {}> {
         this.onSubmit = this.onSubmit.bind(this)
     }
 
-    public setAmount(amount: number) { this.setState({ amount }) }
+    public setAmount(amount: Money) { this.setState({ amount }) }
 
     public onSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
-        if (this.state.amount > 0) {
+        if (this.state.amount !== null) {
             this.props.submitCallback(this.state.amount);
         }
     }

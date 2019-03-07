@@ -1,8 +1,9 @@
 import * as React from 'react';
-import { Input } from 'semantic-ui-react';
+import {Input} from 'semantic-ui-react';
+import {filterEthInput, Money} from "../../types/units";
 
-interface IAmountFieldProps { 
-    callback: (value: number) => void;
+interface IAmountFieldProps {
+    callback: (value: Money) => void;
     className?: "amtField";
     placeholder? : string;
 }
@@ -12,7 +13,7 @@ interface IAmountFieldProps {
  * Final value is in this.state.value, as a string.
  */
 export class AmountField extends React.Component<IAmountFieldProps, {}> {
-    public state: { value: number|string };
+    public state: { value: string };
 
     constructor(props: IAmountFieldProps) {
         super(props);
@@ -33,15 +34,15 @@ export class AmountField extends React.Component<IAmountFieldProps, {}> {
 
     private handleChange(event: React.FormEvent<EventTarget>): void {
         const target = event.target as HTMLInputElement;
-        const value = target.value;
-        const parsedValue = parseInt(value, 10);
+        const inputValueText = filterEthInput(target.value.toString());
+        this.setState({value: inputValueText});
 
-        if (isNaN(parsedValue)) {
-            this.setState({ value: '' });
-            this.props.callback(0);
-        } else {
-            this.setState({ value: parsedValue });
-            this.props.callback(parsedValue);
+        if (inputValueText) {
+            const inputValue = new Money(target.value.toString(), 10, 'eth');
+
+            if (!inputValue.isLessThanZero()) {
+                this.props.callback(inputValue);
+            }
         }
     }
 }

@@ -7,12 +7,13 @@ import { addresses } from '../server/ethereum_addresses'
 import * as Actions from '../types/actions'
 import { Address } from '../types/address'
 import { HashValue } from '../types/hash'
+import {Money} from "../types/units";
 
 import { serverRunning } from './common.test'
 import { makeDeposit } from './cross_chain'
 
 const address = new Address(addresses.Alice);
-const amount = 5;
+const amount = new Money('5');
 const hash = new HashValue('0x' + '00'.repeat(32));
 const balance = 50;
 
@@ -23,7 +24,7 @@ const depositMocks = {
             case post:
                 const expected = fromJS(["deposit", {
                         address:      address.toString(),
-                        amount:       '0x' + amount.toString(16),
+                        amount:       amount.toPrefixedHexWei(),
                         request_guid: effect.args[1].request_guid
                     }])
 

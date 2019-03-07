@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {Address} from '../../types/address'
+import {Money} from "../../types/units";
 import {AmountDialog} from './amount_dialog';
 
 interface IWithdrawDialog {
@@ -8,7 +9,7 @@ interface IWithdrawDialog {
      * (and to which it should be credited on the main chain)
      */
     from: Address;
-    submitCallback: (v: number) => void;
+    submitCallback: (v: Money) => void;
     loading: boolean;
 }
 

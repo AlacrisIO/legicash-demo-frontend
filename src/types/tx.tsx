@@ -1,8 +1,9 @@
-import { emptyAddress } from './address'
-import { Chain, describeChain } from './chain'
-import { Guid } from './guid'
-import { emptyHash } from './hash'
-import { Record } from './immutable'
+import {emptyAddress} from './address'
+import {Chain, describeChain} from './chain'
+import {Guid} from './guid'
+import {emptyHash} from './hash'
+import {Record} from './immutable'
+import {Money} from "./units";
 
 /* XXX: Should have something in Transaction to indicate who the facilitator 
  * is, for sidechain transactions? What about epistemic state? For now, just
@@ -10,8 +11,8 @@ import { Record } from './immutable'
 
 /* tslint:disable:object-literal-sort-keys */
 interface IOptionTypes {  // Declare types where they can't be inferred
-    amount: number | undefined,
-    fee: number | undefined,
+    amount: Money,
+    fee: string | undefined,
     creationDate: Date,
     localGUID: Guid,
     rejected: boolean | undefined
@@ -25,7 +26,7 @@ interface IOptionTypes {  // Declare types where they can't be inferred
 
 const optionValues: IOptionTypes = {
     /** Amount transferred. Cannot be negative. */
-    amount: undefined,
+    amount: new Money('0'),
     /** Transaction fee if applicable */
     fee: undefined,
     /** LOCAL time that this tx was created. */
@@ -66,7 +67,7 @@ type txDifference = [string, (t: Transaction) => any]
 export class Transaction extends Record(defaultValues) {
     constructor(props: Partial<typeof defaultValues>) {
         super({ localGUID: new Guid(), creationDate: new Date(), ...props })
-        if (this.amount && (this.amount < 0)) {
+        if (this.amount && this.amount.isLessThanZero()) {
             throw Error("Tx with negative amount!")
         }
         if (this.rejected && this.validated) {
@@ -92,7 +93,7 @@ export class Transaction extends Record(defaultValues) {
      * and returns the attribute which is different. See assertSameTransaction.
      */
     public txsDiffer(o: Transaction): null | txDifference {
-        if (this.amount !== o.amount) {
+        if (!this.amount.isEqual(o.amount)) {
             return ["Amounts", ((t: Transaction) => t.amount)]
         }
         if (this.dstChain !== o.dstChain) {
@@ -149,7 +150,7 @@ export class Transaction extends Record(defaultValues) {
 
         if (areDifferent) {
             const [description, accessor] = areDifferent
-            throw Error(`${description} differ in transactions ${this.toString()} vs ${o.toString()}: (${accessor(this)} != ${accessor(o)})`)
+            throw Error(`${description} differ in transactions ${this.toString()} vs ${o.toString()}: (${accessor(this)} !=${accessor(o)})`)
         }
 
         return true;
@@ -180,7 +181,7 @@ export class Transaction extends Record(defaultValues) {
         return this.blockNumber as number
     }
 
-    public getFee(): number | undefined {
+    public getFee(): string | undefined {
         return this.fee;
     }
 

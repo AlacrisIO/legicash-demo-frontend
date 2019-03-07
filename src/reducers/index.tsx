@@ -17,7 +17,7 @@ export const rootReducer = (state: UIState, action: Actions.IActionType)
         case Actions.Action.MAKE_DEPOSIT:
             const {tx: MakeDepositTx, address: MakeDepositFrom} = action as Actions.IMakeDeposit;
             return state.setPendingState('deposit', MakeDepositFrom, true)
-                .addTx(MakeDepositTx, false);
+                .addTx(MakeDepositTx);
 
         case Actions.Action.DEPOSIT_VALIDATED:
             return Crosschain.updateTx(
@@ -34,7 +34,7 @@ export const rootReducer = (state: UIState, action: Actions.IActionType)
         // Withdrawal-related actions; see ../types/actions/cross_chain_txs.tsx
         case Actions.Action.MAKE_WITHDRAWAL:
             return state.setPendingState('withdrawal', (action as Actions.IMakeWithdrawal).address, true)
-                .addTx((action as Actions.IMakeWithdrawal).tx, false)
+                .addTx((action as Actions.IMakeWithdrawal).tx)
 
         case Actions.Action.WITHDRAWAL_VALIDATED:
             return Crosschain.updateTx(
@@ -52,7 +52,7 @@ export const rootReducer = (state: UIState, action: Actions.IActionType)
         case Actions.Action.PAYMENT_INITIATED:
             return state.setPendingState('payment', (action as Actions.IPaymentInitiated).address, true)
                    .setPendingState('payment', (action as Actions.IPaymentInitiated).toAddress, true)
-                   .addTx((action as Actions.IPaymentAction).tx, false);
+                   .addTx((action as Actions.IPaymentAction).tx);
 
         case Actions.Action.PAYMENT_VALIDATED:
             const { tx: PayValidTx} = action as Actions.IPaymentValidated;

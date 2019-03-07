@@ -1,12 +1,12 @@
 import * as React from 'react';
-import { connect } from 'react-redux'
-import { Segment } from 'semantic-ui-react'
-import { proofRequested, proofToggled } from '../types/actions/proofs'
-import { Address } from '../types/address'
-import { UIState } from '../types/state';
-import { Transaction } from '../types/tx'
-import { ProofDisplay } from './merkle_proof'
-import { name } from './select_account'
+import {connect} from 'react-redux'
+import {Segment} from 'semantic-ui-react'
+import {proofRequested, proofToggled} from '../types/actions/proofs'
+import {Address} from '../types/address'
+import {UIState} from '../types/state';
+import {Transaction} from '../types/tx'
+import {ProofDisplay} from './merkle_proof'
+import {name} from './select_account'
 
 // XXX: Needs some indication of the direction cross-chain txs go in.
 
@@ -102,7 +102,7 @@ export const DumbTx = ({ tx, requestProof, requestToggle, show, owner }: ITx): J
             <div className={'lrsplit txsSegment'}>
                 <span style={{flex: 0.5}}>
                     <span className={'gray'} >Amount: </span>
-                    <span className={'black'}> {tx.amount}</span>
+                    <span className={'black'}> {tx.amount.toEth(10)}</span>
                 </span>
                 <span style={{flex: 0.5}}>
                     <span className={'gray'} >Status: </span>

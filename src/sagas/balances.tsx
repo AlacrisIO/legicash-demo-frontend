@@ -2,6 +2,7 @@ import { delay } from 'redux-saga';
 import { call, put } from 'redux-saga/effects';
 import { get } from '../server/common';
 import * as Actions from '../types/actions';
+import {Money} from "../types/units";
 
 const BALANCES_POLLING_DELAY = 1000;
 type hexString = string;
@@ -34,12 +35,12 @@ const makeBalances = (response: IBalanceResponse): Actions.IBalances =>
         result[a] = {
             main_chain_account: {
                 address:  a,
-                balance:  parseHexAsNumber(mainchainState.balance),
+                balance:  new Money(mainchainState.balance, 16, 'wei'),
                 revision: parseHexAsNumber(mainchainState.revision)
             },
             side_chain_account: {
                 account_state: {
-                    balance:  parseHexAsNumber(sidechainState.balance),
+                    balance:  new Money(sidechainState.balance, 16, 'wei'),
                     revision: parseHexAsNumber(sidechainState.account_revision)
                 },
                 address: a

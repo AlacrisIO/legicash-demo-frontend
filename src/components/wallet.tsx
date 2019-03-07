@@ -7,6 +7,7 @@ import {Address}                                                from '../types/a
 import {Guid}                                                   from '../types/guid'
 import {IPendingState, UIState}                                 from '../types/state'
 import {Transaction}                                            from '../types/tx'
+import {Money} from "../types/units";
 import {Wallet as WalletType}                                   from '../types/wallet'
 import {SectionTitle}                                           from './section_title'
 import {TxList}                                                 from './tx_list' // Will need this later...
@@ -21,9 +22,9 @@ Object.keys(allAddresses).forEach(n => addressNames[allAddresses[n]] = n)
 export const name = (a: Address) => addressNames[a.toString()]
 
 interface IWallet {
-    depositCallback:  (amount: number) => void
-    payCallback:      (address: Address, amount: number) => void
-    withdrawCallback: (amount: number) => void
+    depositCallback:  (amount: Money) => void
+    payCallback:      (address: Address, amount: Money) => void
+    withdrawCallback: (amount: Money) => void
     killCallback:     () => void;
     wallet:           WalletType;
     txs:              Transaction[];
@@ -142,20 +143,20 @@ export class DumbWallet extends React.Component<IWallet> {
         || this.props.pendingStates.withdrawal
         || this.props.pendingStates.payment;
 
-    public makeDeposit = (amount: number): void => {
+    public makeDeposit = (amount: Money): void => {
         if (!this.props.pendingStates.deposit) {
             this.props.depositCallback(amount);
         }
     };
 
-    public makeWithdrawal = (amount: number): void => {
+    public makeWithdrawal = (amount: Money): void => {
         if (!this.props.pendingStates.withdrawal) {
             this.props.withdrawCallback(amount);
         }
     };
 
-    public makePayment = (to: Address, amount: number): void => {
-        if (!this.props.pendingStates.payment) {
+    public makePayment = (to: Address, amount: Money): void => {
+        if (!this.props.pendingStates.payment && amount.isGreaterThanZero()) {
             this.props.payCallback(to, amount);
         }
     };
@@ -177,10 +178,10 @@ const stateToProps = (address: Address) => (state: UIState) => {
 };
 
 const dispatchToProps = (address: Address) => (dispatch: (a: any) => any) => ({
-    depositCallback:  (a: number)              => dispatch(makeDeposit(address, a)),
+    depositCallback:  (a: Money)              => dispatch(makeDeposit(address, a)),
     killCallback:     ()                       => dispatch(removeWallet(address)),
-    payCallback:      (to: Address, a: number) => dispatch(makePayment(to, address, a)),
-    withdrawCallback: (a: number)              => dispatch(makeWithdrawal(address, a)),
+    payCallback:      (to: Address, a: Money) => dispatch(makePayment(to, address, a)),
+    withdrawCallback: (a: Money)              => dispatch(makeWithdrawal(address, a)),
 });
 
 export const Wallet = ({ address }: { address: Address }) =>

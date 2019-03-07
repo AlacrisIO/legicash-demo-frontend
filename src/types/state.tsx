@@ -110,7 +110,7 @@ export class UIState extends Record(defaultValues) {
     }
 
     /** State with tx added */
-    public addTx(tx: Transaction, updateBalance: boolean = false): this {
+    public addTx(tx: Transaction): this {
         if (tx === undefined) { throw Error("Attempt to add undefined tx") }
 
         const updateTx = (otx: Transaction | undefined): Transaction => {
@@ -123,8 +123,7 @@ export class UIState extends Record(defaultValues) {
         const updateGUID = (s: Set<Guid> | undefined): Set<Guid> => (s || Set()).add(tx.getGUID());
 
         const updateWallet = (a: Address) => (w: Wallet | undefined) => {
-            const rv = (w || new Wallet({ address: a })).addTx(
-                tx, this.txByGUID, updateBalance)
+            const rv = (w || new Wallet({ address: a })).addTx(tx, this.txByGUID)
             return rv
         }
         const updates: updatesType = [

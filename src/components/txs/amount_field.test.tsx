@@ -1,9 +1,10 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import {Money} from "../../types/units";
 import { AmountField } from './amount_field'
 
-const noOp = (x: number): void => { /* Does nothing */ }
+const noOp = (x: Money): void => { /* Does nothing */ }
 const changeEvent = (value: string) => ({
     preventDefault: noOp, target: { value }
 })

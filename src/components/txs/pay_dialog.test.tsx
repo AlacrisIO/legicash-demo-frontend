@@ -1,6 +1,7 @@
 import {mount} from 'enzyme'
 import * as React from 'react'
 import {Address, emptyAddress} from '../../types/address'
+import {Money} from "../../types/units";
 import {findAddressByName, findUserSelectItem} from "../../util/test_util";
 import {PayDialog} from './pay_dialog'
 
@@ -8,11 +9,11 @@ const fromAddress = findAddressByName('Alice');
 
 describe('PayDialog tests', () => {
 
-    let amount: number = -1;
+    let amount: Money = new Money('0');
     let to: Address = emptyAddress;
     let numCalls: number = 0;
 
-    const submitCb  = (newTo: Address, newAmount: number) => {
+    const submitCb  = (newTo: Address, newAmount: Money) => {
         amount = newAmount;
         to = newTo;
         numCalls++;
@@ -24,7 +25,7 @@ describe('PayDialog tests', () => {
 
     it("Refuses to accept bad data", () => {
         form.simulate('submit');
-        expect(amount).toEqual(-1);
+        expect(amount).toEqual('');
         expect(to).toEqual(emptyAddress);
         expect(numCalls).toEqual(0)
     });
@@ -48,12 +49,12 @@ describe('PayDialog tests', () => {
             .find('AmountField')
             .find('Input.amountField')
             .find('input')
-            .simulate('change', { target: { value: 1 } });
+            .simulate('change', { target: { value: '1' } });
 
         // Submit the form
         form.simulate('submit');
 
-        expect(amount).toEqual(1);
+        expect(amount).toEqual('1');
         expect(to).toEqual(findAddressByName(userName));
         expect(numCalls).toEqual(1)
     });

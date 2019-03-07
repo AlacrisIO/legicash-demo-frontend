@@ -24,6 +24,7 @@ import { Address }              from '../types/address'
 import { Guid }                 from '../types/guid'
 import { emptyHash, HashValue } from '../types/hash'
 import { Transaction }          from '../types/tx'
+import {Money} from "../types/units";
 import { listener }             from './common'
 
 /** Hit server with given args, and report deposit failure on exception */
@@ -97,7 +98,7 @@ const crossChainTx = (
 
         const failMsg = (msg: string) => failure(action.tx.from, action.tx, Error(msg));
         const address = action.tx.from.toString()
-        const amount  = "0x" + (action.tx.amount as any).toString(16)
+        const amount  = '0x' + action.tx.amount.toWei(16)
         const server  = serverWithErrorHandling(action.tx.from, action.tx, failure)
 
         // TODO: this smells wrong but right now `localGUID` is allowed to be
@@ -121,7 +122,8 @@ const crossChainTx = (
                 'error',
                 5000
             ));
-            return yield put(failMsg(threadResponse.error));
+            return yield put(failMsg(endpoint + ' Action failed'));
+            // return yield put(failMsg(threadResponse.error));
         }
 
         try {
@@ -166,11 +168,11 @@ const crossChainTx = (
             ]);
 
             const side_chain_account_state = response.side_chain_account_state;
-            const balance = side_chain_account_state.balance;
-            yield put(success(action.tx.from, parseInt(balance, 16), action.tx, newTx));
+            const balance = new Money(side_chain_account_state.balance, 16, 'wei');
+            yield put(success(action.tx.from, balance, action.tx, newTx));
         } catch(e) {
             yield put(Actions.createAddNotificationAction(
-                'Thread Failed',
+                'Thread Failed' + e,
                 'error',
                 5000
             ));
