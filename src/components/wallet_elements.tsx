@@ -32,7 +32,7 @@ export const WalletAddress = ({address} : {address: string}) => {
     )
 }
 
-export const OffchainBalance = ({balance, pending = false} : {balance: number, pending: boolean}) => {
+export const SidechainBalance = ({balance, pending = false} : {balance: number, pending: boolean}) => {
     const loader = pending ? <Loader active={true} inline={true} size={'tiny'} /> : '';
     const balanceClasses =   pending ? 'infoLabel gray accent' : 'infoLabel black accent';
     return (
@@ -43,7 +43,7 @@ export const OffchainBalance = ({balance, pending = false} : {balance: number, p
     )
 }
 
-export const OnchainBalance = ({balance} : {balance: number}) => {
+export const MainchainBalance = ({balance} : {balance: number}) => {
     return (
         <div className={'infoSection'}>
             <p className={'infoLabel gray'}>Main chain balance:</p>

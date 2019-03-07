@@ -13,7 +13,7 @@ import {TxList}                                                 from './tx_list'
 import {DepositDialog}                                          from './txs/deposit_dialog'
 import {PayDialog}                                              from './txs/pay_dialog'
 import {WithdrawDialog}                                         from './txs/withdraw_dialog'
-import {OffchainBalance, OnchainBalance, WalletAddress}         from './wallet_elements'
+import {MainchainBalance, SidechainBalance, WalletAddress}      from './wallet_elements'
 
 export const addressNames: { Address: string } = {} as any
 Object.keys(allAddresses).forEach(n => addressNames[allAddresses[n]] = n)
@@ -72,9 +72,9 @@ export class DumbWallet extends React.Component<IWallet> {
             </Header>
             <Segment vertical={true} style={{margin: 0, padding: 0}}>
                 <WalletAddress address={this.props.wallet.address.toString()} />
-                <OffchainBalance balance={this.props.wallet.offchainBalance}
-                                 pending={this.hasActionsPending()} />
-                <OnchainBalance balance={this.props.wallet.onchainBalance} />
+                <SidechainBalance balance={this.props.wallet.sidechainBalance}
+                                  pending={this.hasActionsPending()} />
+                <MainchainBalance balance={this.props.wallet.mainchainBalance} />
             </Segment>
 
             <Accordion exclusive={false} fluid={true} >

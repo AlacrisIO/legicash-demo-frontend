@@ -28,7 +28,7 @@ export interface IBalanceResponse { [a: string]: IBalanceValue }
 /** Parse the balances response into a friendlier format for the front-end */
 const makeBalances = (response: IBalanceResponse): Actions.IBalances =>
     Object.keys(response).reduce((result, a) => {
-        const offchainState  = response[a].side_chain_account.account_state
+        const sidechainState = response[a].side_chain_account.account_state
         const mainchainState = response[a].main_chain_account
 
         result[a] = {
@@ -39,8 +39,8 @@ const makeBalances = (response: IBalanceResponse): Actions.IBalances =>
             },
             side_chain_account: {
                 account_state: {
-                    balance:  parseHexAsNumber(offchainState.balance),
-                    revision: parseHexAsNumber(offchainState.account_revision)
+                    balance:  parseHexAsNumber(sidechainState.balance),
+                    revision: parseHexAsNumber(sidechainState.account_revision)
                 },
                 address: a
             }

@@ -13,7 +13,10 @@ const txs = new SortedList<Guid, sortKey>({
 describe('Tests of wallet type', () => {
     it('Should accept and store a sensible wallet', () => {
         return new Wallet({
-            address: aliceAddress, offchainBalance: 20, onchainBalance: 1, txs,
+            address: aliceAddress,
+            mainchainBalance: 1,
+            sidechainBalance: 20,
+            txs,
             username: 'alice'
         }) && undefined
     })
@@ -21,10 +24,16 @@ describe('Tests of wallet type', () => {
     it('Should reject negative balances', () => {
         expect(() => new Wallet({
             address: aliceAddress,
-            offchainBalance: 20, onchainBalance: -1, username: 'alice'
+            mainchainBalance: -1,
+            sidechainBalance: 20,
+            username: 'alice'
         })).toThrow()
+
         expect(() => new Wallet({
-            address: aliceAddress, offchainBalance: -20, onchainBalance: 1, txs,
+            address: aliceAddress,
+            mainchainBalance: 1,
+            sidechainBalance: -20,
+            txs,
             username: 'alice',
         })).toThrow()
     })

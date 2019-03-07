@@ -1,7 +1,7 @@
 export const addressRegexp = RegExp("^0x([0-9A-Fa-f]{2}){20}$|^$");
 
 /**
- * Represents the public address for an onchain/sidechain account.
+ * Represents the public address for an mainchain/sidechain account.
  * Currently simple validation assuming an Ethereum address.
  */
 export class Address {

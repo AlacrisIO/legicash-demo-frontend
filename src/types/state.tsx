@@ -168,12 +168,12 @@ export class UIState extends Record(defaultValues) {
                 const bals = balances[address]
 
                 updates.push(
-                    [ ['accounts', asAddress, 'offchainBalance']
+                    [ ['accounts', asAddress, 'sidechainBalance']
                     , _ => bals.side_chain_account.account_state.balance
                     ])
 
                 updates.push(
-                    [ ['accounts', asAddress, 'onchainBalance']
+                    [ ['accounts', asAddress, 'mainchainBalance']
                     , _ => bals.main_chain_account.balance
                     ])
 

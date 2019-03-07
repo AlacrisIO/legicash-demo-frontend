@@ -35,9 +35,13 @@ const defaultValues = {
     /** Cryptographic address for this account */
     address: emptyAddress,
     /** Balance in this address in the side chain. Cannot be negative. */
-    offchainBalance: 0,
-    /** Balance in this address on-chain. Cannot be negative. */
-    onchainBalance: 100000000000000000000,
+    sidechainBalance: 0,
+    /** Balance in this address main-chain. Cannot be negative. */
+    /** TODO `mainchainBalance` should be `0` but right now our synchronization
+     * is incomplete so we fudge the initial value to match what happens during
+     * prefunding
+     */
+    mainchainBalance: 100000000000000000000,
     /** Known transactions for this account */
     // XXX: Key function is broken, because we don't have access to the Txs here
     txs: new SortedList<Guid, sortKey>({
@@ -129,14 +133,14 @@ known tx guids: ${this.txs.elements}`)
             update: (tx: Transaction, chain: Chain) => balanceUpdateFn
             ): Array<[string[], balanceUpdateFn]> {
 
-        return [
-            [['offchainBalance'], update(tx, Chain.Side)],
-            [['onchainBalance'],  update(tx, Chain.Main)]]
+        return [ [['sidechainBalance'], update(tx, Chain.Side)]
+               , [['mainchainBalance'], update(tx, Chain.Main)]
+               ]
     }
 
     private checkBalances(): void {
-        if (this.onchainBalance < 0) { throw Error("Mainchain balance negative!") }
-        if (this.offchainBalance < 0) { throw Error("Sidechain balance negative!") }
+        if (this.mainchainBalance < 0) { throw Error("Main chain balance negative!") }
+        if (this.sidechainBalance < 0) { throw Error("Side chain balance negative!") }
     }
 }
 
