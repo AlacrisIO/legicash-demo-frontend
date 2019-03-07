@@ -121,10 +121,10 @@ export class Wallet extends Record(defaultValues) {
         return (balance: number) => balance + balanceUpdate(tx, address, c)
     }
 
-    private undoBalance(tx: Transaction, c: Chain): balanceUpdateFn {
-        const address = this.address
-        return (balance: number) => balance - balanceUpdate(tx, address, c)
-    }
+    // private undoBalance(tx: Transaction, c: Chain): balanceUpdateFn {
+    //     const address = this.address
+    //     return (balance: number) => balance - balanceUpdate(tx, address, c)
+    // }
 
     private balanceUpdates(
             tx:     Transaction,
