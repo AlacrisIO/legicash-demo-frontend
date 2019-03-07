@@ -9,15 +9,41 @@ type hexNumber = hexString;
 
 const parseHexAsNumber = (n: hexNumber): number => parseInt(n, 16);
 
-export interface IBalanceValue { balance: hexNumber, account_revision: hexNumber }
+export interface IBalanceValue {
+    readonly side_chain_account: {
+        address: hexNumber,
+        account_state: {
+            balance:          hexNumber,
+            account_revision: hexNumber
+        }
+    },
+    readonly main_chain_account: {
+        address:  hexNumber,
+        balance:  hexNumber,
+        revision: hexNumber
+    }
+}
 export interface IBalanceResponse { [a: string]: IBalanceValue }
 
 /** Parse the balances response into a friendlier format for the front-end */
 const makeBalances = (response: IBalanceResponse): Actions.IBalances =>
-    Object.keys(response).reduce((result, address) => {
-        result[address] = {
-            balance: parseHexAsNumber(response[address].balance),
-            revision: parseHexAsNumber(response[address].account_revision)
+    Object.keys(response).reduce((result, a) => {
+        const offchainState  = response[a].side_chain_account.account_state
+        const mainchainState = response[a].main_chain_account
+
+        result[a] = {
+            main_chain_account: {
+                address:  a,
+                balance:  parseHexAsNumber(mainchainState.balance),
+                revision: parseHexAsNumber(mainchainState.revision)
+            },
+            side_chain_account: {
+                account_state: {
+                    balance:  parseHexAsNumber(offchainState.balance),
+                    revision: parseHexAsNumber(offchainState.account_revision)
+                },
+                address: a
+            }
         };
 
         return result;

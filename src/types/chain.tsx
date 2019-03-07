@@ -9,25 +9,28 @@
  *
  */
 
-import { Address } from './address'
+import { Address }     from './address'
 import { Transaction } from './tx'
 
-export enum Chain {
-    Main, Side
-}
+export enum Chain { Main, Side }
 
 /**
  * Return the adjustment to `chain`'s `address` balance by `tx`
  * (-1 for from `address`, 0 for unrelated, +1 for to `address`) * `tx.amount`
  *
  */
-export const balanceUpdate = (
-    tx: Transaction, address: Address, chain: Chain): number => {
+export const balanceUpdate = ( tx:      Transaction
+                             , address: Address
+                             , chain:   Chain
+                             ): number => {
+
     if (tx.amount === undefined) {
         throw Error(`Transaction amount undefined! ${tx}`)
     }
+
     if (tx.from.equals(address) && (chain === tx.srcChain)) { return -tx.amount }
-    if (tx.to.equals(address) && (chain === tx.dstChain)) { return tx.amount }
+    if (tx.to.equals(address)   && (chain === tx.dstChain)) { return  tx.amount }
+
     return 0
 }
 

@@ -15,7 +15,8 @@ export const rootReducer = (state: UIState, action: Actions.IActionType)
         // Deposit-related actions; see ../types/actions/cross_chain_txs.tsx
         case Actions.Action.MAKE_DEPOSIT:
             const {tx: MakeDepositTx, address: MakeDepositFrom} = action as Actions.IMakeDeposit;
-            return state.setPendingState('deposit', MakeDepositFrom, true).addTx(MakeDepositTx, false);
+            return state.setPendingState('deposit', MakeDepositFrom, true)
+                .addTx(MakeDepositTx, false);
 
         case Actions.Action.DEPOSIT_VALIDATED:
             return Crosschain.updateTx(
@@ -32,7 +33,7 @@ export const rootReducer = (state: UIState, action: Actions.IActionType)
         // Withdrawal-related actions; see ../types/actions/cross_chain_txs.tsx
         case Actions.Action.MAKE_WITHDRAWAL:
             return state.setPendingState('withdrawal', (action as Actions.IMakeWithdrawal).address, true)
-            .addTx((action as Actions.IMakeWithdrawal).tx, false)
+                .addTx((action as Actions.IMakeWithdrawal).tx, false)
 
         case Actions.Action.WITHDRAWAL_VALIDATED:
             return Crosschain.updateTx(
@@ -71,12 +72,15 @@ export const rootReducer = (state: UIState, action: Actions.IActionType)
         // Transaction query-related actions
         case Actions.Action.RECENT_TRANSACTIONS_INITIATED:
             return state  // XXX: Reflect this in the UI, somehow?
+
         case Actions.Action.RECENT_TRANSACTIONS_RECEIVED:
             return RecentTxs.addTxs(
                 state, (action as Actions.IRecentTxsReceived).txs)
+
         case Actions.Action.RECENT_TRANSACTIONS_NEW_PAYMENTS:
             return RecentTxs.setNewPayments(
                 state, (action as Actions.IRecentTxsNewPayments).txIds)
+
         case Actions.Action.RECENT_TRANSACTIONS_FAILED:
             return RecentTxs.recentTxsFailed(state) // XXX: Reflect in UI??
 
@@ -84,9 +88,11 @@ export const rootReducer = (state: UIState, action: Actions.IActionType)
         case Actions.Action.PROOF_RECEIVED_AND_VALID:
             const proofAction = (action as Actions.IProofReceivedAndValid)
             return state.addProof(proofAction.tx, proofAction.proof)
+
         case Actions.Action.PROOF_RECEIVED_BUT_INVALID:
             const failAction = (action as Actions.IProofReceivedButInvalid)
             return state.addProof(failAction.tx, failAction.response)
+
         case Actions.Action.PROOF_ERROR:
             const errorAction = action as Actions.IProofError
             return state.addProof(errorAction.tx, errorAction.error)
@@ -95,10 +101,13 @@ export const rootReducer = (state: UIState, action: Actions.IActionType)
         case Actions.Action.ADD_WALLET:
             const addAction = (action as Actions.IAddWallet)
             return state.addWallet(addAction.username, addAction.address)
+
         case Actions.Action.REMOVE_WALLET:
             return state.removeWallet((action as Actions.IRemoveWallet).address)
+
         case Actions.Action.PROOF_REQUESTED:
             return state.removeProof((action as Actions.IProofRequested).tx)
+
         case Actions.Action.PROOF_TOGGLED:
             return state.toggleProof((action as Actions.IProofToggle).tx, (action as Actions.IProofToggle).owner)
     }

@@ -21,7 +21,7 @@ export const WalletAddress = ({address} : {address: string}) => {
                     className={'gray addressLine truncate'}
                     style={{marginLeft: '0 !important'}}
                 >{address}</div>
-                <a 
+                <a
                     ref={linkref as React.RefObject<HTMLAnchorElement>}
                     className={'bluelink addressLine'}
                     onClick={ copyToClipboard }
@@ -37,7 +37,7 @@ export const OffchainBalance = ({balance, pending = false} : {balance: number, p
     const balanceClasses =   pending ? 'infoLabel gray accent' : 'infoLabel black accent';
     return (
         <div className={'infoSection'}>
-            <p className={'infoLabel gray '}>Offchain balance:</p>
+            <p className={'infoLabel gray '}>Sidechain balance:</p>
             <div className={balanceClasses} >{balance}  {loader}</div>
         </div>
     )
@@ -46,7 +46,7 @@ export const OffchainBalance = ({balance, pending = false} : {balance: number, p
 export const OnchainBalance = ({balance} : {balance: number}) => {
     return (
         <div className={'infoSection'}>
-            <p className={'infoLabel gray'} >Onchain balance:</p>
+            <p className={'infoLabel gray'} >Mainchain balance:</p>
             <p className={'infoLabel black accent'}  >{balance}</p>
         </div>
     )

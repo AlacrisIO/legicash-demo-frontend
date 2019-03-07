@@ -2,9 +2,12 @@ import { get, post } from './common'
 import { addresses } from './ethereum_addresses'
 
 export const validateBalance = (resp: any) => {
-    if (!(parseInt(resp.balance, 16) >= 0
-        && parseInt(resp.account_revision, 16) >= 0)) {
+    const side = resp.side_chain_account.account_state
 
+    const valid = parseInt(side.balance,          16) >= 0
+               && parseInt(side.account_revision, 16) >= 0
+
+    if (!valid) {
         throw Error(`Bad balance response: ${JSON.stringify(resp)}`)
     }
 

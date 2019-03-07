@@ -36,10 +36,10 @@ export class ContractState extends DefaultContractState
     constructor(props: IContractState) {
         super(props)
         if (this.fundsInCustody < 0) {
-            throw Error("Onchain balance negative!")
+            throw Error("Mainchain balance negative!")
         }
         if (this.fundsInSidechain < 0) {
-            throw Error("Offchain balance negative!")
+            throw Error("Sidechain balance negative!")
         }
     }
 }

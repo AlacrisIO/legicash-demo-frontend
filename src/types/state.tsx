@@ -165,8 +165,18 @@ export class UIState extends Record(defaultValues) {
             const asAddress = new Address(address)
             if (this.displayedAccountsSet.has(asAddress)) {
                 /* This wallet is displayed, so update its balance */
-                updates.push([['accounts', asAddress, 'offchainBalance'],
-                (_) => balances[address].balance])
+                const bals = balances[address]
+
+                updates.push(
+                    [ ['accounts', asAddress, 'offchainBalance']
+                    , _ => bals.side_chain_account.account_state.balance
+                    ])
+
+                updates.push(
+                    [ ['accounts', asAddress, 'onchainBalance']
+                    , _ => bals.main_chain_account.balance
+                    ])
+
             }
         })
         return this.multiUpdateIn(updates)

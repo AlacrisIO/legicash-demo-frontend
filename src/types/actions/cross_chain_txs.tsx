@@ -1,9 +1,9 @@
 /** Actions related to cross-chain txs */
 
-import { Address } from '../address'
+import { Address }                                 from '../address'
 import { depositTransaction, withdrawTransaction } from '../chain'
-import { Transaction } from '../tx'
-import { Action, IActionType, IServerResponse } from './base_actions'
+import { Transaction }                             from '../tx'
+import { Action, IActionType, IServerResponse }    from './base_actions'
 
 /**
  * Base class for cross-chain-interaction actions
@@ -49,11 +49,16 @@ export interface ICrossChainValidated extends ICrossChain, IServerResponse {
 }
 
 const validatedMessage = (action: Action) =>
-    (address: Address, newBalance: number, tx: Transaction,
-        serverResponse: Transaction): ICrossChainValidated => {
+            ( address:        Address
+            , newBalance:     number
+            , tx:             Transaction
+            , serverResponse: Transaction
+            ): ICrossChainValidated => {
+
         if (!serverResponse.validated) {
             throw Error('Received unvalidated tx!')
         }
+
         tx.assertSameTransaction(serverResponse)  // Same tx, w/ more info?
         return { newBalance, serverResponse, tx, type: action, address }
     }
