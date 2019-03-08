@@ -131,7 +131,7 @@ const crossChainTx = (
 
             if ((result as IThreadResponse).error) {
                 yield put(Actions.createAddNotificationAction(
-                    (result as IThreadResponse).error,
+                    `The ${endpoint} action failed`,
                     'error',
                     5000
                 ));
