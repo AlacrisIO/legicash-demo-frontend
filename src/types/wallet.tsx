@@ -142,8 +142,8 @@ export class Wallet extends Record(defaultValues) {
 }
 
 export const makeWalletWithTxList = (
-    address: Address, allTxs: Set<Guid>, guidMap: Map<Guid, Transaction>,
-    username: string): Wallet => {
+    address: Address, allTxs: Set<Guid>, guidMap: Map<Guid, Transaction>, username: string
+): Wallet => {
     const thisKeyFn = (g: Guid) => {
         const tx = guidMap.get(g)
         if (tx === undefined) {

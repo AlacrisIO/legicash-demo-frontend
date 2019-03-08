@@ -10,10 +10,23 @@ export const TxList = ({ txs, owner }: { txs: Transaction[], owner: Address }) =
     
     if (txs.length) {
         return <Container className="txList">
-            {...txs.sort(sortByCreationDesc).map((tx: Transaction, key: number): any => {
-                const TxComponent = Tx({ tx, owner })
-                return <TxComponent key={key} />
-            })}
+
+            {
+                ...txs
+                    .sort(sortByCreationDesc)
+                    .map(
+                        (tx: Transaction, key: number): any => {
+
+                                    if (!tx) {
+                                        return  null;
+                                    }
+
+                                const TxComponent = Tx({ tx, owner })
+
+                            return <TxComponent key={key} />
+                        })
+                    . filter((item: any) => !!item)
+            }
         </Container>
     } else {
         return <Container className="txList" textAlign={'center'}>
