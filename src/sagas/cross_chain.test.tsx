@@ -11,10 +11,10 @@ import { HashValue } from '../types/hash'
 import { serverRunning } from './common.test'
 import { makeDeposit } from './cross_chain'
 
-const address = new Address(addresses.Alice)
-const amount = 5
-const hash = new HashValue('0x' + '00'.repeat(32))
-const balance = 50
+const address = new Address(addresses.Alice);
+const amount = 5;
+const hash = new HashValue('0x' + '00'.repeat(32));
+const balance = 50;
 
 /** Mocks for server interactions */
 const depositMocks = {
@@ -23,7 +23,7 @@ const depositMocks = {
             case post:
                 const expected = fromJS(["deposit", {
                         address:      address.toString(),
-                        amount:       '0x' + amount.toString(16)
+                        amount:       '0x' + amount.toString(16),
                         request_guid: effect.args[1].request_guid
                     }])
 
@@ -32,9 +32,9 @@ const depositMocks = {
                     /* tslint:disable:no-console */
                     console.log(`Bad post call! ${JSON.stringify(effect)}`)
                 }
-
-                return { result: { thread: 5 }}
-
+                return {
+                    result: { thread: 5 }
+                };
             case get:
                 return {
                     /* tslint:disable:object-literal-sort-keys */
@@ -49,7 +49,6 @@ const depositMocks = {
                         block_hash: hash.toRawString()
                     }
                 }
-
             default:
                 return next()
         }
@@ -84,24 +83,23 @@ result', () => {
         /* TODO: Hit the deposit endpoint multiple times. This would be a
          * regression test */
         describe('Deposit saga test with server interaction', () => {
-            xit('Hits the deposit endpoint, and returns a DEPOSIT_VALIDATED action',
+            it('Hits the deposit endpoint, and returns a DEPOSIT_VALIDATED action',
                 () => {
                     return expectSaga(makeDeposit, makeDepositAction)
                         .run(4500).then((result: any) => {
-                            const put = result.effects.put[0].PUT
-                            const action = put.action
-                            const newTx = action.serverResponse
+                            const put = result.effects.put[0].PUT;
+                            const action = put.action;
+                            const newTx = action.serverResponse;
                             if (action.type !== Actions.Action.DEPOSIT_FAILED) {
                                 // Only run this if deposit succeeded
-                                expect(action.newBalance).toBeGreaterThanOrEqual(0)
-                                expect(tx.txsDiffer.bind(tx)(newTx)).toBeFalsy()
-                                expect(newTx.validated).toBeTruthy()
+                                expect(action.newBalance).toBeGreaterThanOrEqual(0);
+                                expect(tx.txsDiffer.bind(tx)(newTx)).toBeFalsy();
+                                expect(newTx.validated).toBeTruthy();
                                 expect(newTx.rejected || newTx.failureMessage)
                                     .toBeFalsy()
                                 /* tslint:disable:no-console */
                             } else {
-                                console.log(`Deposit test failed! \
-${JSON.stringify(action)}`)
+                                console.log(`Deposit test failed! ${JSON.stringify(action)}`)
                             }
                         })
                     // XXX: More validation, here?
@@ -109,4 +107,4 @@ ${JSON.stringify(action)}`)
         })
     }
 }
-)
+);

@@ -5,6 +5,7 @@ import createSagaMiddleware from 'redux-saga'  // Does not work with braces!!
 import 'semantic-ui-css/semantic.min.css'
 import  './App.css'
 import { AddAccount } from './components/add_account'
+import {Notifications} from "./components/notifications";
 import { WalletList } from './components/wallet_list'
 import { rootReducer } from './reducers'
 import { rootSaga } from './sagas'
@@ -32,6 +33,7 @@ export class App extends React.Component {
                 <div className="App">
                     <AddAccount />
                     <WalletList />
+                    <Notifications />
                 </div>
             </Provider>
         );

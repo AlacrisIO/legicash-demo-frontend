@@ -6,6 +6,7 @@ import * as Actions from "../types/actions";
 import {IRemoveWallet} from "../types/actions";
 import {Address} from '../types/address'
 import * as Chain from '../types/chain'
+import {Guid} from "../types/guid";
 // import {Guid} from "../types/guid";
 import {Transaction} from '../types/tx'
 
@@ -20,18 +21,24 @@ interface IDeposit {
     deposit_amount: hex_number,
     deposit_fee: hex_number,
     main_chain_deposit: { tx_header: { sender: hex_string } },
-    main_chain_deposit_confirmation: { block_number: hex_string}
+    main_chain_deposit_confirmation: { block_number: hex_string},
+    request_guid: string,
+    requested_at: hex_number,
 }
 
 /* tslint:disable:no-empty-interface */
 interface IPayment {
     payment_invoice: { recipient: Address, amount: hex_number, memo: string },
-    main_chain_deposit_confirmation?: { block_number: hex_string}
+    main_chain_deposit_confirmation?: { block_number: hex_string},
+    request_guid: string,
+    requested_at: hex_number,
 }
 
 interface IWithdrawal {
     withdrawal_amount: hex_number,
-    withdrawal_fee: hex_number
+    withdrawal_fee: hex_number,
+    request_guid: string,
+    requested_at: hex_number,
 }
 
 type DepositOperation = ["Deposit", IDeposit]
@@ -61,14 +68,21 @@ export const txFromDeposit = (d: IResponse): Transaction => {
     const dstSideChainRevision = parseHexAsNumber(d.tx_header.tx_revision)
     const transactionType = 'Deposit'
     const blockNumber = parseHexAsNumber(deposit.main_chain_deposit_confirmation.block_number);
+    const localGUID = new Guid(payload.operation[1].request_guid);
+    const creationDate = new Date(
+        (parseHexAsNumber(payload.operation[1].requested_at))
+    );
+
 
     return new Transaction({
         // XXX: Move side-chain determination logic into chain.tsx
         amount,
         blockNumber,
+        creationDate,
         dstChain: Chain.Chain.Side,
         dstSideChainRevision,
         from: address,
+        localGUID,
         srcChain: Chain.Chain.Main,
         to: address,
         transactionType,
@@ -89,15 +103,21 @@ export const txFromWithdrawal = (d: IResponse): Transaction => {
     const amount = parseHexAsNumber(withdrawal.withdrawal_amount);
     const fee = parseHexAsNumber(withdrawal.withdrawal_fee);
     const address = new Address(payload.rx_header.requester);
+    const localGUID = new Guid(payload.operation[1].request_guid);
+    const creationDate = new Date(
+        (parseHexAsNumber(payload.operation[1].requested_at))
+    );
 
     return new Transaction({
         // XXX: Move side-chain determination logic into chain.tsx
         amount,
         // @TODO: Luka where is the ? blockNumber,
+        creationDate,
         dstChain: Chain.Chain.Main,
         dstSideChainRevision,
         fee,
         from: address,
+        localGUID,
         srcChain: Chain.Chain.Side,
         to: address,
         transactionType,
@@ -120,7 +140,13 @@ export const txFromPayment = (p: IResponse): Transaction => {
     const to = new Address(payment.payment_invoice.recipient);
     const transactionType = 'Payment';
 
+    const localGUID = new Guid(payload.operation[1].request_guid);
+    const creationDate = new Date(
+        (parseHexAsNumber(payload.operation[1].requested_at))
+    );
+
     return new Transaction({
+        localGUID,creationDate,
         amount, dstSideChainRevision, srcSideChainRevision, from, to, transactionType,
         srcChain: Chain.Chain.Side, dstChain: Chain.Chain.Side
     });
@@ -151,24 +177,6 @@ export function* recentTxs(action: Actions.IRecentTxsInitiated) {
             yield put(Actions.recentTxsReceived(
                 action.address, response.map(txFromResponse).filter(
                     (t: Transaction): boolean => (t.amount as number) > 0)))
-
-            // new payments @todo: luka  Getting the actual new payments would at least require a solid creation date
-            // const recentPaymentTx = yield select(recentPaymentsSelector(address));
-            // const newPayments: any[] = [];
-            //
-            // // if (!recentPayments.hasOwnProperty(address)) {
-            // //     recentPayments[address] = recentPaymentTx;
-            // // } else {
-            // //     recentPaymentTx.forEach(
-            // //         (tx: string) => {
-            // //             if (recentPayments[address].indexOf(tx) === -1) {
-            // //                 newPayments.push(tx);
-            // //                 recentPayments[address].push(tx);
-            // //             }
-            // //         });
-            // // }
-            // //
-            // // yield put(Actions.newPaymentsReceived(action.address, newPayments));
 
         } catch (e) {
             yield put(Actions.recentTxsFailed(action.address, e))
@@ -201,15 +209,3 @@ export const recentTxsListener = function* () {
     yield takeEvery(initMatcher, recentHandler);
     yield takeEvery(removeMatcher, removeHandler);
 };
-
-// const recentPaymentsSelector = (address: string) => {
-//     return (state: UIState)  => {
-//         return state.txByGUID.filter(
-//             (i:any) => i.to.address === address && i.transactionType === 'Payment'
-//         ).filter(
-//             (i:any) => i.creationDate > new Date(Date.now() - POLLING_DELAY)
-//         ).map(
-//             (i: any, k: Guid) =>  k.toString()
-//         ).toArray()
-//     }
-// };

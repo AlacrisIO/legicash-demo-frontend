@@ -8,7 +8,7 @@ const trentAddress = new Address('0x7472656e747472656e747472656e747472656e74');
 const bobAddress = new Address('0xb0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0');
 const hash = new HashValue('0x' + 'ff'.repeat(32))
 
-const now = new Date()
+export const now = new Date()
 /* tslint:disable:object-literal-sort-keys */
 export const aliceToTrent = new Transaction({
     amount: 19, creationDate: now, dstChain: Chain.Side, failureMessage: '',

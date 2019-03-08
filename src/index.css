@@ -3,3 +3,18 @@ body {
   padding: 0;
   font-family: sans-serif;
 }
+
+.snackbar {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    background:transparent;
+    width:100%;
+    min-height: 40px;
+    position:absolute;
+    bottom: 0;
+    align-content: center;
+    align-items: center;
+    justify-items: center;
+    justify-content: center;
+}

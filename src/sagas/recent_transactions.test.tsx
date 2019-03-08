@@ -22,7 +22,7 @@ const recentTxMocks = {
                     /* tslint:disable:no-console */
                     console.log(`Bad post call! ${JSON.stringify(effect)}`)
                 }
-                return []
+                return [];
             default: return next()
         }
     }
@@ -32,9 +32,7 @@ describe('Recent Txs tests', () => {
 
     it('Sends the address as part of the request', () => {
         return expectSaga(recentTxs, recentTxsInitiated(address))
-            .provide(recentTxMocks).run()
+            .provide(recentTxMocks).run({ silenceTimeout: true })
     })
 })
-
-describe('Dummy test', () => it('returns true', () => new Promise(r => r(true))))
 

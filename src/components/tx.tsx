@@ -40,6 +40,10 @@ interface ITx {
 /** A row corresponding to a tx. */
 export const DumbTx = ({ tx, requestProof, requestToggle, show, owner }: ITx): JSX.Element => {
 
+    if (!tx) {
+        return <span />;
+    }
+
     let toAndFrom = <span/>;
 
     const feeInfo = tx.fee ?  <div className={'lrsplit txsSegment'}><span style={{flex: 0.5}}>
@@ -60,12 +64,39 @@ export const DumbTx = ({ tx, requestProof, requestToggle, show, owner }: ITx): J
         </div>
     }
 
-    return (<Segment vertical={true} style={{ textAlign: 'left', padding: '5px'}}>
+    const proofDisplay = tx.validated ? <ProofDisplay
+        tx={tx}
+        requestProof={requestProof}
+        requestToggle={requestToggle}
+        show={show}
+        showBlockLink={false}
+    /> : '';
+
+    return (<Segment vertical={true} color={'blue'} style={{ textAlign: 'left', padding: '5px'}}>
+            <div className={'lrsplit txsSegment'}>
+                    <span style={{flex: 1}}>
+                        <span className={'black'} >{
+                            tx.creationDate &&
+                            tx.creationDate.toLocaleDateString(
+                                "en-US",
+                                {  year: 'numeric', month: 'short', day: 'numeric' })
+                        } {
+                            tx.creationDate &&
+                            tx.creationDate.toLocaleTimeString("en-US")
+                        }</span>
+                    </span>
+            </div>
             <div className={'lrsplit txsSegment'}>
                 <span style={{flex: 1}}>
                     <span className={'gray'} >Transaction type: </span>
                     <span className={'black'}>{tx.getType()}</span>
                 </span>
+            </div>
+            <div className={'lrsplit txsSegment'}>
+                    <span style={{flex: 1}}>
+                        <span className={'gray'} >ID: </span>
+                        <span className={'black'}>{tx.getGUID().toString()}</span>
+                    </span>
             </div>
             {toAndFrom}
             <div className={'lrsplit txsSegment'}>
@@ -79,7 +110,7 @@ export const DumbTx = ({ tx, requestProof, requestToggle, show, owner }: ITx): J
                 </span>
             </div>
             {feeInfo}
-            <ProofDisplay tx={tx} requestProof={requestProof} requestToggle={requestToggle}  show={show} />
+            {proofDisplay}
     </Segment>)
 }
 

@@ -91,20 +91,19 @@ export class Wallet extends Record(defaultValues) {
         rv.checkBalances()
         return rv
     }
-
     public rejectTx(tx: Transaction): this {
         if (!this.knownTx(tx)) {
-            throw Error(`Server rejected a tx we haven't seen! ${tx}
-known tx guids: ${this.txs.elements}`)
+            throw Error(`Server rejected a tx we haven't seen! ${tx} known tx guids: ${this.txs.elements}`);
         }  // OK, undo the balances
-        const updates = this.balanceUpdates(tx, this.undoBalance.bind(this))
-        updates.push([['txSet'], (s: Set<Guid>) => s.remove(tx.getGUID())])
-        const rv = this.multiUpdateIn(updates)
-        // XXX: Provide a means to remove rejected Txs from the display?
-        rv.checkBalances()
-        return rv
-    }
 
+        // const updates = this.balanceUpdates(tx, this.undoBalance.bind(this))
+        // updates.push([['txSet'], (s: Set<Guid>) => s.remove(tx.getGUID())])
+        // const rv = this.multiUpdateIn(updates)
+        // // XXX: Provide a means to remove rejected Txs from the display?
+        // rv.checkBalances()
+
+        return this;
+    }
     private knownTx(tx: Transaction): boolean {
         return this.txs.hasElt(tx.localGUID as Guid, keyFn(tx)) ||
             this.txSet.has(tx.getGUID())
@@ -116,17 +115,16 @@ known tx guids: ${this.txs.elements}`)
             return l.add(txID, keyFn(tx))
         }
     }
-
     /** Function for updating balance, given tx direction. */
     private updateBalance(tx: Transaction, c: Chain): balanceUpdateFn {
         const address = this.address
         return (balance: number) => balance + balanceUpdate(tx, address, c)
     }
 
-    private undoBalance(tx: Transaction, c: Chain): balanceUpdateFn {
-        const address = this.address
-        return (balance: number) => balance - balanceUpdate(tx, address, c)
-    }
+    // private undoBalance(tx: Transaction, c: Chain): balanceUpdateFn {
+    //     const address = this.address
+    //     return (balance: number) => balance - balanceUpdate(tx, address, c)
+    // }
 
     private balanceUpdates(
             tx:     Transaction,
@@ -137,7 +135,6 @@ known tx guids: ${this.txs.elements}`)
                , [['mainchainBalance'], update(tx, Chain.Main)]
                ]
     }
-
     private checkBalances(): void {
         if (this.mainchainBalance < 0) { throw Error("Main chain balance negative!") }
         if (this.sidechainBalance < 0) { throw Error("Side chain balance negative!") }
@@ -145,8 +142,8 @@ known tx guids: ${this.txs.elements}`)
 }
 
 export const makeWalletWithTxList = (
-    address: Address, allTxs: Set<Guid>, guidMap: Map<Guid, Transaction>,
-    username: string): Wallet => {
+    address: Address, allTxs: Set<Guid>, guidMap: Map<Guid, Transaction>, username: string
+): Wallet => {
     const thisKeyFn = (g: Guid) => {
         const tx = guidMap.get(g)
         if (tx === undefined) {

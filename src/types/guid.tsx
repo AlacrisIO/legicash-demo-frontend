@@ -17,7 +17,9 @@ function uuidv4() {
  */
 export class Guid {
     public guid: string;
-    constructor() { this.guid = uuidv4() }
+    constructor(existingGuid?: string) {
+        this.guid = existingGuid ? existingGuid : uuidv4()
+    }
     public toString(): string { return this.guid }
     public equals(o: Guid): boolean { return this.guid === o.guid }
 }

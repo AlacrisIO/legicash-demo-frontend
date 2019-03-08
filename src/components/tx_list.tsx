@@ -6,14 +6,27 @@ import { Tx } from './tx'
 
 export const TxList = ({ txs, owner }: { txs: Transaction[], owner: Address }) => {
     
-    const sortDescByDestRevNum = (a: Transaction, b: Transaction) => a.getDstSideChainRevision() < b.getDstSideChainRevision() ? 1 : -1;
+    const sortByCreationDesc = (a: Transaction, b: Transaction) => a.creationDate < b.creationDate ? 1 : -1;
     
     if (txs.length) {
         return <Container className="txList">
-            {...txs.sort(sortDescByDestRevNum).map((tx: Transaction, key: number): any => {
-                const TxComponent = Tx({ tx, owner })
-                return <TxComponent key={key} />
-            })}
+
+            {
+                ...txs
+                    .sort(sortByCreationDesc)
+                    .map(
+                        (tx: Transaction, key: number): any => {
+
+                                    if (!tx) {
+                                        return  null;
+                                    }
+
+                                const TxComponent = Tx({ tx, owner })
+
+                            return <TxComponent key={key} />
+                        })
+                    . filter((item: any) => !!item)
+            }
         </Container>
     } else {
         return <Container className="txList" textAlign={'center'}>

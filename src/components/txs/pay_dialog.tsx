@@ -15,7 +15,8 @@ export interface IPayDialog {
 export class PayDialog extends React.Component<IPayDialog, {}> {
     public state: { amount: number; to: Address, loading: boolean } = {
         amount: 0,  loading: false, to: emptyAddress
-    }
+    };
+
     public constructor(props: IPayDialog) {
         super(props)
         this.onSubmit = this.onSubmit.bind(this)

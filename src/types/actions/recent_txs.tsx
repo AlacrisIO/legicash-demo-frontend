@@ -1,6 +1,6 @@
-import { Address } from '../address'
-import { Transaction } from '../tx'
-import { Action, IActionType } from './base_actions'
+import {Address} from '../address'
+import {Transaction} from '../tx'
+import {Action, IActionType} from './base_actions'
 
 export interface IRecentTxs extends IActionType {
     readonly address: Address
@@ -29,6 +29,3 @@ export const recentTxsFailed = (address: Address, error: Error) => ({
     address, error, type: Action.RECENT_TRANSACTIONS_FAILED
 });
 
-export const newPaymentsReceived = (address: Address, txIds: string[]) => ({
-        address, txIds, type: Action.RECENT_TRANSACTIONS_NEW_PAYMENTS
-});

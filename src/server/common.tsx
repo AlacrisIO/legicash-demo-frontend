@@ -31,7 +31,10 @@ export interface IThreadResponse
               // usable like so: `new Date(parseInt('0x16924f6a55c'))`
               , requested_at: string
               }
-    | string }
+    | string,
+
+    error?: any
+    }
 
 /**
  * Return the thread number reported by this thread response.
