@@ -9,13 +9,12 @@ import * as Chain from '../types/chain'
 import {Guid} from "../types/guid";
 // import {Guid} from "../types/guid";
 import {Transaction} from '../types/tx'
+import {hexToDec, hexToNumber, Money} from "../types/units";
 
 
 const POLLING_DELAY = 1000;
 type hex_string = string
 type hex_number = hex_string
-
-const parseHexAsNumber = (h: hex_number) => parseInt(h, 16)
 
 interface IDeposit {
     deposit_amount: hex_number,
@@ -64,13 +63,13 @@ export const txFromDeposit = (d: IResponse): Transaction => {
         throw Error(`txFromDeposit called with operation which is not a deposit! ${payload.operation}`) }
     const deposit = payload.operation[1] as IDeposit
     const address = new Address(deposit.main_chain_deposit.tx_header.sender)
-    const amount = parseHexAsNumber(deposit.deposit_amount)
-    const dstSideChainRevision = parseHexAsNumber(d.tx_header.tx_revision)
+    const amount = new Money(deposit.deposit_amount, 16, 'wei');
+    const dstSideChainRevision = hexToNumber(d.tx_header.tx_revision)
     const transactionType = 'Deposit'
-    const blockNumber = parseHexAsNumber(deposit.main_chain_deposit_confirmation.block_number);
+    const blockNumber = hexToNumber(deposit.main_chain_deposit_confirmation.block_number);
     const localGUID = new Guid(payload.operation[1].request_guid);
     const creationDate = new Date(
-        (parseHexAsNumber(payload.operation[1].requested_at))
+        (hexToNumber(payload.operation[1].requested_at))
     );
 
 
@@ -98,14 +97,14 @@ export const txFromWithdrawal = (d: IResponse): Transaction => {
     }
 
     const transactionType = 'Withdrawal'
-    const dstSideChainRevision = parseHexAsNumber(d.tx_header.tx_revision);
+    const dstSideChainRevision = hexToNumber(d.tx_header.tx_revision);
     const withdrawal = payload.operation[1] as IWithdrawal;
-    const amount = parseHexAsNumber(withdrawal.withdrawal_amount);
-    const fee = parseHexAsNumber(withdrawal.withdrawal_fee);
+    const amount = new Money(withdrawal.withdrawal_amount, 16, 'wei');
+    const fee = hexToDec(withdrawal.withdrawal_fee);
     const address = new Address(payload.rx_header.requester);
     const localGUID = new Guid(payload.operation[1].request_guid);
     const creationDate = new Date(
-        (parseHexAsNumber(payload.operation[1].requested_at))
+        (hexToNumber(payload.operation[1].requested_at))
     );
 
     return new Transaction({
@@ -133,16 +132,16 @@ export const txFromPayment = (p: IResponse): Transaction => {
     }
 
     const payment = payload.operation[1] as IPayment;
-    const amount = parseHexAsNumber(payment.payment_invoice.amount);
+    const amount = new Money(payment.payment_invoice.amount, 16, 'wei');
     const from = new Address(payload.rx_header.requester);
-    const dstSideChainRevision = parseHexAsNumber(p.tx_header.tx_revision);
+    const dstSideChainRevision = hexToNumber(p.tx_header.tx_revision);
     const srcSideChainRevision = dstSideChainRevision;
     const to = new Address(payment.payment_invoice.recipient);
     const transactionType = 'Payment';
 
     const localGUID = new Guid(payload.operation[1].request_guid);
     const creationDate = new Date(
-        (parseHexAsNumber(payload.operation[1].requested_at))
+        (hexToNumber(payload.operation[1].requested_at))
     );
 
     return new Transaction({
@@ -175,8 +174,9 @@ export function* recentTxs(action: Actions.IRecentTxsInitiated) {
             }
 
             yield put(Actions.recentTxsReceived(
-                action.address, response.map(txFromResponse).filter(
-                    (t: Transaction): boolean => (t.amount as number) > 0)))
+                action.address,
+                response.map(txFromResponse).filter((t: Transaction): boolean => !!t.amount)
+            ));
 
         } catch (e) {
             yield put(Actions.recentTxsFailed(action.address, e))

@@ -1,6 +1,7 @@
 import { Address } from '../address'
 import { isSideChain, makeSideChain } from '../chain'
 import { Transaction } from '../tx'
+import {Money} from "../units";
 import { Action, IActionType } from './base_actions'
 
 export interface IPaymentAction extends IActionType {
@@ -18,7 +19,7 @@ export const payment = (tx: Transaction, from: Address): IPaymentInitiated => {
 }
 
 export const makePayment =
-    (to: Address, from: Address, amount: number): IPaymentInitiated =>
+    (to: Address, from: Address, amount: Money): IPaymentInitiated =>
         payment(makeSideChain(new Transaction({ to, from, amount })), from)
 
 export interface IPaymentValidated extends IPaymentAction {

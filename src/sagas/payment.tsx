@@ -1,14 +1,14 @@
-import { delay }                                from 'redux-saga'
-import { call, put }                            from 'redux-saga/effects'
-import { get, post, readThread, resultPending } from '../server/common'
-import * as Actions                             from '../types/actions'
-import { Guid }                                 from '../types/guid'
-import { listener }                             from './common'
+import {delay} from 'redux-saga'
+import {call, put} from 'redux-saga/effects'
+import {get, IThreadResponse, post, readThread, resultPending} from '../server/common'
+import * as Actions from '../types/actions'
+import {Guid} from '../types/guid'
+import {listener} from './common'
 
 const parseHexAsNumber = (s: string) => parseInt(s, 16)
 
 export function* payment(action: Actions.IPaymentInitiated) {
-    const tx = action.tx
+    const tx = action.tx;
 
     try {
 
@@ -20,7 +20,7 @@ export function* payment(action: Actions.IPaymentInitiated) {
         // tslint:disable:variable-name
         const request_guid = (action.tx.localGUID || new Guid()).toString()
 
-        const body = { amount:      '0x' + (tx.amount as number).toString(16)
+        const body = { amount:      tx.amount.toPrefixedHexWei()
                      , recipient:   `${tx.to}`
                      , request_guid
                      , sender:      `${tx.from}`
@@ -42,7 +42,7 @@ export function* payment(action: Actions.IPaymentInitiated) {
             return yield failMsg(threadResponse.error)
         }
 
-        const threadNumber = readThread(threadResponse as { result: string })
+        const threadNumber = readThread(threadResponse as { result: string , error?: any})
         let delayTimeMS    = 1  // Initial delay time before checking
         let threadCheck
 
@@ -58,6 +58,16 @@ export function* payment(action: Actions.IPaymentInitiated) {
             }
 
             if (!resultPending(threadCheck)) { break }
+        }
+
+        if ((threadCheck as IThreadResponse).error) {
+            yield put(Actions.createAddNotificationAction(
+                `The payment action failed`,
+                'error',
+                5000
+            ));
+
+            return yield failMsg((threadCheck as IThreadResponse).error);
         }
 
         const response = threadCheck;
@@ -76,7 +86,6 @@ export function* payment(action: Actions.IPaymentInitiated) {
         yield put(Actions.paymentValidated(finalTx, action.address))
 
     } catch (e) {
-        throw e
         return yield put(Actions.paymentFailed(tx.set('rejected', true)
                                              , e
                                              , action.address))

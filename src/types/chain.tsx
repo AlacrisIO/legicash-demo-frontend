@@ -9,29 +9,12 @@
  *
  */
 
-import { Address }     from './address'
+import { Address } from './address'
 import { Transaction } from './tx'
+import {Money} from "./units";
 
-export enum Chain { Main, Side }
-
-/**
- * Return the adjustment to `chain`'s `address` balance by `tx`
- * (-1 for from `address`, 0 for unrelated, +1 for to `address`) * `tx.amount`
- *
- */
-export const balanceUpdate = ( tx:      Transaction
-                             , address: Address
-                             , chain:   Chain
-                             ): number => {
-
-    if (tx.amount === undefined) {
-        throw Error(`Transaction amount undefined! ${tx}`)
-    }
-
-    if (tx.from.equals(address) && (chain === tx.srcChain)) { return -tx.amount }
-    if (tx.to.equals(address)   && (chain === tx.dstChain)) { return  tx.amount }
-
-    return 0
+export enum Chain {
+    Main, Side
 }
 
 export const describeChain = (chain: Chain | undefined) => {
@@ -41,14 +24,11 @@ export const describeChain = (chain: Chain | undefined) => {
     return rv
 }
 
-export const isDeposit = (tx: Transaction) =>
-    (tx.srcChain === Chain.Main) && (tx.dstChain === Chain.Side)
-
 /* tslint:disable:object-literal-sort-keys */
 
 /** Constructs a deposit from side chain to main chain, as Transaction */
 export const depositTransaction =
-    (address: Address, amount: number, revision?: number): Transaction => {
+    (address: Address, amount: Money, revision?: number): Transaction => {
         const details = { amount
                         , from:                 address
                         , to:                   address
@@ -62,7 +42,7 @@ export const depositTransaction =
 
 /** Constructs a withdrawl from side chain to main chain, as Transaction */
 export const withdrawTransaction =
-    (address: Address, amount: number, revision?: number): Transaction => {
+    (address: Address, amount: Money, revision?: number): Transaction => {
         const details = { amount
                         , from:                 address
                         , to:                   address

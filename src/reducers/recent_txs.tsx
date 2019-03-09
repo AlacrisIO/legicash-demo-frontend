@@ -20,7 +20,7 @@ export const addTxs = (state: UIState, txs: Transaction[]): UIState => {
             continue;
         }
 
-        state = state.addTx(tx, false);  // Add to state without updating balances
+        state = state.addTx(tx);  // Add to state without updating balances
         numTxs += 1
     }
     return state

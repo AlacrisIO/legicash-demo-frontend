@@ -10,7 +10,9 @@ import { WalletList } from './components/wallet_list'
 import { rootReducer } from './reducers'
 import { rootSaga } from './sagas'
 import { UIState } from './types/state'
+import { Money} from "./types/units";
 
+(window as any).Money = Money;
 
 const sagaMiddleware = createSagaMiddleware()
 

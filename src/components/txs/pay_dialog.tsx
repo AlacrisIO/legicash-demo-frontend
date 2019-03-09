@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Button } from 'semantic-ui-react'
 import { Address, emptyAddress } from '../../types/address'
+import {Money} from "../../types/units";
 import { knownAddresses, name, SelectAccount } from '../select_account'
 import { AmountField } from './amount_field'
 
@@ -8,13 +9,13 @@ export interface IPayDialog {
     /** The address the payment will be sent from */
     from: Address;
     /** Submit receiver. `amount`: how much to send, `to`: who to send to */
-    submitCallback: (to: Address, amount: number) => void;
+    submitCallback: (to: Address, amount: Money) => void;
     loading: boolean;
 }
 
 export class PayDialog extends React.Component<IPayDialog, {}> {
-    public state: { amount: number; to: Address, loading: boolean } = {
-        amount: 0,  loading: false, to: emptyAddress
+    public state: { amount: Money|null; to: Address, loading: boolean } = {
+        amount: null,  loading: false, to: emptyAddress
     };
 
     public constructor(props: IPayDialog) {
@@ -26,13 +27,13 @@ export class PayDialog extends React.Component<IPayDialog, {}> {
     public onSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault()
         // XXX: Give error message; don't just refuse.
-        if (!this.state.to.equals(emptyAddress) && (this.state.amount > 0)) {
+        if (!this.state.to.equals(emptyAddress) && this.state.amount && !this.state.amount.isLessThanZero()) {
             const to = new Address(this.state.to)
             this.props.submitCallback(to, this.state.amount)
         }
     }
     public setTo(to: Address) { this.setState({ to }) }
-    public setAmount(amount: number) { this.setState({ amount }) }
+    public setAmount(amount: Money) { this.setState({ amount }) }
     public render() {
         const recipients = knownAddresses.remove(this.props.from).toList()
             .sortBy(name).toList()

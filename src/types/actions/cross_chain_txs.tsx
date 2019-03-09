@@ -3,6 +3,7 @@
 import { Address }                                 from '../address'
 import { depositTransaction, withdrawTransaction } from '../chain'
 import { Transaction }                             from '../tx'
+import {Money} from "../units";
 import { Action, IActionType, IServerResponse }    from './base_actions'
 
 /**
@@ -25,7 +26,7 @@ export interface IMakeDeposit extends ICrossChainInitiate {
     readonly address: Address;
 };
 
-export const makeDeposit = (address: Address, amount: number): IMakeDeposit => {
+export const makeDeposit = (address: Address, amount: Money): IMakeDeposit => {
     const tx = depositTransaction(address, amount)
     return { type: Action.MAKE_DEPOSIT, tx, address }
 };
@@ -35,7 +36,7 @@ export interface IMakeWithdrawal extends ICrossChainInitiate {
     readonly type: Action.MAKE_WITHDRAWAL;
     readonly address: Address;
 }
-export const makeWithdrawal = (address: Address, amount: number
+export const makeWithdrawal = (address: Address, amount: Money
 ): IMakeWithdrawal => {
     const tx = withdrawTransaction(address, amount)
     return { type: Action.MAKE_WITHDRAWAL, tx, address}
@@ -44,14 +45,14 @@ export const makeWithdrawal = (address: Address, amount: number
 /** Represents a crosschain transaction validated by the server */
 export interface ICrossChainValidated extends ICrossChain, IServerResponse {
     // New balance for the depositing user, per the server.
-    readonly newBalance: number;
+    readonly newBalance: Money;
     readonly serverResponse: Transaction;
     readonly address: Address;
 }
 
 const validatedMessage = (action: Action) =>
         ( address:        Address
-        , newBalance:     number
+        , newBalance:     Money
         , tx:             Transaction
         , serverResponse: Transaction
         ): ICrossChainValidated => {

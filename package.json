@@ -3,11 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@types/bignumber.js": "^5.0.0",
     "@types/enzyme": "^3.1.12",
     "@types/react-redux": "^6.0.5",
     "@types/redux-mock-store": "^1.0.0",
     "@types/redux-saga-tester": "^1.0.0",
     "ajv": "^6.5.2",
+    "bignumber.js": "^8.1.1",
     "immutable": "^3.8.2",
     "js-sha3": "^0.7.0",
     "jsonlint": "^1.6.3",
