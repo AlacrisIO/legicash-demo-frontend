@@ -135,7 +135,7 @@ const crossChainTx = (
                     'error',
                     5000
                 ));
-		console.log('Error in operation ${endpoint}');
+		console.log(`Error in operation ${endpoint}`);
 		console.log((result as IThreadResponse).error);
                 return yield put(failMsg((result as IThreadResponse).error));
             }
