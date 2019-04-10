@@ -1,8 +1,8 @@
-import { List, Set } from 'immutable'
-import * as React from 'react'
+import { List, Set }                   from 'immutable'
+import * as React                      from 'react'
 import { Dropdown, DropdownItemProps } from 'semantic-ui-react'
-import { addresses as allAddresses } from '../server/ethereum_addresses'
-import { Address } from '../types/address'
+import { addresses as allAddresses }   from '../server/ethereum_addresses'
+import { Address }                     from '../types/address'
 
 export const knownAddresses = Set(Object.keys(allAddresses).map(
     n => allAddresses[n]))
@@ -12,15 +12,15 @@ Object.keys(allAddresses).forEach(n => addressNames[allAddresses[n]] = n)
 export const name = (a: Address) => addressNames[a.toString()]
 
 const addressOptions = ( addresses: List<Address>): DropdownItemProps[] => {
-        const options: DropdownItemProps[] = [];
-        addresses.forEach(
-            (address: Address, i: number) => {
-                options.push({ key:i, value: address.toString() , text: name(address)})
-            }
-        )
-        
-        return options;
-    }
+    const options: DropdownItemProps[] = [];
+    addresses.forEach(
+        (address: Address, i: number) => {
+            options.push({ key:i, value: address.toString() , text: name(address)})
+        }
+    )
+
+    return options;
+}
 
 export interface ISelect {
     /** Message for before address is selected */
@@ -51,7 +51,7 @@ export class SelectAccount extends BaseComponent {
     }
     public getNameValue() {
         if(
-            !this.props.displayedAddresses.contains(this.state.selectedAddress) 
+            !this.props.displayedAddresses.contains(this.state.selectedAddress)
         ) {
             return ( new Address('')).toString();
         }
@@ -67,7 +67,7 @@ export class SelectAccount extends BaseComponent {
                 onChange={this.onChange}
                 className="accountMenu"
                 value={this.getNameValue()}
-                options={addressOptions(this.props.displayedAddresses)} 
+                options={addressOptions(this.props.displayedAddresses)}
             />
         )
     }
