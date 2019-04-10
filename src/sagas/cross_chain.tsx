@@ -24,7 +24,7 @@ import { Address }              from '../types/address'
 import { Guid }                 from '../types/guid'
 import { emptyHash, HashValue } from '../types/hash'
 import { Transaction }          from '../types/tx'
-import {Money} from "../types/units";
+import { Money }                from "../types/units";
 import { listener }             from './common'
 
 /** Hit server with given args, and report deposit failure on exception */
@@ -135,8 +135,10 @@ const crossChainTx = (
                     'error',
                     5000
                 ));
-		console.warn(`Error in operation ${endpoint}`);
-		console.warn((result as IThreadResponse).error);
+                // tslint:disable:no-console
+                console.warn(`Error in operation ${endpoint}`);
+                // tslint:disable:no-console
+                console.warn((result as IThreadResponse).error);
                 return yield put(failMsg((result as IThreadResponse).error));
             }
 
