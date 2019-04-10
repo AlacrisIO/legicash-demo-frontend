@@ -1,15 +1,18 @@
-import * as React from 'react';
+import * as React  from 'react';
 import { connect } from 'react-redux'
+
 // This is the magic typescript invocation for react-spinkit. See
 // https://github.com/DefinitelyTyped/DefinitelyTyped/issues/27455#issuecomment-406763025
-import * as Spinner from 'react-spinkit'
-import { Card, Table } from 'semantic-ui-react'
-import { HashValue } from '../types/hash'
+import * as Spinner                 from 'react-spinkit'
+import { Card, Table }              from 'semantic-ui-react'
+import { HashValue }                from '../types/hash'
 import { stepsIntermediateDigests } from '../types/proofs/proof_protocol'
+
 import {
     IBranch, IResponse, ISkip, isLeftBranch, isSkip, step
 } from '../types/proofs/proof_types'
-import { UIState } from '../types/state'
+
+import { UIState }     from '../types/state'
 import { Transaction } from '../types/tx'
 
 
@@ -122,7 +125,7 @@ interface IProofDisplay { requestProof: () => void; requestToggle: () => void; s
 
 /** Button in tx table row which allows user to toggle/request proof display */
 export class ProofDisplay extends React.Component<IProofDisplay, {}> {
-    public state = { 
+    public state = {
         display: false,
         proofOpen: false
     }
