@@ -32,3 +32,4 @@ configs/*.env
 !configs/production.env
 !configs/staging.env
 !configs/qa.env
+!configs/mathieu.env

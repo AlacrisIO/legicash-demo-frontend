@@ -5,7 +5,7 @@ import {emptyHash} from './hash'
 import {Record} from './immutable'
 import {Money} from "./units";
 
-/* XXX: Should have something in Transaction to indicate who the facilitator 
+/* XXX: Should have something in Transaction to indicate who the facilitator
  * is, for sidechain transactions? What about epistemic state? For now, just
  * "validated" or "rejected". Treating server as trusted resource. */
 

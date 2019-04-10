@@ -1,12 +1,12 @@
-import * as React from 'react';
-import {connect} from 'react-redux'
-import {Segment} from 'semantic-ui-react'
+import * as React                     from 'react';
+import {connect}                      from 'react-redux'
+import {Segment}                      from 'semantic-ui-react'
 import {proofRequested, proofToggled} from '../types/actions/proofs'
-import {Address} from '../types/address'
-import {UIState} from '../types/state';
-import {Transaction} from '../types/tx'
-import {ProofDisplay} from './merkle_proof'
-import {name} from './select_account'
+import {Address}                      from '../types/address'
+import {UIState}                      from '../types/state';
+import {Transaction}                  from '../types/tx'
+import {ProofDisplay}                 from './merkle_proof'
+import {name}                         from './select_account'
 
 // XXX: Needs some indication of the direction cross-chain txs go in.
 
@@ -22,19 +22,19 @@ const txClass = (tx: Transaction) => {
         }
         return <span className={"green status"} >Valid</span>
     }
-    if (tx.rejected) { 
+    if (tx.rejected) {
         return <span className={"red status"} >Invalid</span>
     }
-    
+
     return <span className={"yellow status"} >Pending</span>
 }
 
-interface ITx { 
-    tx: Transaction,
-    requestProof: () => void,
+interface ITx {
+    tx:            Transaction,
+    requestProof:  () => void,
     requestToggle: () => void,
-    show: boolean,
-    owner: Address
+    show:          boolean,
+    owner:         Address
 }
 
 /** A row corresponding to a tx. */

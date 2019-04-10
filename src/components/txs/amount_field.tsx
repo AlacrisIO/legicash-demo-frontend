@@ -1,5 +1,5 @@
-import * as React from 'react';
-import {Input} from 'semantic-ui-react';
+import * as React              from 'react';
+import {Input}                 from 'semantic-ui-react';
 import {filterEthInput, Money} from "../../types/units";
 
 interface IAmountFieldProps {
@@ -22,13 +22,13 @@ export class AmountField extends React.Component<IAmountFieldProps, {}> {
     }
 
     public render() {
-        return <Input 
+        return <Input
             type="text"
             fluid={true}
             placeholder={this.props.placeholder || 'Amount to deposit'}
             value={this.state.value}
             style={{flex: 0.95}}
-            className="amountField" 
+            className="amountField"
             onChange={this.handleChange} />
     }
 
@@ -46,4 +46,3 @@ export class AmountField extends React.Component<IAmountFieldProps, {}> {
         }
     }
 }
-
