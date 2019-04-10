@@ -1,11 +1,11 @@
-import { List } from 'immutable'
-import * as React from 'react'
-import { connect } from 'react-redux'
+import { List }                                     from 'immutable'
+import * as React                                   from 'react'
+import { connect }                                  from 'react-redux'
 import { Button, Container, Form, Header, Segment } from 'semantic-ui-react'
-import { addAddress, recentTxsInitiated } from '../types/actions'
-import { Address, emptyAddress } from '../types/address'
-import { UIState } from '../types/state'
-import { knownAddresses, name, SelectAccount } from './select_account'
+import { addAddress, recentTxsInitiated }           from '../types/actions'
+import { Address, emptyAddress }                    from '../types/address'
+import { UIState }                                  from '../types/state'
+import { knownAddresses, name, SelectAccount }      from './select_account'
 
 export interface IAddAccount {
     /** Callback when account-add is requested */
@@ -35,27 +35,26 @@ export class DumbAddAccount extends BaseComponent {
                 this.stateForNewDisplay(this.state, this.props.displayedAddresses)
             )
         }
-        
-        
     }
+
     public render() {
         return (
-            <Container 
+            <Container
                 textAlign={"center"}
                 style={{marginTop: '20px', maxWidth: '500px',  width: '500px'}}
-            >
-                <Segment
-                raised={true} 
-                basic={true}
                 >
+                <Segment
+                    raised={true}
+                    basic={true}
+                    >
                     <Form className="addAccountMenu" onSubmit={this.onSubmit}>
                         <Segment basic={true}>
                             <Header as="h2" content="Add Wallet" textAlign="left" />
                             <SelectAccount
-                                    displayedAddresses={this.props.displayedAddresses}
-                                    initialMessage="Please pick a wallet to display"
-                                    select={this.selectChange}
-                            />
+                                displayedAddresses={this.props.displayedAddresses}
+                                initialMessage="Please pick a wallet to display"
+                                select={this.selectChange}
+                                />
                             <Button primary={true} size="large" type="submit" style={{marginTop: '10px'}}>Submit</Button>
                         </Segment>
                     </Form>
