@@ -1,14 +1,10 @@
-import { fromJS, is } from 'immutable'
-import { expectSaga } from 'redux-saga-test-plan'
-
-import { post } from '../server/common'
-import { addresses } from '../server/ethereum_addresses'
-/* import * as Actions from '../types/actions' */
-import { recentTxsInitiated } from '../types/actions/recent_txs'
-import { Address } from '../types/address'
-
-/* import { serverRunning } from './common.test' */
-import { recentTxs } from './recent_transactions'
+import { fromJS, is }         from  'immutable'
+import { expectSaga }         from  'redux-saga-test-plan'
+import { post }               from  '../server/common'
+import { addresses }          from  '../server/ethereum_addresses'
+import { recentTxsInitiated } from  '../types/actions/recent_txs'
+import { Address }            from  '../types/address'
+import { recentTxs }          from  './recent_transactions'
 
 const address = new Address(addresses.Alice)
 
@@ -23,6 +19,7 @@ const recentTxMocks = {
                     console.log(`Bad post call! ${JSON.stringify(effect)}`)
                 }
                 return [];
+
             default: return next()
         }
     }
@@ -35,4 +32,3 @@ describe('Recent Txs tests', () => {
             .provide(recentTxMocks).run({ silenceTimeout: true })
     })
 })
-

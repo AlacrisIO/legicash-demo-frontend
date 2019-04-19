@@ -1,16 +1,15 @@
-import {mount} from 'enzyme'
-import * as React from 'react'
-import {Address, emptyAddress} from '../../types/address'
-import {Money} from "../../types/units";
-import {findAddressByName, findUserSelectItem} from "../../util/test_util";
-import {PayDialog} from './pay_dialog'
+import { mount }                                 from 'enzyme'
+import * as React                                from 'react'
+import { Address, emptyAddress }                 from '../../types/address'
+import { Money }                                 from '../../types/units'
+import { findAddressByName, findUserSelectItem } from '../../util/test_util'
+import { PayDialog }                             from './pay_dialog'
 
 const fromAddress = findAddressByName('Alice');
 
 describe('PayDialog tests', () => {
-
-    let amount: Money = new Money('0');
-    let to: Address = emptyAddress;
+    let amount: Money    = new Money('0');
+    let to: Address      = emptyAddress;
     let numCalls: number = 0;
 
     const submitCb  = (newTo: Address, newAmount: Money) => {
@@ -25,7 +24,7 @@ describe('PayDialog tests', () => {
 
     it("Refuses to accept bad data", () => {
         form.simulate('submit');
-        expect(amount).toEqual('');
+        expect(amount.toWei()).toEqual('0');
         expect(to).toEqual(emptyAddress);
         expect(numCalls).toEqual(0)
     });
@@ -35,7 +34,6 @@ describe('PayDialog tests', () => {
     });
 
     it("Accepts good data", () => {
-
         const userName = 'Bob';
 
         // Select Bob From Dropdown
@@ -45,8 +43,7 @@ describe('PayDialog tests', () => {
         ).simulate('click');
 
         // Enter 1 in the amount field
-        form
-            .find('AmountField')
+        form.find('AmountField')
             .find('Input.amountField')
             .find('input')
             .simulate('change', { target: { value: '1' } });
@@ -54,21 +51,8 @@ describe('PayDialog tests', () => {
         // Submit the form
         form.simulate('submit');
 
-        expect(amount).toEqual('1');
+        expect(amount.toEth()).toEqual('1');
         expect(to).toEqual(findAddressByName(userName));
         expect(numCalls).toEqual(1)
     });
-
-    it("Doesn't accept 0 for the amount", () => {
-        // Enter 0 in the amount field
-        form
-            .find('AmountField')
-            .find('Input.amountField')
-            .find('input')
-            .simulate('change', { target: { value: 0 } });
-        form.simulate('submit');
-
-        expect(numCalls).toEqual(1)  // Unchanged
-    })
 });
-
