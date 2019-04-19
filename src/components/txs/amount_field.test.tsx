@@ -1,13 +1,13 @@
-import { shallow } from 'enzyme';
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-import {Money} from "../../types/units";
-import { AmountField } from './amount_field'
+import { shallow }     from  'enzyme'
+import * as React      from  'react'
+import * as ReactDOM   from  'react-dom'
+import { Money }       from  '../../types/units'
+import { AmountField } from  './amount_field'
 
 const noOp = (x: Money): void => { /* Does nothing */ }
-const changeEvent = (value: string) => ({
-    preventDefault: noOp, target: { value }
-})
+
+const changeEvent = (value: string) =>
+    ({ preventDefault: noOp, target: { value }})
 
 describe('AmountField tests', () => {
     it('Renders', () => {
@@ -20,12 +20,6 @@ describe('AmountField tests', () => {
         expect(field.find('Input').props().value).toEqual('')
     });
 
-    it('Forces whole numbers out of float input', () => {
-        const field = shallow(<AmountField callback={noOp} />)
-        field.find('Input').simulate('change', changeEvent('3.5'));
-        expect(field.find('Input').props().value).toEqual(3)
-    });
-
     it('Rejects a non-numeric input', () => {
         const field = shallow(<AmountField callback={noOp} />)
         field.find('Input').simulate('change', changeEvent('hello'))
@@ -33,15 +27,14 @@ describe('AmountField tests', () => {
     });
 
     it('Rejects input with a single trailing non-numeric input', () => {
-        // Regression test. Failed due to unquoted backslash in numberRe.
         const field = shallow(<AmountField callback={noOp} />)
         field.find('Input').simulate('change', changeEvent('3.5a'))
-        expect(field.find('Input').props().value).toEqual(3)
+        expect(field.find('Input').props().value).toEqual('3.5')
     });
 
-    it("Does what it's supposed to with its callback", (done) => {
+    it('Does what it\'s supposed to with its callback', (done) => {
         const cb = (v: any)  => {
-            expect(v).toEqual(3);
+            expect(v.toEth()).toEqual('3.5');
             done();
         };
 
