@@ -159,18 +159,25 @@ export class ProofDisplay extends React.Component<IProofDisplay, {}> {
             display = <div><WaitComponent /></div>
         }
 
+        /*
         const expBlockStyle = {display: this.props.showBlockLink ? 'block' : 'none'};
         let exploreBlockLink = <span />;
+
         if (this.props.tx.getBlockNumber()) {
             exploreBlockLink = <a className={'bluelink'} style={expBlockStyle} onClick={this.exploreBlock}>Explore block</a>
         }
 
         const merkleProofLinkText = this.props.show ? 'Hide Merkle Proof' : 'Show Merkle Proof';
+        */
 
         return <div style={{marginTop: '10px'}}>
             <div className={'lrsplit'}>
+
+            {/* TODO implement reliable proof queries or remove altogether
             <a className={'bluelink'} onClick={this.getProof}>{merkleProofLinkText}</a>
                 {exploreBlockLink}
+            */}
+
             </div>
             {display}
         </div>
