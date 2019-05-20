@@ -121,7 +121,13 @@ export const MerkleProofWait = ({ tx }: { tx: Transaction }) => connect(
     (dispatch: any) => ({})
 )(DumbMerkleProofWait)
 
-interface IProofDisplay { requestProof: () => void; requestToggle: () => void; show: boolean; showBlockLink : boolean; tx: Transaction }
+interface IProofDisplay {
+    requestProof:  () => void;
+    requestToggle: () => void;
+    show:          boolean;
+    showBlockLink: boolean;
+    tx:            Transaction
+}
 
 /** Button in tx table row which allows user to toggle/request proof display */
 export class ProofDisplay extends React.Component<IProofDisplay, {}> {
