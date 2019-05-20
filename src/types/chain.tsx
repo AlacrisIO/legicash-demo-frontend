@@ -9,9 +9,9 @@
  *
  */
 
-import { Address } from './address'
+import { Address }     from './address'
 import { Transaction } from './tx'
-import {Money} from "./units";
+import { Money }       from "./units";
 
 export enum Chain {
     Main, Side
@@ -62,7 +62,7 @@ export const makeSideChain = (tx: Transaction) =>
 
 export const sidechainIdx = (tx: Transaction): number => {
     if (tx.dstChain === Chain.Side) { return tx.dstSideChainRevision as number }
-    if (tx.srcChain === Chain.Side) { return tx.dstSideChainRevision as number }
+    if (tx.srcChain === Chain.Side) { return tx.srcSideChainRevision as number }
     throw Error(`No sidechain found in tx ${tx}!`)
 }
 
