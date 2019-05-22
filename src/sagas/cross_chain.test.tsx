@@ -86,7 +86,7 @@ describe('Deposit saga tests', () => {
         // TODO: More validation?
         whenConnectedIt('Hits deposit endpoint, returns DEPOSIT_VALIDATED action', () =>
             expectSaga(makeDeposit, makeDepositAction)
-                .run(4500)
+                .run(120000)
                 .then((result: any) => {
                     const put    = result.effects.put[0].PUT;
                     const action = put.action;
